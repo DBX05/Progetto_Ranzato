@@ -13,50 +13,30 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+# --- Trova Qt6 ---
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
 
 set(TS_FILES untitled_it_IT.ts)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        ${TS_FILES}
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+    ${TS_FILES}
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(untitled
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
+# --- Eseguibile Qt6 ---
+qt_add_executable(untitled
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-else()
-    if(ANDROID)
-        add_library(untitled SHARED
-            ${PROJECT_SOURCES}
-        )
-    else()
-        add_executable(untitled
-            ${PROJECT_SOURCES}
-        )
-    endif()
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-endif()
-
-target_link_libraries(untitled PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.untitled)
-endif()
+target_link_libraries(untitled PRIVATE Qt6::Widgets)
 
 set_target_properties(untitled PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
@@ -68,6 +48,4 @@ install(TARGETS untitled
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(untitled)
-endif()
+qt_finalize_executable(untitled)
