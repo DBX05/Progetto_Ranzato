@@ -4,9 +4,8 @@
 #include <vector>
 
 // include personali
-#include <dataora.h>
-#include <persona.h>
-
+#include <fileCpp\dataora\dataora.h>
+#include <fileCpp\persona\persona.h>
 
 /*
     File header gerarchia persona
