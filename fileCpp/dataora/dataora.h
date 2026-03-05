@@ -134,7 +134,11 @@ public:
         st = x;
         stcor = Settimana[st];
     };
-    // Possibile aggiunta futura: void systemDay() const;
+    std::string systemDay() const{
+        time_t now = std::time(nullptr);
+        tm* timestamp = std::localtime(&now);
+        return (Settimana[timestamp->tm_wday -1]);
+    };
 
     /*
     Prende in input un'oggetto di tipo data
@@ -194,7 +198,11 @@ public:
         ms = x;
         mscor = Mesi[ms];
     }
-    // Possibile aggiunta futura : void systemMonth() const;
+    std::string systemMounth() const{
+        time_t now = std::time(nullptr);
+        tm* timestamp = std::localtime(&now);
+        return (Mesi[timestamp->tm_mon]);
+    };
 
     /*
     Prende in input un'oggetto di tipo mese
