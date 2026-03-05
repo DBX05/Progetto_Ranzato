@@ -22,78 +22,86 @@ private:
     int timestamp, sc, min, hr;
 
 public:
-    orario(int tm = 0, int s = 0, int m = 0, int h = 0) : timestamp(tm<0 ? systemTime() : tm), hr( h<0 || h>23 ? systemHour() : h), 
-    min(m<0 || m>60 ? systemMin() : m),sc(s<0 || s>60 ? systemSecond() : s){};
-    int getSec() const {
+    orario(int tm = 0, int s = 0, int m = 0, int h = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+                                                          min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
+    int getSec() const
+    {
         return sc;
     };
 
-    int getMin() const {
+    int getMin() const
+    {
         return min;
     };
 
-    int getHour() const {
+    int getHour() const
+    {
         return hr;
     };
 
-    std::string curTime() const {
+    std::string curTime() const
+    {
         return std::to_string(hr) + "/" + std::to_string(min) + "/" + std::to_string(sc);
     };
     void getFormat();
-    void modificaOrario(int h = -1, int m = -1, int s = -1) {
-        if(h < 0 || h > 23) throw orario();
+    void modificaOrario(int h = -1, int m = -1, int s = -1)
+    {
+        if (h < 0 || h > 23)
+            throw orario();
         hr = h;
-        if(m < 0 || m > 60) throw orario();
+        if (m < 0 || m > 60)
+            throw orario();
         min = m;
-        if(s < 0 || s > 60) throw orario();
+        if (s < 0 || s > 60)
+            throw orario();
         sc = s;
     }
-    int systemHour() const {
+    int systemHour() const
+    {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
 
         // Converti in struttura tm locale
-        std::tm* localTime = std::localtime(&now);
+        std::tm *localTime = std::localtime(&now);
 
         return int(localTime->tm_hour);
-
     };
 
-    int systemSecond() const {
+    int systemSecond() const
+    {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
 
         // Converti in struttura tm locale
-        std::tm* localTime = std::localtime(&now);
+        std::tm *localTime = std::localtime(&now);
 
         return int(localTime->tm_sec);
-
     };
 
-    int systemMin() const {
+    int systemMin() const
+    {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
 
         // Converti in struttura tm locale
-        std::tm* localTime = std::localtime(&now);
+        std::tm *localTime = std::localtime(&now);
 
         return int(localTime->tm_min);
-
     };
 
-    int systemTime() const {
+    int systemTime() const
+    {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
 
         // Converti in struttura tm locale
-        std::tm* localTime = std::localtime(&now);
+        std::tm *localTime = std::localtime(&now);
 
         // Estrai l'ora e formattala come stringa
-        //char buffer[3]; // 2 cifre + terminatore
-        //std::strftime(buffer, sizeof(buffer), "%H", localTime);
-        
-        return int(localTime);
+        // char buffer[3]; // 2 cifre + terminatore
+        // std::strftime(buffer, sizeof(buffer), "%H", localTime);
 
+        return int(localTime);
     };
 };
 
@@ -134,10 +142,11 @@ public:
         st = x;
         stcor = Settimana[st];
     };
-    std::string systemDay() const{
+    std::string systemDay() const
+    {
         time_t now = std::time(nullptr);
-        tm* timestamp = std::localtime(&now);
-        return (Settimana[timestamp->tm_wday -1]);
+        tm *timestamp = std::localtime(&now);
+        return (Settimana[timestamp->tm_wday - 1]);
     };
 
     /*
@@ -198,9 +207,10 @@ public:
         ms = x;
         mscor = Mesi[ms];
     }
-    std::string systemMounth() const{
+    std::string systemMounth() const
+    {
         time_t now = std::time(nullptr);
-        tm* timestamp = std::localtime(&now);
+        tm *timestamp = std::localtime(&now);
         return (Mesi[timestamp->tm_mon]);
     };
 
