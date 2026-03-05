@@ -1,4 +1,5 @@
 #include <string>
+#include <ctime>
 /*
     File header gerarchia dataora
         Prima stesura: 2 / 2 / 2026
@@ -18,15 +19,82 @@
 class orario
 {
 private:
-    uint32_t secondi;
+    int timestamp, sc, min, hr;
 
 public:
-    orario();
-    uint32_t getSec() const;
-    // metodi void: cambiare il tipo di ritorno con quello adeguato se necessario
+    orario(int tm = 0, int s = 0, int m = 0, int h = 0) : timestamp(tm<0 ? systemTime() : tm), hr( h<0 || h>23 ? systemHour() : h), 
+    min(m<0 || m>60 ? systemMin() : m),sc(s<0 || s>60 ? systemSecond() : s){};
+    int getSec() const {
+        return sc;
+    };
+
+    int getMin() const {
+        return min;
+    };
+
+    int getHour() const {
+        return hr;
+    };
+
+    std::string curTime() const {
+        return std::to_string(hr) + "/" + std::to_string(min) + "/" + std::to_string(sc);
+    };
     void getFormat();
-    void modificaOrario();
-    void systemTime() const;
+    void modificaOrario(int h = -1, int m = -1, int s = -1) {
+        if(h < 0 || h > 23) throw orario();
+        hr = h;
+        if(m < 0 || m > 60) throw orario();
+        min = m;
+        if(s < 0 || s > 60) throw orario();
+        sc = s;
+    }
+    int systemHour() const {
+        // Ottieni il timestamp corrente
+        std::time_t now = std::time(nullptr);
+
+        // Converti in struttura tm locale
+        std::tm* localTime = std::localtime(&now);
+
+        return int(localTime->tm_hour);
+
+    };
+
+    int systemSecond() const {
+        // Ottieni il timestamp corrente
+        std::time_t now = std::time(nullptr);
+
+        // Converti in struttura tm locale
+        std::tm* localTime = std::localtime(&now);
+
+        return int(localTime->tm_sec);
+
+    };
+
+    int systemMin() const {
+        // Ottieni il timestamp corrente
+        std::time_t now = std::time(nullptr);
+
+        // Converti in struttura tm locale
+        std::tm* localTime = std::localtime(&now);
+
+        return int(localTime->tm_min);
+
+    };
+
+    int systemTime() const {
+        // Ottieni il timestamp corrente
+        std::time_t now = std::time(nullptr);
+
+        // Converti in struttura tm locale
+        std::tm* localTime = std::localtime(&now);
+
+        // Estrai l'ora e formattala come stringa
+        //char buffer[3]; // 2 cifre + terminatore
+        //std::strftime(buffer, sizeof(buffer), "%H", localTime);
+        
+        return int(localTime);
+
+    };
 };
 
 class data
