@@ -30,7 +30,7 @@ private:
     unsigned int sc, min, hr;
 
 public:
-    orario(int tm = 0, unsigned int s = 0, unsigned int m = 0, unsigned int h = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+    orario( unsigned int s = 0, unsigned int m = 0, unsigned int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
                                                           min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
     unsigned int getSec() const
     {
@@ -69,7 +69,7 @@ public:
             throw orario();
         sc = s;
     }
-    unsigned int systemHour() const
+    static unsigned int systemHour()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -80,7 +80,7 @@ public:
         return int(localTime->tm_hour);
     };
 
-    unsigned int systemSecond() const
+    static unsigned int systemSecond() 
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -91,7 +91,7 @@ public:
         return int(localTime->tm_sec);
     };
 
-    unsigned int systemMin() const
+    static unsigned int systemMin()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -102,7 +102,7 @@ public:
         return int(localTime->tm_min);
     };
 
-    int systemTime() const
+    static int systemTime() 
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -160,11 +160,11 @@ public:
         st = x;
         stcor = Settimana[st];
     };
-    std::string systemDay() const
+    static unsigned int systemDay()
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
-        return (Settimana[timestamp->tm_wday - 1]);
+        return (timestamp->tm_wday);
     };
 
     /*
@@ -230,11 +230,11 @@ public:
         ms = x;
         mscor = Mesi[ms];
     }
-    std::string systemMounth() const
+     static unsigned int systemMonth() 
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
-        return (Mesi[timestamp->tm_mon]);
+        return timestamp->tm_mon;
     };
 
     /*
@@ -283,7 +283,7 @@ public:
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
-         return timestamp->tm_year;
+        return timestamp->tm_year;
     }
 };
 
@@ -292,7 +292,8 @@ class dateTime : public orario, public data, public mese, public anno
 private:
     // attributi ereditati
 public:
-    dateTime();
+    dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond()) 
+    :   orario(s, mn, h), data(d), mese(m), anno(an) {};
     void getDateTime() const;
     // metodi void: cambiare il tipo di ritorno con quello adeguato se necessario
     void modificaDateTime();
