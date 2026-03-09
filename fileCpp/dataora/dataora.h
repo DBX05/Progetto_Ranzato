@@ -137,7 +137,7 @@ public:
     se il valore è valido inizializza l'oggetto;
     altrimenti lancia un'eccezzione (da gestire).
     */
-    data(unsigned int x = 0) : st((x > -1 || x < 8) ? x : -1)
+    data(unsigned int x = 0) : st((x-1 > -1 || x-1 < 8) ? x : -1)
     {
         if (st == -1)
             throw data();
@@ -207,7 +207,7 @@ public:
     */
 
     // Versione 1
-    mese(unsigned int x = 0) : ms((x < 12 || x > -1) ? x : -1)
+    mese(unsigned int x = 0) : ms((x-1 < 12 || x-1 > -1) ? x : -1)
     {
         if (ms == -1)
             throw mese();
@@ -255,18 +255,36 @@ public:
         return 1;
     }
 };
-
+/*
+@Classe anno rappresenatta come:
+unsigned int annocr: rappresenta in valore intero l'anno corrente
+*/
 class anno
 {
 private:
-    uint32_t annoCampoDati;
+    unsigned int annocr;
 
 public:
-    anno();
-    uint32_t getAnno() const;
-    // metodi void: cambiare il tipo di ritorno con quello adeguato se necessario
-    void modificaAnno();
-    void systemYear() const;
+    anno(unsigned int an = systemYear() ): annocr((an < 0) ? systemYear() : an){};
+    
+    //restituisce il valore dell'anno
+    unsigned int getAnno() const
+    {
+        return annocr;
+    };
+    // prende in input un intero e aggiorna il valore dell'anno
+    void modificaAnno(unsigned int x)
+    {
+        if(x > -1 ) annocr = x;
+    };
+    
+    // ritorna l'anno corrente del sistema
+    static int systemYear()
+    {
+        time_t now = std::time(nullptr);
+        tm *timestamp = std::localtime(&now);
+         return timestamp->tm_year;
+    }
 };
 
 class dateTime : public orario, public data, public mese, public anno
