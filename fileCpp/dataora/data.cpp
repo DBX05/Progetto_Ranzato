@@ -1,5 +1,6 @@
 #include <string>
 #include <ctime>
+#include <format>
 /*
     File header gerarchia dataora
         Prima stesura: 2 / 2 / 2026
@@ -30,8 +31,8 @@ private:
     unsigned int sc, min, hr;
 
 public:
-    orario( unsigned int s = 0, unsigned int m = 0, unsigned int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
-                                                          min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
+    orario(unsigned int s = 0, unsigned int m = 0, unsigned int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+                                                                                     min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
     unsigned int getSec() const
     {
         return sc;
@@ -47,7 +48,7 @@ public:
         return hr;
     };
 
-    int getTimestamp () const 
+    int getTimestamp() const
     {
         return timestamp;
     };
@@ -80,7 +81,7 @@ public:
         return int(localTime->tm_hour);
     };
 
-    static unsigned int systemSecond() 
+    static unsigned int systemSecond()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -102,7 +103,7 @@ public:
         return int(localTime->tm_min);
     };
 
-    static int systemTime() 
+    static int systemTime()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -137,7 +138,7 @@ public:
     se il valore è valido inizializza l'oggetto;
     altrimenti lancia un'eccezzione (da gestire).
     */
-    data(unsigned int x = 0) : st((x-1 > -1 || x-1 < 8) ? x : -1)
+    data(unsigned int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
     {
         if (st == -1)
             throw data();
@@ -145,9 +146,14 @@ public:
     };
 
     // ritorna la data dell'oggetto corrente
-    std::string getGiorno(int) const
+    std::string getGiorno() const
     {
         return Settimana[st];
+    };
+
+    unsigned int getDate() const
+    {
+        return st;
     };
 
     /*
@@ -207,7 +213,7 @@ public:
     */
 
     // Versione 1
-    mese(unsigned int x = 0) : ms((x-1 < 12 || x-1 > -1) ? x : -1)
+    mese(unsigned int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
             throw mese();
@@ -230,7 +236,7 @@ public:
         ms = x;
         mscor = Mesi[ms];
     }
-     static unsigned int systemMonth() 
+    static unsigned int systemMonth()
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
@@ -265,9 +271,9 @@ private:
     unsigned int annocr;
 
 public:
-    anno(unsigned int an = systemYear() ): annocr((an < 0) ? systemYear() : an){};
-    
-    //restituisce il valore dell'anno
+    anno(unsigned int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
+
+    // restituisce il valore dell'anno
     unsigned int getAnno() const
     {
         return annocr;
@@ -275,9 +281,10 @@ public:
     // prende in input un intero e aggiorna il valore dell'anno
     void modificaAnno(unsigned int x)
     {
-        if(x > -1 ) annocr = x;
+        if (x > -1)
+            annocr = x;
     };
-    
+
     // ritorna l'anno corrente del sistema
     static int systemYear()
     {
@@ -292,10 +299,15 @@ class dateTime : public orario, public data, public mese, public anno
 private:
     // attributi ereditati
 public:
-    dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond()) 
-    :   orario(s, mn, h), data(d), mese(m), anno(an) {};
+    dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond())
+        : orario(s, mn, h), data(d), mese(m), anno(an) {};
     void getDateTime() const;
     // metodi void: cambiare il tipo di ritorno con quello adeguato se necessario
     void modificaDateTime();
-    void systemDateTime() const;
+    std::string systemDateTime() const
+    {
+        time_t now = std::time(nullptr);
+        std::tm timestamp = *std::localtime(&now);
+        return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+    };
 };
