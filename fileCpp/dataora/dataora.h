@@ -16,27 +16,40 @@
         1) metodi system: implementati con librerie di sistema operativo?
 */
 
+/*
+@Classe oraio rappresenatta come:
+int timestamp rapprenta il timestamp completo dell'intera data
+int sc rappresenta i secondi in sessantesimi
+int min rappresenta i minuti in sessantesimi
+int hr rappresenta le ore in sessantesimi
+*/
 class orario
 {
 private:
-    int timestamp, sc, min, hr;
+    int timestamp;
+    unsigned int sc, min, hr;
 
 public:
-    orario(int tm = 0, int s = 0, int m = 0, int h = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+    orario(int tm = 0, unsigned int s = 0, unsigned int m = 0, unsigned int h = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
                                                           min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
-    int getSec() const
+    unsigned int getSec() const
     {
         return sc;
     };
 
-    int getMin() const
+    unsigned int getMin() const
     {
         return min;
     };
 
-    int getHour() const
+    unsigned int getHour() const
     {
         return hr;
+    };
+
+    int getTimestamp () const 
+    {
+        return timestamp;
     };
 
     std::string curTime() const
@@ -44,7 +57,7 @@ public:
         return std::to_string(hr) + "/" + std::to_string(min) + "/" + std::to_string(sc);
     };
     void getFormat();
-    void modificaOrario(int h = -1, int m = -1, int s = -1)
+    void modificaOrario(unsigned int h = -1, unsigned int m = -1, unsigned int s = -1)
     {
         if (h < 0 || h > 23)
             throw orario();
@@ -56,7 +69,7 @@ public:
             throw orario();
         sc = s;
     }
-    int systemHour() const
+    unsigned int systemHour() const
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -67,7 +80,7 @@ public:
         return int(localTime->tm_hour);
     };
 
-    int systemSecond() const
+    unsigned int systemSecond() const
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -78,7 +91,7 @@ public:
         return int(localTime->tm_sec);
     };
 
-    int systemMin() const
+    unsigned int systemMin() const
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -105,6 +118,11 @@ public:
     };
 };
 
+/*
+@Classe data rappresenatta come:
+stringa stcor che rappresenta il valore in stringa del giorno corrente
+unsigned int st che rappresenta in valore intero il giorno corrente
+*/
 class data
 {
 private:
@@ -168,6 +186,11 @@ public:
     }
 };
 
+/*
+@Classe mese rappresenatta come:
+stringa mscor:  rappresenta il valore in stringa del mese corrente
+unsigned int ms: rappresenta in valore intero il mese corrente
+*/
 class mese
 {
 private:
