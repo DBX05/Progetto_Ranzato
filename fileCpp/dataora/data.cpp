@@ -297,13 +297,36 @@ public:
 class dateTime : public orario, public data, public mese, public anno
 {
 private:
+    std::string dateT;
     // attributi ereditati
 public:
     dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
-    void getDateTime() const;
-    // metodi void: cambiare il tipo di ritorno con quello adeguato se necessario
-    void modificaDateTime();
+    std::string getDateTime() const
+    {
+        return dateT;
+    }
+    
+    
+    // Ricontrollare questo metodo per evntuale efficentamento
+    void modificaDateTime(unsigned int an=0, unsigned int m=-1, int d=-1,  int h=-1, int mn=-1, int s=-1)
+    {
+        if(an != 0) modificaAnno(an);
+        if(m != -1) modificaMese(m);
+        if(d != -1) modificaData(d);
+        if(h != -1) modificaAnno(h);
+        if(mn != -1) modificaAnno(mn);
+        if(s != -1) modificaAnno(s);
+    }
+
+    // rifare funzione per accettare più tipologie di formattazione
+    void FormatDate()
+    {
+        dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+    }
+
+    //funzione che ritorna la data completa di sistema già formattata.
+    //controlare formattazione per efficentamento
     std::string systemDateTime() const
     {
         time_t now = std::time(nullptr);
