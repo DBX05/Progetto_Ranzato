@@ -306,17 +306,22 @@ public:
     {
         return dateT;
     }
-    
-    
+
     // Ricontrollare questo metodo per evntuale efficentamento
-    void modificaDateTime(unsigned int an=0, unsigned int m=-1, int d=-1,  int h=-1, int mn=-1, int s=-1)
+    void modificaDateTime(unsigned int an = 0, unsigned int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1)
     {
-        if(an != 0) modificaAnno(an);
-        if(m != -1) modificaMese(m);
-        if(d != -1) modificaData(d);
-        if(h != -1) modificaAnno(h);
-        if(mn != -1) modificaAnno(mn);
-        if(s != -1) modificaAnno(s);
+        if (an != 0)
+            modificaAnno(an);
+        if (m != -1)
+            modificaMese(m);
+        if (d != -1)
+            modificaData(d);
+        if (h != -1)
+            modificaAnno(h);
+        if (mn != -1)
+            modificaAnno(mn);
+        if (s != -1)
+            modificaAnno(s);
     }
 
     // rifare funzione per accettare più tipologie di formattazione
@@ -325,22 +330,21 @@ public:
         dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
     }
 
-    //funzione che ritorna la data completa di sistema già formattata.
-    //controlare formattazione per efficentamento
+    // funzione che ritorna la data completa di sistema già formattata.
+    // controlare formattazione per efficentamento
     std::string systemDateTime() const
     {
         time_t rawtime;
-        struct tm * timeinfo;
+        struct tm *timeinfo;
 
-        std::time (&rawtime);
-        timeinfo = std::localtime (&rawtime);
-        printf ("Current local time and date: %s" , std::asctime(timeinfo));
-    
+        std::time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        printf("Current local time and date: %s", std::asctime(timeinfo));
+
         /*
         time_t now = std::time(nullptr);
         std::tm timestamp = *std::localtime(&now);
         return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
-
-    */
+        */
     };
 };
