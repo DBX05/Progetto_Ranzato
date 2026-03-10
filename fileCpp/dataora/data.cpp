@@ -329,8 +329,18 @@ public:
     //controlare formattazione per efficentamento
     std::string systemDateTime() const
     {
+        time_t rawtime;
+        struct tm * timeinfo;
+
+        std::time (&rawtime);
+        timeinfo = std::localtime (&rawtime);
+        printf ("Current local time and date: %s" , std::asctime(timeinfo));
+    
+        /*
         time_t now = std::time(nullptr);
         std::tm timestamp = *std::localtime(&now);
         return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+
+    */
     };
 };
