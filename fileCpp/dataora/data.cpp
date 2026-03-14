@@ -339,12 +339,27 @@ public:
 
         std::time(&rawtime);
         timeinfo = std::localtime(&rawtime);
-        printf("Current local time and date: %s", std::asctime(timeinfo));
+        printf("Current local time and date: %d%s%d%s%d%s%d%s%d%s%d", timeinfo->tm_mday,"/", timeinfo->tm_mon,"/", 1900 + timeinfo->tm_year, "/  ", 
+        timeinfo->tm_hour, ":", timeinfo->tm_min,":", timeinfo->tm_sec ); 
 
         /*
+
+            MOLTO OPZIONALE:
+            
         time_t now = std::time(nullptr);
         std::tm timestamp = *std::localtime(&now);
         return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+        
+        --------
+        
+            Ottimale:
+
+        time_t rawtime;
+        struct tm *timeinfo;
+
+        std::time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        printf("Current local time and date: %s", std::asctime(timeinfo));
         */
     };
 };
