@@ -1,6 +1,8 @@
 #include <string>
 #include <ctime>
 #include <format>
+#include <QDateTimeEdit>
+
 /*
     File header gerarchia dataora
         Prima stesura: 2 / 2 / 2026
@@ -220,6 +222,11 @@ public:
         mscor = Mesi[ms];
     };
 
+    usigned int numMese()
+    {
+        return ms;
+    }
+
     // ritorna il mese dell'oggetto corrente
     std::string getMese() const
     {
@@ -327,7 +334,9 @@ public:
     // rifare funzione per accettare più tipologie di formattazione
     void FormatDate()
     {
-        dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+        //dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
+        QDateTime dt(QDate(getAnno(), numMese(), getDate()), QTime(getHour(), getMin(), getSec()));
+        QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
     }
 
     /*
