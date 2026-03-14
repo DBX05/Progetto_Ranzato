@@ -307,7 +307,7 @@ public:
         return dateT;
     }
 
-
+    // Ricontrollare funzione per eventuale modifica o ottimizzazione
     void modificaDateTime(unsigned int an = 0, unsigned int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1)
     {
         if (an != 0)
