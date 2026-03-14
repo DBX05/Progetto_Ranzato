@@ -3,7 +3,9 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:/Qt/6.10.2/mingw_64/include/QtWidgets",
+                "C:/Qt/6.10.2/mingw_64/include/QDateTimeEdit"
             ],
             "defines": [
                 "_DEBUG",
