@@ -307,7 +307,7 @@ public:
         return dateT;
     }
 
-    // Ricontrollare questo metodo per evntuale efficentamento
+
     void modificaDateTime(unsigned int an = 0, unsigned int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1)
     {
         if (an != 0)
@@ -330,8 +330,9 @@ public:
         dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
     }
 
-    // funzione che ritorna la data completa di sistema già formattata.
-    // controlare formattazione per efficentamento
+    /*
+    Ritorna la data di sistema fomrattata come day/month/year hour:min:sec
+    */
     std::string systemDateTime() const
     {
         time_t rawtime;
@@ -345,7 +346,7 @@ public:
         /*
 
             MOLTO OPZIONALE:
-            
+
         time_t now = std::time(nullptr);
         std::tm timestamp = *std::localtime(&now);
         return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
