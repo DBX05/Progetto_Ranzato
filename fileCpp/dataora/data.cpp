@@ -28,7 +28,7 @@
 */
 
 /*
-@Classe oraio rappresenatta come:
+@Classe orario rappresentata come:
 int timestamp rapprenta il timestamp completo dell'intera data
 int sc rappresenta i secondi in sessantesimi
 int min rappresenta i minuti in sessantesimi
@@ -41,8 +41,8 @@ private:
     unsigned int sc, min, hr;
 
 public:
-    orario(unsigned int s = 0, unsigned int m = 0, unsigned int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
-                                                                                     min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
+    orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+                                                                    min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
     unsigned int getSec() const
     {
         return sc;
@@ -68,7 +68,7 @@ public:
         return std::to_string(hr) + "/" + std::to_string(min) + "/" + std::to_string(sc);
     };
     void getFormat();
-    void modificaOrario(unsigned int h = -1, unsigned int m = -1, unsigned int s = -1)
+    void modificaOrario(int h = -1, int m = -1, int s = -1)
     {
         if (h < 0 || h > 23)
             throw orario();
@@ -139,7 +139,7 @@ class data
 private:
     // consiglio: se volessimo stampare il nome abbreviato alle prime 3 lettere, mettere una funzione di troncamento che stampa fino alla terza lettera
     std::string Settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
-    unsigned int st;
+    int st;
     std::string stcor;
 
 public:
@@ -148,7 +148,7 @@ public:
     se il valore è valido inizializza l'oggetto;
     altrimenti lancia un'eccezzione (da gestire).
     */
-    data(unsigned int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
+    data(int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
     {
         if (st == -1)
             throw data();
@@ -161,7 +161,7 @@ public:
         return Settimana[st];
     };
 
-    unsigned int getDate() const
+    int getDate() const
     {
         return st;
     };
@@ -169,7 +169,7 @@ public:
     /*
     cambia il valore dell'oggetto data
     */
-    void modificaData(unsigned int x)
+    void modificaData(int x)
     {
         if (x < 0 || x > 7)
             throw data();
@@ -192,7 +192,7 @@ public:
     */
 
     // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    unsigned int ConfGrioni(unsigned int x) const
+    int ConfGrioni(int x) const
     {
         if (st == x)
             return 0;
@@ -223,6 +223,9 @@ public:
     */
 
     // Versione 1
+    // controllare assegnazione a ms: se x fosse per esempio 14, la prima condizione dell'or è falsa,
+    // ma la seconda è vera, quindi assegno 14 a ms e alla riga 232 assegno mscor = Mesi[14] ! out of bounds
+    // va messo && ?
     mese(unsigned int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
@@ -244,7 +247,7 @@ public:
     /*
     cambia il valore dell'oggetto mese
     */
-    void modificaMese(unsigned int x)
+    void modificaMese(int x)
     {
         if (x < 0 || x > 11)
             throw mese();
@@ -259,7 +262,7 @@ public:
     };
 
     /*
-    Prende in input un'oggetto di tipo mese
+    Prende in input un oggetto di tipo mese
     Confronta i valori di due mesi
     ritorna 0 se sono uguali
     -1 se l'oggetto corretnte è maggiore
@@ -267,7 +270,7 @@ public:
     */
 
     // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    unsigned int ConfMesi(unsigned int x) const
+    int ConfMesi(int x) const
     {
         if (ms == x)
             return 0;
@@ -286,7 +289,7 @@ private:
     unsigned int annocr;
 
 public:
-    anno(unsigned int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
+    anno(int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
 
     // restituisce il valore dell'anno
     unsigned int getAnno() const
@@ -323,7 +326,7 @@ public:
     }
 
     // Ricontrollare funzione per eventuale modifica o ottimizzazione
-    void modificaDateTime(unsigned int an = 0, unsigned int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1)
+    void modificaDateTime(int an = 0, int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1)
     {
         if (an != 0)
             modificaAnno(an);
@@ -331,12 +334,8 @@ public:
             modificaMese(m);
         if (d != -1)
             modificaData(d);
-        if (h != -1)
-            modificaAnno(h);
-        if (mn != -1)
-            modificaAnno(mn);
-        if (s != -1)
-            modificaAnno(s);
+        if ( h != -1 || mn != -1 || s != -1 )
+            modificaOrario(h, mn, s);
     }
 
     // rifare funzione per accettare più tipologie di formattazione
