@@ -1,14 +1,14 @@
 #include <string>
 #include <ctime>
 #include <format>
-#include <QDateTimeEdit>
-/*
+//#include <QDateTimeEdit>
+
 // classe per la funzione FormatDate della classe DateTime():
 
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-*/
+
 
 
 /*
@@ -230,7 +230,7 @@ public:
         mscor = Mesi[ms];
     };
 
-    usigned int numMese()
+    unsigned int numMese()
     {
         return ms;
     }
@@ -339,25 +339,32 @@ public:
             modificaAnno(s);
     }
 
-    // rifare funzione per accettare più tipologie di formattazione
-    void FormatDate()
+    /*
+    Prende input una stringa con valore definito a vuoto che indica il formato base;
+    In caso abbia un valore diverso viene utilizzato come formato per la data;
+    controlli sulla corretezza della stringa vanno fatti esternamente
+    */
+    void FormatDate(std::string s = "")
     {
-        //dateT = getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
-        QDateTime dt(QDate(getAnno(), numMese(), getDate()), QTime(getHour(), getMin(), getSec()));
-        QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
-
-
         /*
-        versione con put_time funzione di cpp:
-
+        versione con funzione di qt:
+        QDateTime dt(QDate(getAnno(), numMese(), getDate()), QTime(getHour(), getMin(), getSec()));
+        */
         std::time_t t = std::time(nullptr);
         std::tm* tm_ptr = std::localtime(&t);
         tm_ptr->tm_sec = getSec(); tm_ptr->tm_min = getMin(); tm_ptr->tm_hour = getHour(); tm_ptr->tm_mday = getDate(); tm_ptr->tm_year = getAnno(); tm_ptr->tm_mon = numMese();
         std::stringstream ss;
-        ss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S");
-        std::string formatted = ss.str();
-        std::cout << formatted << std::endl;
-        */
+
+        if(s == "")
+        {
+            //QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
+            ss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S");
+        }
+        else 
+        {
+            //QString formatted = dt.toString(s); // "21.05.2023 14:13:09"
+            ss << std::put_time(tm_ptr, &s);
+        }
     }
 
     /*
