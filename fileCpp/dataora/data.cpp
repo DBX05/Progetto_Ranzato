@@ -32,6 +32,14 @@ int min rappresenta i minuti in sessantesimi
 int hr rappresenta le ore in sessantesimi
 */
 
+class orarioexp
+{
+    private:
+        std::string errore;
+    public:
+        orarioexp(std::string s = ""): errore(s == "" ? s : s){};
+};
+
 class orario
 {
 private:
@@ -80,13 +88,13 @@ public:
     void modificaOrario(int h = -1, int m = -1, int s = -1)
     {
         if (h < 0 || h > 23)
-            throw orario();
+            throw orarioexp("Le ore devono avere valore fra le 1 e 23");
         hr = h;
         if (m < 0 || m > 60)
-            throw orario();
+            throw orarioexp("I minuti devono avere valore fra le 1 e 60");
         min = m;
         if (s < 0 || s > 60)
-            throw orario();
+            throw orarioexp("I secondi devono avere valore fra le 1 e 60");
         sc = s;
     }
     static unsigned int systemHour()
