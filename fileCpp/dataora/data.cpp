@@ -50,7 +50,7 @@ private:
         min = y.min;
     }
     return *this;
-}
+    }
 
 public:
     orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
@@ -172,6 +172,15 @@ private:
     int st;
     std::string stcor;
 
+    data& operator=( data& y){
+    if(this != &y )
+    {
+        st = y.st;
+        stcor = y.stcor;
+    }
+    return *this;
+    }
+    
 public:
     /*
     prende un intero con valore compreso da 0 e 6 compreso e default 0;
@@ -232,6 +241,21 @@ public:
     }
 };
 
+bool operator==(data& x, data& y){
+    if(&x != &y && x.getDate() == y.getDate()) return true;
+    return false;
+}
+
+bool operator>(data& x, data& y){
+    if(&x != &y && x.getDate() > y.getDate()) return true;
+    return false;
+}
+
+bool operator<(data& x, data& y){
+    if(&x != &y && x.getDate() < y.getDate()) return true;
+    return false;
+}
+
 /*
 @Classe mese rappresenatta come:
 stringa mscor:  rappresenta il valore in stringa del mese corrente
@@ -244,8 +268,18 @@ private:
     std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
     unsigned int ms;
     std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
+    
+    mese& operator=( mese& y){
+    if(this != &y )
+    {
+        ms = y.ms;
+        mscor = y.mscor;
+    }
+    return *this;
+    }
 
 public:
+
     /*
     prende un intero con valore compreso da 0 e 11 compreso e default 0;
     se il valore è valido inizializza l'oggetto;
@@ -309,6 +343,21 @@ public:
         return 1;
     }
 };
+
+bool operator==(mese& x, mese& y){
+    if(&x != &y && x.numMese() == y.numMese()) return true;
+    return false;
+}
+
+bool operator>(mese& x, mese& y){
+    if(&x != &y && x.numMese() > y.numMese()) return true;
+    return false;
+}
+
+bool operator<(mese& x, mese& y){
+    if(&x != &y && x.numMese() < y.numMese()) return true;
+    return false;
+}
 /*
 @Classe anno rappresenatta come:
 unsigned int annocr: rappresenta in valore intero l'anno corrente
@@ -317,6 +366,14 @@ class anno
 {
 private:
     unsigned int annocr;
+
+    anno& operator=( anno& y){
+    if(this != &y )
+    {
+        annocr = y.annocr;
+    }
+    return *this;
+    }
 
 public:
     anno(int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
@@ -341,6 +398,21 @@ public:
         return timestamp->tm_year;
     }
 };
+
+bool operator==(anno& x, anno& y){
+    if(&x != &y && x.getAnno() == y.getAnno()) return true;
+    return false;
+}
+
+bool operator>(anno& x, anno& y){
+    if(&x != &y && x.getAnno() > y.getAnno()) return true;
+    return false;
+}
+
+bool operator<(anno& x, anno& y){
+    if(&x != &y && x.getAnno() < y.getAnno()) return true;
+    return false;
+}
 
 class dateTime : public orario, public data, public mese, public anno
 {
