@@ -1,15 +1,12 @@
 #include <string>
 #include <ctime>
 #include <format>
-//#include <QDateTimeEdit>
-
-// classe per la funzione FormatDate della classe DateTime():
-
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
+//#include <QDateTimeEdit>
 
 /*
     File header gerarchia dataora
