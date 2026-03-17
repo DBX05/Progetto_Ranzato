@@ -419,6 +419,14 @@ class dateTime : public orario, public data, public mese, public anno
 private:
     std::string dateT;
     // attributi ereditati
+
+    dateTime& operator=( dateTime& y){
+    if(this != &y )
+    {
+        dateT = y.dateT;
+    }
+    return *this;
+    }
 public:
     dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
@@ -502,3 +510,18 @@ public:
         */
     };
 };
+
+bool operator==(dateTime& x, dateTime& y){
+    if(&x != &y && x.getDateTime() == y.getDateTime()) return true;
+    return false;
+}
+
+bool operator>(dateTime& x, dateTime& y){
+    if(&x != &y && x.getDateTime() > y.getDateTime()) return true;
+    return false;
+}
+
+bool operator<(dateTime& x, dateTime& y){
+    if(&x != &y && x.getDateTime() < y.getDateTime()) return true;
+    return false;
+}
