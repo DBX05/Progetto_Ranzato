@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-
+#include <stdexcept>
 
 
 /*
@@ -34,11 +34,23 @@ int sc rappresenta i secondi in sessantesimi
 int min rappresenta i minuti in sessantesimi
 int hr rappresenta le ore in sessantesimi
 */
+
 class orario
 {
 private:
     int timestamp;
     unsigned int sc, min, hr;
+
+    orario& operator=( orario& y){
+    if(this != &y )
+    {
+        timestamp = y.timestamp;
+        sc = y.sc;
+        hr = y.hr;
+        min = y.min;
+    }
+    return *this;
+}
 
 public:
     orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
@@ -128,6 +140,24 @@ public:
         return int(localTime);
     };
 };
+
+
+bool operator==(orario& x, orario& y){
+    if(&x != &y && x.getTimestamp() == y.getTimestamp() && x.getHour() == y.getHour() && x.getMin() == y.getMin() && x.getSec() == y.getSec()) return true;
+    return false;
+}
+
+bool operator>(orario& x, orario& y){
+    if(&x != &y && x.getTimestamp() > y.getTimestamp() && x.getHour() > y.getHour() && x.getMin() > y.getMin() && x.getSec() > y.getSec()) return true;
+    return false;
+}
+
+bool operator<(orario& x, orario& y){
+    if(&x != &y && x.getTimestamp() < y.getTimestamp() && x.getHour() < y.getHour() && x.getMin() < y.getMin() && x.getSec() < y.getSec()) return true;
+    return false;
+}
+
+
 
 /*
 @Classe data rappresenatta come:
