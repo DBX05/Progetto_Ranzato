@@ -193,6 +193,15 @@ bool operator<(orario &x, orario &y)
 stringa stcor che rappresenta il valore in stringa del giorno corrente
 unsigned int st che rappresenta in valore intero il giorno corrente
 */
+
+class dataexp
+{
+private:
+    std::string errore;
+
+public:
+    dataexp(std::string s = "") : errore(s == "" ? s : s) {};
+};
 class data
 {
 private:
@@ -220,7 +229,7 @@ public:
     data(int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
     {
         if (st == -1)
-            throw data();
+            throw dataexp();
         stcor = Settimana[st];
     };
 
@@ -241,7 +250,7 @@ public:
     void modificaData(int x)
     {
         if (x < 0 || x > 7)
-            throw data();
+            throw dataexp();
         st = x;
         stcor = Settimana[st];
     };
@@ -297,6 +306,15 @@ bool operator<(data &x, data &y)
 stringa mscor:  rappresenta il valore in stringa del mese corrente
 unsigned int ms: rappresenta in valore intero il mese corrente
 */
+
+class mesexp
+{
+private:
+    std::string errore;
+
+public:
+    mesexp(std::string s = "") : errore(s == "" ? s : s) {};
+};
 class mese
 {
 private:
@@ -329,7 +347,7 @@ public:
     mese(unsigned int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
-            throw mese();
+            throw mesexp();
         mscor = Mesi[ms];
     };
 
@@ -350,7 +368,7 @@ public:
     void modificaMese(int x)
     {
         if (x < 0 || x > 11)
-            throw mese();
+            throw mesexp();
         ms = x;
         mscor = Mesi[ms];
     }
@@ -404,6 +422,14 @@ bool operator<(mese &x, mese &y)
 @Classe anno rappresenatta come:
 unsigned int annocr: rappresenta in valore intero l'anno corrente
 */
+class annoexp
+{
+private:
+    std::string errore;
+
+public:
+    annoexp(std::string s = "") : errore(s == "" ? s : s) {};
+};
 class anno
 {
 private:
@@ -462,6 +488,15 @@ bool operator<(anno &x, anno &y)
         return true;
     return false;
 }
+
+class DateTimexp
+{
+private:
+    std::string errore;
+
+public:
+    DateTimexp(std::string s = "") : errore(s == "" ? s : s) {};
+};
 
 class dateTime : public orario, public data, public mese, public anno
 {
