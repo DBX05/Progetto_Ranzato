@@ -6,7 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 
-//#include <QDateTimeEdit>
+// #include <QDateTimeEdit>
 
 /*
     File header gerarchia dataora
@@ -34,10 +34,11 @@ int hr rappresenta le ore in sessantesimi
 
 class orarioexp
 {
-    private:
-        std::string errore;
-    public:
-        orarioexp(std::string s = ""): errore(s == "" ? s : s){};
+private:
+    std::string errore;
+
+public:
+    orarioexp(std::string s = "") : errore(s == "" ? s : s) {};
 };
 
 class orario
@@ -46,20 +47,40 @@ private:
     int timestamp;
     unsigned int sc, min, hr;
 
-    orario& operator=( orario& y){
-    if(this != &y )
+    orario &operator=(orario &y)
     {
-        timestamp = y.timestamp;
-        sc = y.sc;
-        hr = y.hr;
-        min = y.min;
+        if (this != &y)
+        {
+            timestamp = y.timestamp;
+            sc = y.sc;
+            hr = y.hr;
+            min = y.min;
+        }
+        return *this;
     }
-    return *this;
+
+    void create_timestamp(unsigned int h, unsigned int m, unsigned int s)
+    {
+        if (timestamp != 0 || timestamp != systemTime())
+        {
+            std::time_t now = std::time(nullptr);
+            std::tm tm = *std::localtime(&now); // prende anno/mese/giorno correnti in locale
+            tm.tm_hour = h;
+            tm.tm_min = m;
+            tm.tm_sec = s;
+            tm.tm_isdst = -1;                 // lascia che mktime determini DST
+            std::time_t t = std::mktime(&tm); // interpreta tm come ora locale
+            timestamp = static_cast<long long int>(t);
+        }
     }
 
 public:
     orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
-                                                                    min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s) {};
+                                                          min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s)
+    {
+        if (h != 0 && min != 0 && s != 0)
+            create_timestamp(h, m, s);
+    }
     unsigned int getSec() const
     {
         return sc;
@@ -146,23 +167,26 @@ public:
     };
 };
 
-
-bool operator==(orario& x, orario& y){
-    if(&x != &y && x.getTimestamp() == y.getTimestamp() && x.getHour() == y.getHour() && x.getMin() == y.getMin() && x.getSec() == y.getSec()) return true;
+bool operator==(orario &x, orario &y)
+{
+    if (&x != &y && x.getTimestamp() == y.getTimestamp())
+        return true;
     return false;
 }
 
-bool operator>(orario& x, orario& y){
-    if(&x != &y && x.getTimestamp() > y.getTimestamp() && x.getHour() > y.getHour() && x.getMin() > y.getMin() && x.getSec() > y.getSec()) return true;
+bool operator>(orario &x, orario &y)
+{
+    if (&x != &y && x.getTimestamp() > y.getTimestamp())
+        return true;
     return false;
 }
 
-bool operator<(orario& x, orario& y){
-    if(&x != &y && x.getTimestamp() < y.getTimestamp() && x.getHour() < y.getHour() && x.getMin() < y.getMin() && x.getSec() < y.getSec()) return true;
+bool operator<(orario &x, orario &y)
+{
+    if (&x != &y && x.getTimestamp() < y.getTimestamp())
+        return true;
     return false;
 }
-
-
 
 /*
 @Classe data rappresenatta come:
@@ -177,15 +201,16 @@ private:
     int st;
     std::string stcor;
 
-    data& operator=( data& y){
-    if(this != &y )
+    data &operator=(data &y)
     {
-        st = y.st;
-        stcor = y.stcor;
+        if (this != &y)
+        {
+            st = y.st;
+            stcor = y.stcor;
+        }
+        return *this;
     }
-    return *this;
-    }
-    
+
 public:
     /*
     prende un intero con valore compreso da 0 e 6 compreso e default 0;
@@ -246,18 +271,24 @@ public:
     }
 };
 
-bool operator==(data& x, data& y){
-    if(&x != &y && x.getDate() == y.getDate()) return true;
+bool operator==(data &x, data &y)
+{
+    if (&x != &y && x.getDate() == y.getDate())
+        return true;
     return false;
 }
 
-bool operator>(data& x, data& y){
-    if(&x != &y && x.getDate() > y.getDate()) return true;
+bool operator>(data &x, data &y)
+{
+    if (&x != &y && x.getDate() > y.getDate())
+        return true;
     return false;
 }
 
-bool operator<(data& x, data& y){
-    if(&x != &y && x.getDate() < y.getDate()) return true;
+bool operator<(data &x, data &y)
+{
+    if (&x != &y && x.getDate() < y.getDate())
+        return true;
     return false;
 }
 
@@ -273,18 +304,18 @@ private:
     std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
     unsigned int ms;
     std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
-    
-    mese& operator=( mese& y){
-    if(this != &y )
+
+    mese &operator=(mese &y)
     {
-        ms = y.ms;
-        mscor = y.mscor;
-    }
-    return *this;
+        if (this != &y)
+        {
+            ms = y.ms;
+            mscor = y.mscor;
+        }
+        return *this;
     }
 
 public:
-
     /*
     prende un intero con valore compreso da 0 e 11 compreso e default 0;
     se il valore è valido inizializza l'oggetto;
@@ -349,18 +380,24 @@ public:
     }
 };
 
-bool operator==(mese& x, mese& y){
-    if(&x != &y && x.numMese() == y.numMese()) return true;
+bool operator==(mese &x, mese &y)
+{
+    if (&x != &y && x.numMese() == y.numMese())
+        return true;
     return false;
 }
 
-bool operator>(mese& x, mese& y){
-    if(&x != &y && x.numMese() > y.numMese()) return true;
+bool operator>(mese &x, mese &y)
+{
+    if (&x != &y && x.numMese() > y.numMese())
+        return true;
     return false;
 }
 
-bool operator<(mese& x, mese& y){
-    if(&x != &y && x.numMese() < y.numMese()) return true;
+bool operator<(mese &x, mese &y)
+{
+    if (&x != &y && x.numMese() < y.numMese())
+        return true;
     return false;
 }
 /*
@@ -372,12 +409,13 @@ class anno
 private:
     unsigned int annocr;
 
-    anno& operator=( anno& y){
-    if(this != &y )
+    anno &operator=(anno &y)
     {
-        annocr = y.annocr;
-    }
-    return *this;
+        if (this != &y)
+        {
+            annocr = y.annocr;
+        }
+        return *this;
     }
 
 public:
@@ -404,18 +442,24 @@ public:
     }
 };
 
-bool operator==(anno& x, anno& y){
-    if(&x != &y && x.getAnno() == y.getAnno()) return true;
+bool operator==(anno &x, anno &y)
+{
+    if (&x != &y && x.getAnno() == y.getAnno())
+        return true;
     return false;
 }
 
-bool operator>(anno& x, anno& y){
-    if(&x != &y && x.getAnno() > y.getAnno()) return true;
+bool operator>(anno &x, anno &y)
+{
+    if (&x != &y && x.getAnno() > y.getAnno())
+        return true;
     return false;
 }
 
-bool operator<(anno& x, anno& y){
-    if(&x != &y && x.getAnno() < y.getAnno()) return true;
+bool operator<(anno &x, anno &y)
+{
+    if (&x != &y && x.getAnno() < y.getAnno())
+        return true;
     return false;
 }
 
@@ -425,13 +469,15 @@ private:
     std::string dateT;
     // attributi ereditati
 
-    dateTime& operator=( dateTime& y){
-    if(this != &y )
+    dateTime &operator=(dateTime &y)
     {
-        dateT = y.dateT;
+        if (this != &y)
+        {
+            dateT = y.dateT;
+        }
+        return *this;
     }
-    return *this;
-    }
+
 public:
     dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
@@ -449,7 +495,7 @@ public:
             modificaMese(m);
         if (d != -1)
             modificaData(d);
-        if ( h != -1 || mn != -1 || s != -1 )
+        if (h != -1 || mn != -1 || s != -1)
             modificaOrario(h, mn, s);
     }
 
@@ -465,18 +511,23 @@ public:
         QDateTime dt(QDate(getAnno(), numMese(), getDate()), QTime(getHour(), getMin(), getSec()));
         */
         std::time_t t = std::time(nullptr);
-        std::tm* tm_ptr = std::localtime(&t);
-        tm_ptr->tm_sec = getSec(); tm_ptr->tm_min = getMin(); tm_ptr->tm_hour = getHour(); tm_ptr->tm_mday = getDate(); tm_ptr->tm_year = getAnno(); tm_ptr->tm_mon = numMese();
+        std::tm *tm_ptr = std::localtime(&t);
+        tm_ptr->tm_sec = getSec();
+        tm_ptr->tm_min = getMin();
+        tm_ptr->tm_hour = getHour();
+        tm_ptr->tm_mday = getDate();
+        tm_ptr->tm_year = getAnno();
+        tm_ptr->tm_mon = numMese();
         std::stringstream ss;
 
-        if(s == "")
+        if (s == "")
         {
-            //QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
+            // QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
             ss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S");
         }
-        else 
+        else
         {
-            //QString formatted = dt.toString(s); // "21.05.2023 14:13:09"
+            // QString formatted = dt.toString(s); // "21.05.2023 14:13:09"
             ss << std::put_time(tm_ptr, &s);
         }
     }
@@ -491,8 +542,8 @@ public:
 
         std::time(&rawtime);
         timeinfo = std::localtime(&rawtime);
-        printf("Current local time and date: %d%s%d%s%d%s%d%s%d%s%d", timeinfo->tm_mday,"/", timeinfo->tm_mon,"/", 1900 + timeinfo->tm_year, "/  ", 
-        timeinfo->tm_hour, ":", timeinfo->tm_min,":", timeinfo->tm_sec ); 
+        printf("Current local time and date: %d%s%d%s%d%s%d%s%d%s%d", timeinfo->tm_mday, "/", timeinfo->tm_mon, "/", 1900 + timeinfo->tm_year, "/  ",
+               timeinfo->tm_hour, ":", timeinfo->tm_min, ":", timeinfo->tm_sec);
 
         /*
 
@@ -501,9 +552,9 @@ public:
         time_t now = std::time(nullptr);
         std::tm timestamp = *std::localtime(&now);
         return getGiorno() + "/" + std::to_string(getDate()) + "/" + getMese() + "/" + std::to_string(getAnno()) + " " + std::to_string(getHour()) + ":" + std::to_string(getMin()) + ":" + std::to_string(getSec());
-        
+
         --------
-        
+
             Ottimale:
 
         time_t rawtime;
@@ -516,17 +567,23 @@ public:
     };
 };
 
-bool operator==(dateTime& x, dateTime& y){
-    if(&x != &y && x.getDateTime() == y.getDateTime()) return true;
+bool operator==(dateTime &x, dateTime &y)
+{
+    if (&x != &y && x.getDateTime() == y.getDateTime())
+        return true;
     return false;
 }
 
-bool operator>(dateTime& x, dateTime& y){
-    if(&x != &y && x.getDateTime() > y.getDateTime()) return true;
+bool operator>(dateTime &x, dateTime &y)
+{
+    if (&x != &y && x.getDateTime() > y.getDateTime())
+        return true;
     return false;
 }
 
-bool operator<(dateTime& x, dateTime& y){
-    if(&x != &y && x.getDateTime() < y.getDateTime()) return true;
+bool operator<(dateTime &x, dateTime &y)
+{
+    if (&x != &y && x.getDateTime() < y.getDateTime())
+        return true;
     return false;
 }
