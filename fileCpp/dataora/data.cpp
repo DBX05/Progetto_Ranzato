@@ -34,11 +34,10 @@ int hr rappresenta le ore in sessantesimi
 
 class orarioexp
 {
-private:
-    std::string errore;
-
 public:
-    orarioexp(std::string s = "") : errore(s == "" ? s : s) {};
+    std::string errore;
+    int str;
+    orarioexp(std::string s, int st) : errore(s), str(st) {};
 };
 
 class orario
@@ -109,13 +108,13 @@ public:
     void modificaOrario(int h = -1, int m = -1, int s = -1)
     {
         if (h < 0 || h > 23)
-            throw orarioexp("Le ore devono avere valore fra le 1 e 23");
+            throw orarioexp("Le ore devono avere valore fra le 1 e 23", h);
         hr = h;
         if (m < 0 || m > 60)
-            throw orarioexp("I minuti devono avere valore fra le 1 e 60");
+            throw orarioexp("I minuti devono avere valore fra le 1 e 60", m);
         min = m;
         if (s < 0 || s > 60)
-            throw orarioexp("I secondi devono avere valore fra le 1 e 60");
+            throw orarioexp("I secondi devono avere valore fra le 1 e 60", s);
         sc = s;
     }
     static unsigned int systemHour()
@@ -196,11 +195,10 @@ unsigned int st che rappresenta in valore intero il giorno corrente
 
 class dataexp
 {
-private:
-    std::string errore;
-
 public:
-    dataexp(std::string s = "") : errore(s == "" ? s : s) {};
+    std::string errore;
+    int str;
+    dataexp(std::string s, int st) : errore(s), str(st) {};
 };
 class data
 {
@@ -229,7 +227,7 @@ public:
     data(int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
     {
         if (st == -1)
-            throw dataexp();
+            throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", st);
         stcor = Settimana[st];
     };
 
@@ -250,7 +248,7 @@ public:
     void modificaData(int x)
     {
         if (x < 0 || x > 7)
-            throw dataexp();
+            throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", x);
         st = x;
         stcor = Settimana[st];
     };
@@ -309,11 +307,10 @@ unsigned int ms: rappresenta in valore intero il mese corrente
 
 class mesexp
 {
-private:
-    std::string errore;
-
 public:
-    mesexp(std::string s = "") : errore(s == "" ? s : s) {};
+    std::string errore;
+    int str;
+    mesexp(std::string s, int st) : errore(s), str(st) {};
 };
 class mese
 {
@@ -347,7 +344,7 @@ public:
     mese(unsigned int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
-            throw mesexp();
+            throw mesexp("il mese deve avere valore compreso fra 1 e 12",ms);
         mscor = Mesi[ms];
     };
 
@@ -368,7 +365,7 @@ public:
     void modificaMese(int x)
     {
         if (x < 0 || x > 11)
-            throw mesexp();
+            throw mesexp("il mese deve avere valore compreso fra 1 e 12", ms);
         ms = x;
         mscor = Mesi[ms];
     }
@@ -424,11 +421,10 @@ unsigned int annocr: rappresenta in valore intero l'anno corrente
 */
 class annoexp
 {
-private:
-    std::string errore;
-
 public:
-    annoexp(std::string s = "") : errore(s == "" ? s : s) {};
+    std::string errore;
+    int str;
+    annoexp(std::string s, int st) : errore(s), str(st) {};
 };
 class anno
 {
@@ -491,11 +487,9 @@ bool operator<(anno &x, anno &y)
 
 class DateTimexp
 {
-private:
-    std::string errore;
-
 public:
-    DateTimexp(std::string s = "") : errore(s == "" ? s : s) {};
+    std::string errore;
+    DateTimexp(std::string s) : errore(s) {};
 };
 
 class dateTime : public orario, public data, public mese, public anno
