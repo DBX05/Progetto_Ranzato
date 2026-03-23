@@ -27,26 +27,26 @@ class orario
 {
 private:
     int timestamp;
-    unsigned int sc, min, hr;
+     int sc, min, hr;
 
 public:
-    orario( unsigned int, unsigned int, unsigned int, int);
-    unsigned int getSec() const;
+    orario(  int,  int,  int, int);
+     int getSec() const;
 
-    unsigned int getMin() const;
+     int getMin() const;
 
-    unsigned int getHour() const;
+     int getHour() const;
 
     int getTimestamp () const;
 
     std::string curTime() const;
     void getFormat();
-    void modificaOrario(unsigned int, unsigned int, unsigned int);
-    static unsigned int systemHour();
+    void modificaOrario( int,  int,  int);
+    static  int systemHour();
 
-    static unsigned int systemSecond();
+    static  int systemSecond();
 
-    static unsigned int systemMin();
+    static  int systemMin();
 
     static int systemTime();
 };
@@ -54,14 +54,14 @@ public:
 /*
 @Classe data rappresenatta come:
 stringa stcor che rappresenta il valore in stringa del giorno corrente
-unsigned int st che rappresenta in valore intero il giorno corrente
+ int st che rappresenta in valore intero il giorno corrente
 */
 class data
 {
 private:
     // consiglio: se volessimo stampare il nome abbreviato alle prime 3 lettere, mettere una funzione di troncamento che stampa fino alla terza lettera
     std::string Settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
-    unsigned int st;
+     int st;
     std::string stcor;
 
 public:
@@ -70,18 +70,18 @@ public:
     se il valore è valido inizializza l'oggetto;
     altrimenti lancia un'eccezzione (da gestire).
     */
-    data(unsigned int);
+    data( int);
 
     // ritorna la data dell'oggetto corrente
     std::string getGiorno() const;
 
-    unsigned int getDate() const;
+     int getDate() const;
 
     /*
     cambia il valore dell'oggetto data
     */
-    void modificaData(unsigned int);
-    static unsigned int systemDay();
+    void modificaData( int);
+    static  int systemDay();
 
     /*
     Prende in input un'oggetto di tipo data
@@ -92,20 +92,20 @@ public:
     */
 
     // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    unsigned int ConfGrioni(unsigned int) const;
+     int ConfGrioni( int) const;
 };
 
 /*
 @Classe mese rappresenatta come:
 stringa mscor:  rappresenta il valore in stringa del mese corrente
-unsigned int ms: rappresenta in valore intero il mese corrente
+ int ms: rappresenta in valore intero il mese corrente
 */
 class mese
 {
 private:
     // aggiungere funzione che passato il mese come parametro (o indice dell'enumMese) restituisce i giorni di quel mese?
     std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
-    unsigned int ms;
+     int ms;
     std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
 
 public:
@@ -116,7 +116,7 @@ public:
     */
 
     // Versione 1
-    mese(unsigned int);
+    mese( int);
 
     // ritorna il mese dell'oggetto corrente
     std::string getMese() const;
@@ -124,8 +124,8 @@ public:
     /*
     cambia il valore dell'oggetto mese
     */
-    void modificaMese(unsigned int);
-    static unsigned int systemMonth();
+    void modificaMese( int);
+    static  int systemMonth();
 
     /*
     Prende in input un'oggetto di tipo mese
@@ -136,24 +136,24 @@ public:
     */
 
     // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    unsigned int ConfMesi(unsigned int) const;
+     int ConfMesi( int) const;
 };
 /*
 @Classe anno rappresenatta come:
-unsigned int annocr: rappresenta in valore intero l'anno corrente
+ int annocr: rappresenta in valore intero l'anno corrente
 */
 class anno
 {
 private:
-    unsigned int annocr;
+     int annocr;
 
 public:
-    anno(unsigned int);
+    anno( int);
 
     // restituisce il valore dell'anno
-    unsigned int getAnno() const;
+     int getAnno() const;
     // prende in input un intero e aggiorna il valore dell'anno
-    void modificaAnno(unsigned int);
+    void modificaAnno( int);
 
     // ritorna l'anno corrente del sistema
     static int systemYear();
@@ -165,12 +165,12 @@ private:
     std::string dateT;
     // attributi ereditati
 public:
-    dateTime(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+    dateTime( int,  int,  int,  int,  int,  int);
     std::string getDateTime() const;
     
     
     // Ricontrollare questo metodo per evntuale efficentamento
-    void modificaDateTime(unsigned int, unsigned int, int,  int, int, int);
+    void modificaDateTime( int,  int, int,  int, int, int);
 
     // rifare funzione per accettare più tipologie di formattazione
     void FormatDate();
