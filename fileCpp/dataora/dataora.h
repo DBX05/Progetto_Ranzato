@@ -1,181 +1,149 @@
 #include <string>
 #include <ctime>
-/*
-    File header gerarchia dataora
-        Prima stesura: 2 / 2 / 2026
 
-    Controllare:
-        correttezza campi private e campi public.
-        Vogliamo garantire information hiding?
-    Finire:
-        costruttori
-*/
+// Exception classes
+class orarioexp;
+class dataexp;
+class mesexp;
+class annoexp;
+class DateTimexp;
 
 /*
-    DOMANDE:
-        1) metodi system: implementati con librerie di sistema operativo?
-*/
-
-/*
-@Classe oraio rappresenatta come:
-int timestamp rapprenta il timestamp completo dell'intera data
-int sc rappresenta i secondi in sessantesimi
-int min rappresenta i minuti in sessantesimi
-int hr rappresenta le ore in sessantesimi
+    CLASSE ORARIO
+    Rappresenta un orario composto da ore, minuti e secondi, con supporto a timestamp Unix.
 */
 class orario
 {
 private:
     int timestamp;
-     int sc, min, hr;
+    int sc, min, hr;
+    
+    orario &operator=(const orario &y);
+    void create_timestamp(int h, int m, int s);
 
 public:
-    orario(  int,  int,  int, int);
-     int getSec() const;
-
-     int getMin() const;
-
-     int getHour() const;
-
-    int getTimestamp () const;
-
+    orario(int s = 0, int m = 0, int h = 0, int tm = 0);
+    
+    int getSec() const;
+    int getMin() const;
+    int getHour() const;
+    int getTimestamp() const;
     std::string curTime() const;
     void getFormat();
-    void modificaOrario( int,  int,  int);
-    static  int systemHour();
-
-    static  int systemSecond();
-
-    static  int systemMin();
-
+    void modificaOrario(int h = -1, int m = -1, int s = -1);
+    
+    static int systemHour();
+    static int systemSecond();
+    static int systemMin();
     static int systemTime();
+    
+    friend bool operator==(const orario &x, const orario &y);
+    friend bool operator>(const orario &x, const orario &y);
+    friend bool operator<(const orario &x, const orario &y);
 };
 
 /*
-@Classe data rappresenatta come:
-stringa stcor che rappresenta il valore in stringa del giorno corrente
- int st che rappresenta in valore intero il giorno corrente
+    CLASSE DATA
+    Rappresenta un giorno della settimana come intero e come stringa.
 */
 class data
 {
 private:
-    // consiglio: se volessimo stampare il nome abbreviato alle prime 3 lettere, mettere una funzione di troncamento che stampa fino alla terza lettera
     std::string Settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
-     int st;
+    int st;
     std::string stcor;
+    
+    data &operator=(const data &y);
 
 public:
-    /*
-    prende un intero con valore compreso da 0 e 6 compreso e default 0;
-    se il valore è valido inizializza l'oggetto;
-    altrimenti lancia un'eccezzione (da gestire).
-    */
-    data( int);
-
-    // ritorna la data dell'oggetto corrente
+    data(int x = 0);
+    
     std::string getGiorno() const;
-
-     int getDate() const;
-
-    /*
-    cambia il valore dell'oggetto data
-    */
-    void modificaData( int);
-    static  int systemDay();
-
-    /*
-    Prende in input un'oggetto di tipo data
-    Confronta i valori di due date
-    ritorna 0 se sono uguali
-    -1 se l'oggetto corretnte è maggiore
-    1 se l'oggetto corrente è minore
-    */
-
-    // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-     int ConfGrioni( int) const;
+    int getDate() const;
+    void modificaData(int x);
+    
+    static int systemDay();
+    int ConfGrioni(int x) const;
+    
+    friend bool operator==(const data &x, const data &y);
+    friend bool operator>(const data &x, const data &y);
+    friend bool operator<(const data &x, const data &y);
 };
 
 /*
-@Classe mese rappresenatta come:
-stringa mscor:  rappresenta il valore in stringa del mese corrente
- int ms: rappresenta in valore intero il mese corrente
+    CLASSE MESE
+    Rappresenta un mese dell'anno come intero e come stringa.
 */
 class mese
 {
 private:
-    // aggiungere funzione che passato il mese come parametro (o indice dell'enumMese) restituisce i giorni di quel mese?
-    std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
-     int ms;
-    std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
+    std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+                             "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
+    int ms;
+    std::string mscor;
+    
+    mese &operator=(const mese &y);
 
 public:
-    /*
-    prende un intero con valore compreso da 0 e 11 compreso e default 0;
-    se il valore è valido inizializza l'oggetto;
-    altrimenti lancia un'eccezzione (da gestire).
-    */
-
-    // Versione 1
-    mese( int);
-
-    // ritorna il mese dell'oggetto corrente
+    mese(int x = 0);
+    
+    int numMese() const;
     std::string getMese() const;
-
-    /*
-    cambia il valore dell'oggetto mese
-    */
-    void modificaMese( int);
-    static  int systemMonth();
-
-    /*
-    Prende in input un'oggetto di tipo mese
-    Confronta i valori di due mesi
-    ritorna 0 se sono uguali
-    -1 se l'oggetto corretnte è maggiore
-    1 se l'oggetto corrente è minore
-    */
-
-    // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-     int ConfMesi( int) const;
+    void modificaMese(int x);
+    
+    static int systemMonth();
+    int ConfMesi(int x) const;
+    
+    friend bool operator==(const mese &x, const mese &y);
+    friend bool operator>(const mese &x, const mese &y);
+    friend bool operator<(const mese &x, const mese &y);
 };
+
 /*
-@Classe anno rappresenatta come:
- int annocr: rappresenta in valore intero l'anno corrente
+    CLASSE ANNO
+    Rappresenta un anno come valore intero.
 */
 class anno
 {
 private:
-     int annocr;
+    int annocr;
+    
+    anno &operator=(const anno &y);
 
 public:
-    anno( int);
-
-    // restituisce il valore dell'anno
-     int getAnno() const;
-    // prende in input un intero e aggiorna il valore dell'anno
-    void modificaAnno( int);
-
-    // ritorna l'anno corrente del sistema
+    anno(int an = systemYear());
+    
+    int getAnno() const;
+    void modificaAnno(int x);
+    
     static int systemYear();
+    
+    friend bool operator==(const anno &x, const anno &y);
+    friend bool operator>(const anno &x, const anno &y);
+    friend bool operator<(const anno &x, const anno &y);
 };
 
+/*
+    CLASSE DATETIME
+    Rappresenta una data e ora completa tramite ereditarietà multipla.
+*/
 class dateTime : public orario, public data, public mese, public anno
 {
 private:
     std::string dateT;
-    // attributi ereditati
+    
+    dateTime &operator=(const dateTime &y);
+
 public:
-    dateTime( int,  int,  int,  int,  int,  int);
+    dateTime(int an = systemYear(), int m = systemMonth(), int d = systemDay(),
+             int h = systemHour(), int mn = systemMin(), int s = systemSecond());
+    
     std::string getDateTime() const;
-    
-    
-    // Ricontrollare questo metodo per evntuale efficentamento
-    void modificaDateTime( int,  int, int,  int, int, int);
-
-    // rifare funzione per accettare più tipologie di formattazione
-    void FormatDate();
-
-    //funzione che ritorna la data completa di sistema già formattata.
-    //controlare formattazione per efficentamento
+    void modificaDateTime(int an = 0, int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1);
+    std::string FormatDate(std::string s = "");
     std::string systemDateTime() const;
+    
+    friend bool operator==(const dateTime &x, const dateTime &y);
+    friend bool operator>(const dateTime &x, const dateTime &y);
+    friend bool operator<(const dateTime &x, const dateTime &y);
 };
