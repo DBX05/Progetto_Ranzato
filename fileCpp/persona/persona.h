@@ -1,45 +1,113 @@
+#ifndef PERSONA_H
+#define PERSONA_H
+
 #include <string>
 #include <cstdint>
+#include <stdexcept>
 
-/*
-    File header gerarchia persona
-        Prima stesura: 2 / 2 / 2026
-    
-    Controllare:
-        correttezza campi private e campi public.
-        Vogliamo garantire information hiding?
-    Finire:
-        costruttori
+/*!
+    \class PersonaException
+    \brief Eccezione base per errori di gestione persona.
 */
+class PersonaException : public std::exception
+{
+private:
+    std::string message;
+public:
+    PersonaException(const std::string& msg);
+    const char* what() const noexcept override;
+};
 
+/*!
+    \class utente
+    \brief Classe base astratta per utenti del sistema.
+*/
 class utente
 {
-    private:
-        const unsigned int id;
-        bool policy;
-    public:
-        utente();
-        virtual ~utente() =0;
-        void gestionePolicy();
+protected:
+    unsigned int id;
+    bool policy;
+    
+    utente(unsigned int userId);
+    
+public:
+    virtual ~utente() = default;
+    
+    unsigned int getId() const;
+    bool getPolicyStatus() const;
+    void setPolicyStatus(bool accepted);
+    virtual void gestionePolicy() = 0;
 };
 
-class persona: public utente
+/*!
+    \class persona
+    \brief Gestione profilo utente con validazione e controllo errori.
+*/
+class persona : public utente
 {
-    private:
-        std::string email;
-        std::string password;
-        std::string nome;
-        std::string dataNascita;
+private:
+    std::string email;
+    std::string passwordHash;
+    std::string nome;
+    std::string dataNascita;
+    
+    static bool isValidEmail(const std::string& email);
+    static bool isValidPassword(const std::string& password);
+    static bool isValidDate(const std::string& date);
+    static std::string hashPassword(const std::string& password);
+    
+public:
+    persona() = delete;
+    explicit persona(unsigned int userId, const std::string& email, 
+                     const std::string& password, const std::string& nome, 
+                     const std::string& dataNascita);
+    
+    std::string getEmail() const;
+    std::string getNome() const;
+    std::string getDataNascita() const;
+    
+    void setEmail(const std::string& newEmail);
+    void setPassword(const std::string& newPassword);
+    void setNome(const std::string& newNome);
+    void setDataNascita(const std::string& newData);
+    
+    bool verifyPassword(const std::string& password) const;
+    
+    void updateProfile(const std::string& email = "", 
+                       const std::string& nome = "", 
+                       const std::string& dataNascita = "");
+    
+    void gestionePolicy() override;
+    
+    /*!
+        \class InvalidEmailException
+        \brief Eccezione per email non valida.
+    */
+    class InvalidEmailException : public PersonaException
+    {
     public:
-        persona() = default;
-        persona(std::string, std::string, std::string, std::string);
-        void setPassword(const std::string&);
-        std::string getEmail() const;
-        std::string getPassowrd() const;
-        std::string getNome() const;
-        std::string getDataNascita() const;
-        // passare come parametri bit 0 1 per la modifica dei campi dati?
-        // esempio: modicaPersona(int bitModEmail =0, int bitModPassword =0, int bitModNome =0, int bitModDataNascita =0)
-        // default = 0 perché potrei non voler modificare tutti i campi nello stesso momento
-        void modificaPersona(int = 0, int = 0, int = 0, int = 0);
+        InvalidEmailException(const std::string& email);
+    };
+    
+    /*!
+        \class InvalidPasswordException
+        \brief Eccezione per password non valida.
+    */
+    class InvalidPasswordException : public PersonaException
+    {
+    public:
+        InvalidPasswordException(const std::string& reason);
+    };
+    
+    /*!
+        \class InvalidDateException
+        \brief Eccezione per data non valida.
+    */
+    class InvalidDateException : public PersonaException
+    {
+    public:
+        InvalidDateException(const std::string& date);
+    };
 };
+
+#endif // PERSONA_H
