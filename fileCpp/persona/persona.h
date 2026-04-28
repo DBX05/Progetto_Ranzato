@@ -15,7 +15,7 @@
 class utente
 {
     private:
-        const uint32_t id;
+        const unsigned int id;
         bool policy;
     public:
         utente();
@@ -27,18 +27,19 @@ class persona: public utente
 {
     private:
         std::string email;
-        const std::string password;
+        std::string password;
         std::string nome;
         std::string dataNascita;
     public:
-        persona();
+        persona() = default;
+        persona(std::string, std::string, std::string, std::string);
+        void setPassword(const std::string&);
         std::string getEmail() const;
         std::string getPassowrd() const;
         std::string getNome() const;
         std::string getDataNascita() const;
-        // passare come parametri bit 0 1 per la modifica del campi dati?
+        // passare come parametri bit 0 1 per la modifica dei campi dati?
         // esempio: modicaPersona(int bitModEmail =0, int bitModPassword =0, int bitModNome =0, int bitModDataNascita =0)
         // default = 0 perché potrei non voler modificare tutti i campi nello stesso momento
-        void modificaPersona();
-        
+        void modificaPersona(int = 0, int = 0, int = 0, int = 0);
 };
