@@ -147,3 +147,24 @@ public:
     friend bool operator>(const dateTime &x, const dateTime &y);
     friend bool operator<(const dateTime &x, const dateTime &y);
 };
+
+/*
+    CLASSE DATANASCITA
+    Rappresenta una data di nascita (data completa senza orario).
+    Eredita da data, mese e anno per validazione e gestione robusta.
+*/
+class dataNascita : public data, public mese, public anno
+{
+public:
+    dataNascita() = delete;
+    explicit dataNascita(int giorno, int meseVal, int annoVal);
+    explicit dataNascita(const std::string& dateString);
+    
+    std::string getDataFormatted() const;
+    int getEta() const;
+    bool isValidBirthDate() const;
+    
+    friend bool operator==(const dataNascita &x, const dataNascita &y);
+    friend bool operator>(const dataNascita &x, const dataNascita &y);
+    friend bool operator<(const dataNascita &x, const dataNascita &y);
+};

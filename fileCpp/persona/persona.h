@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <stdexcept>
 
+class dataNascita;  // Forward declaration
+
 /*!
     \class PersonaException
     \brief Eccezione base per errori di gestione persona.
@@ -42,6 +44,12 @@ public:
 /*!
     \class persona
     \brief Gestione profilo utente con validazione e controllo errori.
+    
+    Questa classe gestisce i dati personali dell'utente:
+    - Email (con validazione formato)
+    - Password (con hash)
+    - Nome
+    - Data di nascita (usando la classe dataNascita)
 */
 class persona : public utente
 {
@@ -49,33 +57,35 @@ private:
     std::string email;
     std::string passwordHash;
     std::string nome;
-    std::string dataNascita;
+    dataNascita dataNascita_member;
     
     static bool isValidEmail(const std::string& email);
     static bool isValidPassword(const std::string& password);
-    static bool isValidDate(const std::string& date);
+    static bool isValidDateString(const std::string& date);
     static std::string hashPassword(const std::string& password);
     
 public:
     persona() = delete;
     explicit persona(unsigned int userId, const std::string& email, 
                      const std::string& password, const std::string& nome, 
-                     const std::string& dataNascita);
+                     const dataNascita& dataNas);
     
     std::string getEmail() const;
     std::string getNome() const;
-    std::string getDataNascita() const;
+    dataNascita getDataNascita() const;
+    std::string getDataNascitaFormatted() const;
+    int getEta() const;
     
     void setEmail(const std::string& newEmail);
     void setPassword(const std::string& newPassword);
     void setNome(const std::string& newNome);
-    void setDataNascita(const std::string& newData);
+    void setDataNascita(const dataNascita& newData);
     
     bool verifyPassword(const std::string& password) const;
     
     void updateProfile(const std::string& email = "", 
                        const std::string& nome = "", 
-                       const std::string& dataNascita = "");
+                       const dataNascita* dataNas = nullptr);
     
     void gestionePolicy() override;
     
@@ -97,16 +107,6 @@ public:
     {
     public:
         InvalidPasswordException(const std::string& reason);
-    };
-    
-    /*!
-        \class InvalidDateException
-        \brief Eccezione per data non valida.
-    */
-    class InvalidDateException : public PersonaException
-    {
-    public:
-        InvalidDateException(const std::string& date);
     };
 };
 
