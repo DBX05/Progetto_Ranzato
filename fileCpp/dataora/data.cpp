@@ -80,6 +80,13 @@ public:
         if (h != 0 && min != 0 && s != 0)
             create_timestamp(h, m, s);
     }
+
+    orario(std::string ora)
+    {
+        
+        /*if (h != 0 && min != 0 && s != 0)
+            create_timestamp(h, m, s);*/
+    }
     unsigned int getSec() const
     {
         return sc;
@@ -99,6 +106,10 @@ public:
     {
         return timestamp;
     };
+
+    std::string getorario() const{
+        return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc);
+    }
 
     std::string curTime() const
     {
@@ -348,7 +359,7 @@ public:
         mscor = Mesi[ms];
     };
 
-    unsigned int numMese()
+    unsigned int numMese() const
     {
         return ms;
     }
@@ -526,6 +537,10 @@ public:
             modificaData(d);
         if (h != -1 || mn != -1 || s != -1)
             modificaOrario(h, mn, s);
+    }
+
+        std::string getDateTime() const{
+        return getGiorno() +"/"+ getMese() +"/"+ std::to_string(getAnno()) + " " + getorario();
     }
 
     /*
