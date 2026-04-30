@@ -44,7 +44,7 @@ class orario
 {
 private:
     int timestamp;
-    unsigned int sc, min, hr;
+     int sc, min, hr;
 
     orario &operator=(orario &y)
     {
@@ -58,7 +58,7 @@ private:
         return *this;
     }
 
-    void create_timestamp(unsigned int h, unsigned int m, unsigned int s)
+    void create_timestamp( int h,  int m,  int s)
     {
         if (timestamp != 0 || timestamp != systemTime())
         {
@@ -80,6 +80,7 @@ public:
         if (h != 0 && min != 0 && s != 0)
             create_timestamp(h, m, s);
     }
+<<<<<<< HEAD:fileCpp/dataora/data.cpp
 
     orario(std::string ora)
     {
@@ -88,16 +89,19 @@ public:
             create_timestamp(h, m, s);*/
     }
     unsigned int getSec() const
+=======
+     int getSec() const
+>>>>>>> 456458f5ac9cf22659e907edd1c0d71a6c65528e:fileCpp/dataora/dataora.cpp
     {
         return sc;
     };
 
-    unsigned int getMin() const
+     int getMin() const
     {
         return min;
     };
 
-    unsigned int getHour() const
+     int getHour() const
     {
         return hr;
     };
@@ -128,7 +132,7 @@ public:
             throw orarioexp("I secondi devono avere valore fra le 1 e 60", s);
         sc = s;
     }
-    static unsigned int systemHour()
+    static  int systemHour()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -139,7 +143,7 @@ public:
         return int(localTime->tm_hour);
     };
 
-    static unsigned int systemSecond()
+    static  int systemSecond()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -150,7 +154,7 @@ public:
         return int(localTime->tm_sec);
     };
 
-    static unsigned int systemMin()
+    static  int systemMin()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -201,7 +205,7 @@ bool operator<(orario &x, orario &y)
 /*
 @Classe data rappresenatta come:
 stringa stcor che rappresenta il valore in stringa del giorno corrente
-unsigned int st che rappresenta in valore intero il giorno corrente
+ int st che rappresenta in valore intero il giorno corrente
 */
 
 class dataexp
@@ -263,7 +267,7 @@ public:
         st = x;
         stcor = Settimana[st];
     };
-    static unsigned int systemDay()
+    static  int systemDay()
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
@@ -313,7 +317,7 @@ bool operator<(data &x, data &y)
 /*
 @Classe mese rappresenatta come:
 stringa mscor:  rappresenta il valore in stringa del mese corrente
-unsigned int ms: rappresenta in valore intero il mese corrente
+ int ms: rappresenta in valore intero il mese corrente
 */
 
 class mesexp
@@ -328,7 +332,7 @@ class mese
 private:
     // aggiungere funzione che passato il mese come parametro (o indice dell'enumMese) restituisce i giorni di quel mese?
     std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
-    unsigned int ms;
+     int ms;
     std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
 
     mese &operator=(mese &y)
@@ -352,14 +356,18 @@ public:
     // controllare assegnazione a ms: se x fosse per esempio 14, la prima condizione dell'or è falsa,
     // ma la seconda è vera, quindi assegno 14 a ms e alla riga 232 assegno mscor = Mesi[14] ! out of bounds
     // va messo && ?
-    mese(unsigned int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
+    mese( int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
             throw mesexp("il mese deve avere valore compreso fra 1 e 12",ms);
         mscor = Mesi[ms];
     };
 
+<<<<<<< HEAD:fileCpp/dataora/data.cpp
     unsigned int numMese() const
+=======
+     int numMese()
+>>>>>>> 456458f5ac9cf22659e907edd1c0d71a6c65528e:fileCpp/dataora/dataora.cpp
     {
         return ms;
     }
@@ -380,7 +388,7 @@ public:
         ms = x;
         mscor = Mesi[ms];
     }
-    static unsigned int systemMonth()
+    static  int systemMonth()
     {
         time_t now = std::time(nullptr);
         tm *timestamp = std::localtime(&now);
@@ -428,7 +436,7 @@ bool operator<(mese &x, mese &y)
 }
 /*
 @Classe anno rappresenatta come:
-unsigned int annocr: rappresenta in valore intero l'anno corrente
+ int annocr: rappresenta in valore intero l'anno corrente
 */
 class annoexp
 {
@@ -440,7 +448,7 @@ public:
 class anno
 {
 private:
-    unsigned int annocr;
+     int annocr;
 
     anno &operator=(anno &y)
     {
@@ -455,12 +463,12 @@ public:
     anno(int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
 
     // restituisce il valore dell'anno
-    unsigned int getAnno() const
+     int getAnno() const
     {
         return annocr;
     };
     // prende in input un intero e aggiorna il valore dell'anno
-    void modificaAnno(unsigned int x)
+    void modificaAnno( int x)
     {
         if (x > -1)
             annocr = x;
@@ -519,7 +527,7 @@ private:
     }
 
 public:
-    dateTime(unsigned int an = systemYear(), unsigned int m = systemMonth(), unsigned int d = systemDay(), unsigned int h = systemHour(), unsigned int mn = systemMin(), unsigned int s = systemSecond())
+    dateTime( int an = systemYear(),  int m = systemMonth(),  int d = systemDay(),  int h = systemHour(),  int mn = systemMin(),  int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
     std::string getDateTime() const
     {
