@@ -40,7 +40,7 @@ dataNascita::dataNascita(const std::string& dateString)
         
         // Validazione usando le classi base
         data tempData(giorno);
-        mese tempMese(meseVal - 1);  // mese usa 0-11
+        mese tempMese(meseVal);
         anno tempAnno(annoVal);
         
         // Se arriviamo qui, è tutto valido
