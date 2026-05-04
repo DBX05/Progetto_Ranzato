@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <string>
 #include <cstdint>
 #include <dataora.h>
@@ -57,7 +56,6 @@ class persona: public utente
         void gestionePolicy();
         
 };
-=======
 #include "persona.h"
 #include "dataora.h"
 #include <regex>
@@ -499,4 +497,3 @@ persona::InvalidEmailException::InvalidEmailException(const std::string& email)
 */
 persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason)
     : PersonaException("Password non valida: " + reason) {}
->>>>>>> 456458f5ac9cf22659e907edd1c0d71a6c65528e
