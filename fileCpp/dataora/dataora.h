@@ -65,8 +65,6 @@ private:
     std::string Settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
     int st;
     std::string stcor;
-    
-    data &operator=(const data &y);
 
 public:
     data(int x = 0);
@@ -78,6 +76,8 @@ public:
     static int systemDay();
     int ConfGrioni(int x) const;
     
+
+    data &operator=(const data &y);
     friend bool operator==(const data &x, const data &y);
     friend bool operator>(const data &x, const data &y);
     friend bool operator<(const data &x, const data &y);
@@ -103,8 +103,6 @@ private:
                              "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
     int ms;
     std::string mscor;
-    
-    mese &operator=(const mese &y);
 
 public:
     mese(int x = 0);
@@ -116,6 +114,8 @@ public:
     static int systemMonth();
     int ConfMesi(int x) const;
     
+    
+    mese &operator=(const mese &y);
     friend bool operator==(const mese &x, const mese &y);
     friend bool operator>(const mese &x, const mese &y);
     friend bool operator<(const mese &x, const mese &y);
@@ -138,8 +138,6 @@ class anno
 {
 private:
     int annocr;
-    
-    anno &operator=(const anno &y);
 
 public:
     anno(int an = systemYear());
@@ -149,6 +147,8 @@ public:
     
     static int systemYear();
     
+
+    anno &operator=(const anno &y);
     friend bool operator==(const anno &x, const anno &y);
     friend bool operator>(const anno &x, const anno &y);
     friend bool operator<(const anno &x, const anno &y);

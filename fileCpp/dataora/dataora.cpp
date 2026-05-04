@@ -219,16 +219,6 @@ private:
     int st;
     std::string stcor;
 
-    data &operator=(data &y)
-    {
-        if (this != &y)
-        {
-            st = y.st;
-            stcor = y.stcor;
-        }
-        return *this;
-    }
-
 public:
     /*
     prende un intero con valore compreso da 0 e 6 compreso e default 0;
@@ -287,6 +277,20 @@ public:
             return -1;
         return 1;
     }
+
+    data &operator=(const data &y)
+    {
+        if (this != &y)
+        {
+            st = y.st;
+            stcor = y.stcor;
+        }
+        return *this;
+    }
+
+    friend bool operator==(const data &x, const data &y);
+    friend bool operator>(const data &x, const data &y);
+    friend bool operator<(const data &x, const data &y);
 };
 
 bool operator==(data &x, data &y)
@@ -330,16 +334,6 @@ private:
     std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
      int ms;
     std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
-
-    mese &operator=(mese &y)
-    {
-        if (this != &y)
-        {
-            ms = y.ms;
-            mscor = y.mscor;
-        }
-        return *this;
-    }
 
 public:
     /*
@@ -404,6 +398,19 @@ public:
             return -1;
         return 1;
     }
+
+    mese &operator=(const mese &y)
+    {
+        if (this != &y)
+        {
+            ms = y.ms;
+            mscor = y.mscor;
+        }
+        return *this;
+    }
+    friend bool operator==(const mese &x, const mese &y);
+    friend bool operator>(const mese &x, const mese &y);
+    friend bool operator<(const mese &x, const mese &y);
 };
 
 bool operator==(mese &x, mese &y)
@@ -442,15 +449,6 @@ class anno
 private:
      int annocr;
 
-    anno &operator=(anno &y)
-    {
-        if (this != &y)
-        {
-            annocr = y.annocr;
-        }
-        return *this;
-    }
-
 public:
     anno(int an = systemYear()) : annocr((an < 0) ? systemYear() : an) {};
 
@@ -473,6 +471,19 @@ public:
         tm *timestamp = std::localtime(&now);
         return timestamp->tm_year;
     }
+
+    anno &operator=(const anno &y)
+    {
+        if (this != &y)
+        {
+            annocr = y.annocr;
+        }
+        return *this;
+    }
+
+    friend bool operator==(const anno &x, const anno &y);
+    friend bool operator>(const anno &x, const anno &y);
+    friend bool operator<(const anno &x, const anno &y);
 };
 
 bool operator==(anno &x, anno &y)
