@@ -363,11 +363,7 @@ public:
         mscor = Mesi[ms];
     };
 
-<<<<<<< HEAD:fileCpp/dataora/data.cpp
     unsigned int numMese() const
-=======
-     int numMese()
->>>>>>> 456458f5ac9cf22659e907edd1c0d71a6c65528e:fileCpp/dataora/dataora.cpp
     {
         return ms;
     }
