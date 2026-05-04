@@ -80,7 +80,6 @@ public:
         if (h != 0 && min != 0 && s != 0)
             create_timestamp(h, m, s);
     }
-<<<<<<< HEAD:fileCpp/dataora/data.cpp
 
     orario(std::string ora)
     {
@@ -89,9 +88,6 @@ public:
             create_timestamp(h, m, s);*/
     }
     unsigned int getSec() const
-=======
-     int getSec() const
->>>>>>> 456458f5ac9cf22659e907edd1c0d71a6c65528e:fileCpp/dataora/dataora.cpp
     {
         return sc;
     };
