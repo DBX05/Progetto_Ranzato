@@ -2,16 +2,20 @@
 #include <ctime>
 
 // Exception classes
-class orarioexp;
-class dataexp;
-class mesexp;
-class annoexp;
-class DateTimexp;
 
 /*
     CLASSE ORARIO
     Rappresenta un orario composto da ore, minuti e secondi, con supporto a timestamp Unix.
 */
+
+class orarioexp
+{
+public:
+    std::string errore;
+    int str;
+    orarioexp(std::string s, int st);
+};
+
 class orario
 {
 private:
@@ -46,6 +50,15 @@ public:
     CLASSE DATA
     Rappresenta un giorno della settimana come intero e come stringa.
 */
+
+class dataexp
+{
+public:
+    std::string errore;
+    int str;
+    dataexp(std::string s, int st);
+};
+
 class data
 {
 private:
@@ -74,6 +87,15 @@ public:
     CLASSE MESE
     Rappresenta un mese dell'anno come intero e come stringa.
 */
+
+class mesexp
+{
+public:
+    std::string errore;
+    int str;
+    mesexp(std::string s, int st);
+};
+
 class mese
 {
 private:
@@ -103,6 +125,15 @@ public:
     CLASSE ANNO
     Rappresenta un anno come valore intero.
 */
+
+class annoexp
+{
+public:
+    std::string errore;
+    int str;
+    annoexp(std::string s, int st);
+};
+
 class anno
 {
 private:
@@ -127,6 +158,15 @@ public:
     CLASSE DATETIME
     Rappresenta una data e ora completa tramite ereditarietà multipla.
 */
+
+class DateTimexp
+{
+public:
+    std::string errore;
+    DateTimexp(std::string s);
+};
+
+
 class dateTime : public orario, public data, public mese, public anno
 {
 private:
