@@ -107,15 +107,11 @@ public:
         return timestamp;
     };
 
-    std::string getorario() const{
-        return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc);
-    }
-
     std::string curTime() const
     {
-        return std::to_string(hr) + "/" + std::to_string(min) + "/" + std::to_string(sc);
+        return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc);
     };
-    void getFormat();
+    //void getFormat();
     void modificaOrario(int h = -1, int m = -1, int s = -1)
     {
         if (h < 0 || h > 23)
