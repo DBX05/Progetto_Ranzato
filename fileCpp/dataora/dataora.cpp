@@ -547,7 +547,7 @@ public:
     }
 
         std::string getDateTime() const{
-        return getGiorno() +"/"+ getMese() +"/"+ std::to_string(getAnno()) + " " + getorario();
+        return getGiorno() +"/"+ getMese() +"/"+ std::to_string(getAnno()) + " " + curTime();
     }
 
     /*
