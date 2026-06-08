@@ -171,9 +171,6 @@ class dateTime : public orario, public data, public mese, public anno
 {
 private:
     std::string dateT;
-    
-    dateTime &operator=(const dateTime &y);
-
 public:
     dateTime(int an = systemYear(), int m = systemMonth(), int d = systemDay(),
              int h = systemHour(), int mn = systemMin(), int s = systemSecond());
@@ -186,6 +183,8 @@ public:
     friend bool operator==(const dateTime &x, const dateTime &y);
     friend bool operator>(const dateTime &x, const dateTime &y);
     friend bool operator<(const dateTime &x, const dateTime &y);
+
+    dateTime &operator=(const dateTime &y);
 };
 
 /*
