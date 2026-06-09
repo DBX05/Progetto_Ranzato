@@ -4,8 +4,8 @@
 #include <vector>
 
 // include personali
-#include <fileCpp\dataora\dataora.h>
-#include <fileCpp\persona\persona.h>
+#include <fileCpp/dataora/dataora.h>
+#include <fileCpp/persona/persona.h>
 
 /*
     File header gerarchia impegno
