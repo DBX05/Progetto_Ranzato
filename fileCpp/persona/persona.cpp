@@ -4,7 +4,7 @@
 #include <dataora.cpp>
 
 /*
-    File header gerarchia persona
+    File cpp gerarchia persona
         Prima stesura: 2 / 2 / 2026
     
     Controllare:
@@ -12,20 +12,7 @@
         Vogliamo garantire information hiding?
     Finire:
         costruttori
-*/
-
-class utente
-{
-    private:
-        const int id;
-        bool policy;
-    public:
-        utente() = default;
-        utente(const int& userID): id(userID) {}
-        virtual ~utente() =0;
-        virtual void gestionePolicy() =0;
-};
-
+*/ 
 class persona: public utente
 {
     private:
@@ -33,8 +20,9 @@ class persona: public utente
         std::string password;
         std::string nome;
         dateTime dataNascita;
+
     public:
-        persona(std::string em = "",std::string p = "", std::string n = "", dateTime dt ): email(em), password(p), nome(n), dataNascita(dt.getDateTime() != "" ? dt : dateTime()) {};
+        persona(std::string em = "",std::string p = "", std::string n = "", dateTime dt, const int& userID ): email(em), password(p), nome(n), dataNascita(dt.getDateTime() != "" ? dt : dateTime()), utente(userID) {};
         std::string getEmail() const{
             return email;
         };
@@ -93,37 +81,28 @@ const char* PersonaException::what() const noexcept
     \brief Costruisce un utente base con ID e policy di default.
     \param userId ID univoco dell'utente.
 */
-utente::utente(unsigned int userId) : id(userId), policy(false) {}
+utente::utente(const int& userId): id(userId), policy(false) { }
 
 /*!
     \fn unsigned int utente::getId() const
     \brief Restituisce l'ID univoco dell'utente.
     \return ID dell'utente.
 */
-unsigned int utente::getId() const
-{
-    return id;
-}
+unsigned int utente::getId() const { return id; }
 
 /*!
     \fn bool utente::getPolicyStatus() const
     \brief Restituisce lo stato di accettazione delle policy.
     \return \c true se le policy sono accettate, \c false altrimenti.
 */
-bool utente::getPolicyStatus() const
-{
-    return policy;
-}
+bool utente::getPolicyStatus() const { return policy; }
 
 /*!
     \fn void utente::setPolicyStatus(bool accepted)
     \brief Imposta lo stato di accettazione delle policy.
     \param accepted \c true per accettare, \c false per rifiutare.
 */
-void utente::setPolicyStatus(bool accepted)
-{
-    policy = accepted;
-}
+void utente::setPolicyStatus(bool accepted) { policy = accepted; }
 
 // ============================================================================
 // persona - Implementazione privata (Validazione)

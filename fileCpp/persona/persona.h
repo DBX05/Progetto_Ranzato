@@ -58,16 +58,13 @@ private:
     bool policy;
 
 public:
+    // costruttore di default
     utente() = default;
+    // costruttore con costruzione dei campi dato
     utente(const int& );
-    // Costruttore: inizializza utente con ID e policy=false
-    // Input: unsigned int userId
-    // Output: oggetto utente inizializzato
-    utente(unsigned int userId);
 
-public:
     // Distruttore virtuale
-    virtual ~utente() = default;
+    virtual ~utente() = 0;
 
     // Getter: restituisce l'ID univoco dell'utente
     // Input: nessuno
