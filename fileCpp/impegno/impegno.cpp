@@ -27,8 +27,8 @@ class impegno
         const int id;
         unsigned int priorita;
         public:
-        virtual ~impegno() =0;
     public:
+        virtual ~impegno() =0;
         impegno(int id, dateTime momentoInizio, unsigned int priorita): id(id < 0 ? 0 : id), momentoInizio(momentoInizio), priorita(priorita < 0 ? 0 : priorita) {}
         virtual dateTime getMomentoInizio() const{
             return momentoInizio;
