@@ -15,10 +15,7 @@
     \throws mesexp Se il mese non è valido.
     \throws annoexp Se l'anno non è valido.
 */
-dataNascita::dataNascita(int giorno, int meseVal, int annoVal)
-    : data(giorno), mese(meseVal), anno(annoVal)
-{
-}
+dataNascita::dataNascita(int giorno, int meseVal, int annoVal): data(giorno), mese(meseVal), anno(annoVal) {}
 
 /*!
     \fn dataNascita::dataNascita(const std::string& dateString)
