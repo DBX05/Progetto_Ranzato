@@ -26,13 +26,13 @@ public:
 */
 class utente
 {
-protected:
-    unsigned int id;
+private:
+    const int id;
     bool policy;
-    
-    utente(unsigned int userId);
-    
+
 public:
+    utente() = default;
+    utente(const int& );
     virtual ~utente() = default;
     
     unsigned int getId() const;

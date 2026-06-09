@@ -19,7 +19,8 @@ class utente
         const int id;
         bool policy;
     public:
-        utente();
+        utente() = default;
+        utente(const int& userID): id(userID) {}
         virtual ~utente() =0;
         virtual void gestionePolicy() =0;
 };
@@ -32,7 +33,7 @@ class persona: public utente
         std::string nome;
         dateTime dataNascita;
     public:
-        persona(std::string em = "",std::string p = "", std::string n = "", std::string dt = "" ): email(em), password(p), nome(n), dataNascita(dt != "" ? dt : nullptr){};
+        persona(std::string em = "",std::string p = "", std::string n = "", dateTime dt ): email(em), password(p), nome(n), dataNascita(dt.getDateTime() != "" ? dt : dateTime()) {};
         std::string getEmail() const{
             return email;
         };
@@ -42,14 +43,12 @@ class persona: public utente
         std::string getDataNascita() const{
             dataNascita.getDate();
         };
-        // passare come parametri bit 0 1 per la modifica del campi dati?
-        // esempio: modicaPersona(int bitModEmail =0, int bitModPassword =0, int bitModNome =0, int bitModDataNascita =0)
-        // default = 0 perché potrei non voler modificare tutti i campi nello stesso momento
-        void modificaPersona(std::string em = "",std::string p = "", std::string n = "", std::string dt = "" ){
+        
+        void modificaPersona(std::string em = "",std::string p = "", std::string n = "", dateTime dt ){
             if(em != "") email = em;
             if(p != "") password = p;
             if(n != "") nome = n;
-            if(dt != "") dataNascita = dt;
+            if(dt.getDateTime() != "") dataNascita = dt;
 
         };
 

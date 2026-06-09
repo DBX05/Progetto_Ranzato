@@ -195,9 +195,9 @@ public:
 class dataNascita : public data, public mese, public anno
 {
 public:
-    dataNascita() = delete;
-    explicit dataNascita(int giorno, int meseVal, int annoVal);
-    explicit dataNascita(const std::string& dateString);
+    dataNascita() = default;
+    dataNascita(int giorno, int meseVal, int annoVal);
+    dataNascita(const std::string& dateString);
     
     std::string getDataFormatted() const;
     int getEta() const;
