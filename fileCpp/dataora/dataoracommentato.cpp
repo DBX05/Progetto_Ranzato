@@ -12,26 +12,8 @@
 
     \sa orario
 */
-class orarioexp
-{
-public:
-    /*!n        \variable orarioexp::errore
-        \brief Messaggio descrittivo dell'errore verificatosi.
-    */
-    std::string errore;
-
-    /*!n        \variable orarioexp::str
-        \brief Valore intero non valido che ha causato l'eccezione.
-    */
-    int str;
-
-    /*!n        \fn orarioexp::orarioexp(std::string s, int st)
-        \brief Costruisce un'eccezione con messaggio e valore non valido.
-        \param s Stringa descrittiva dell'errore.
-        \param st Valore intero che ha causato l'eccezione.
-    */
-    orarioexp(std::string s, int st) : errore(s), str(st) {}
-};
+// Implementazione del costruttore per l'eccezione dichiarata in dataora.h
+orarioexp::orarioexp(std::string s, int st) : errore(s), str(st) {}
 
 /*!n    \class orario
     \brief Rappresenta un orario composto da ore, minuti e secondi, con supporto a timestamp Unix.
@@ -89,7 +71,8 @@ orario &orario::operator=(const orario &y)
 */
 void orario::create_timestamp(int h, int m, int s)
 {
-    if (timestamp != 0 || timestamp != systemTime())
+    // Aggiorna il timestamp solo se è nullo o diverso dall'ora di sistema
+    if (timestamp == 0 || timestamp != systemTime())
     {
         std::time_t now = std::time(nullptr);
         std::tm tm = *std::localtime(&now);
@@ -98,7 +81,7 @@ void orario::create_timestamp(int h, int m, int s)
         tm.tm_sec = s;
         tm.tm_isdst = -1;
         std::time_t t = std::mktime(&tm);
-        timestamp = static_cast<long long int>(t);
+        timestamp = static_cast<int>(t);
     }
 }
 
@@ -120,7 +103,8 @@ orario::orario(int s, int m, int h, int tm)
       min(m < 0 || m > 59 ? systemMin() : m),
       sc(s < 0 || s > 59 ? systemSecond() : s)
 {
-    if (h != 0 && min != 0 && s != 0)
+    // Se tutti i componenti orari sono diversi da zero, calcola il timestamp
+    if (h != 0 && m != 0 && s != 0)
         create_timestamp(h, m, s);
 }
 
@@ -169,10 +153,7 @@ std::string orario::curTime() const
 
     \note Metodo dichiarato ma non ancora implementato.
 */
-void orario::getFormat()
-{
-    // TODO: Implementare
-}
+
 
 /*!n    \fn void orario::modificaOrario(int h, int m, int s)
     \brief Modifica i valori di ore, minuti e secondi dell'orario.
@@ -289,26 +270,8 @@ bool operator<(const orario &x, const orario &y)
 
     \sa data
 */
-class dataexp
-{
-public:
-    /*!n        \variable dataexp::errore
-        \brief Messaggio descrittivo dell'errore verificatosi.
-    */
-    std::string errore;
-
-    /*!n        \variable dataexp::str
-        \brief Valore intero non valido che ha causato l'eccezione.
-    */
-    int str;
-
-    /*!n        \fn dataexp::dataexp(std::string s, int st)
-        \brief Costruisce un'eccezione con messaggio e valore non valido.
-        \param s Stringa descrittiva dell'errore.
-        \param st Valore intero che ha causato l'eccezione.
-    */
-    dataexp(std::string s, int st) : errore(s), str(st) {}
-};
+// Implementazione del costruttore per l'eccezione dichiarata in dataora.h
+dataexp::dataexp(std::string s, int st) : errore(s), str(st) {}
 
 /*!n    \class data
     \brief Rappresenta un giorno della settimana come intero e come stringa.
@@ -465,26 +428,8 @@ bool operator<(const data &x, const data &y)
 
     \sa mese
 */
-class mesexp
-{
-public:
-    /*!n        \variable mesexp::errore
-        \brief Messaggio descrittivo dell'errore verificatosi.
-    */
-    std::string errore;
-
-    /*!n        \variable mesexp::str
-        \brief Valore intero non valido che ha causato l'eccezione.
-    */
-    int str;
-
-    /*!n        \fn mesexp::mesexp(std::string s, int st)
-        \brief Costruisce un'eccezione con messaggio e valore non valido.
-        \param s Stringa descrittiva dell'errore.
-        \param st Valore intero che ha causato l'eccezione.
-    */
-    mesexp(std::string s, int st) : errore(s), str(st) {}
-};
+// Implementazione del costruttore per l'eccezione dichiarata in dataora.h
+mesexp::mesexp(std::string s, int st) : errore(s), str(st) {}
 
 /*!n    \class mese
     \brief Rappresenta un mese dell'anno come intero e come stringa.
@@ -536,7 +481,7 @@ mese::mese(int x) : ms((x >= 0 && x <= 11) ? x : -1)
     \brief Restituisce l'indice numerico del mese corrente.
     \return Intero compreso tra 0 e 11.
 */
-int mese::numMese() const { return ms; }
+unsigned int mese::numMese() const { return static_cast<unsigned int>(ms); }
 
 /*!n    \fn std::string mese::getMese() const
     \brief Restituisce il nome del mese corrente.
@@ -553,7 +498,7 @@ std::string mese::getMese() const { return Mesi[ms]; }
 void mese::modificaMese(int x)
 {
     if (x < 0 || x > 11)
-        throw mesexp("il mese deve avere valore compreso fra 0 e 11", ms);
+        throw mesexp("il mese deve avere valore compreso fra 0 e 11", x);
     ms = x;
     mscor = Mesi[ms];
 }
@@ -636,26 +581,8 @@ bool operator<(const mese &x, const mese &y)
 
     \sa anno
 */
-class annoexp
-{
-public:
-    /*!n        \variable annoexp::errore
-        \brief Messaggio descrittivo dell'errore verificatosi.
-    */
-    std::string errore;
-
-    /*!n        \variable annoexp::str
-        \brief Valore intero non valido che ha causato l'eccezione.
-    */
-    int str;
-
-    /*!n        \fn annoexp::annoexp(std::string s, int st)
-        \brief Costruisce un'eccezione con messaggio e valore non valido.
-        \param s Stringa descrittiva dell'errore.
-        \param st Valore intero che ha causato l'eccezione.
-    */
-    annoexp(std::string s, int st) : errore(s), str(st) {}
-};
+// Implementazione del costruttore per l'eccezione dichiarata in dataora.h
+annoexp::annoexp(std::string s, int st) : errore(s), str(st) {}
 
 /*!n    \class anno
     \brief Rappresenta un anno come valore intero.
@@ -772,20 +699,8 @@ bool operator<(const anno &x, const anno &y)
 
     \sa dateTime
 */
-class DateTimexp
-{
-public:
-    /*!n        \variable DateTimexp::errore
-        \brief Messaggio descrittivo dell'errore verificatosi.
-    */
-    std::string errore;
-
-    /*!n        \fn DateTimexp::DateTimexp(std::string s)
-        \brief Costruisce un'eccezione con il messaggio specificato.
-        \param s Stringa descrittiva dell'errore.
-    */
-    DateTimexp(std::string s) : errore(s) {}
-};
+// Implementazione del costruttore per l'eccezione dichiarata in dataora.h
+DateTimexp::DateTimexp(std::string s) : errore(s) {}
 
 /*!n    \class dateTime
     \brief Rappresenta una data e ora completa tramite ereditarietà multipla.
