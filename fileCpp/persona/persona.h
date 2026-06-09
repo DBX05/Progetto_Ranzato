@@ -57,11 +57,9 @@ private:
     const int id;
     bool policy;
 
-<<<<<<< HEAD
 public:
     utente() = default;
     utente(const int& );
-=======
     // Costruttore: inizializza utente con ID e policy=false
     // Input: unsigned int userId
     // Output: oggetto utente inizializzato
@@ -69,7 +67,6 @@ public:
 
 public:
     // Distruttore virtuale
->>>>>>> 7234c7d0cd91e19eb423bd74b7077cde17a722df
     virtual ~utente() = default;
 
     // Getter: restituisce l'ID univoco dell'utente

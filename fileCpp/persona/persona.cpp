@@ -1,6 +1,7 @@
 #include <string>
 #include <cstdint>
 #include <dataora.h>
+#include <dataora.cpp>
 
 /*
     File header gerarchia persona

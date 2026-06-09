@@ -46,18 +46,6 @@ private:
     int timestamp;
      int sc, min, hr;
 
-    orario &operator=(orario &y)
-    {
-        if (this != &y)
-        {
-            timestamp = y.timestamp;
-            sc = y.sc;
-            hr = y.hr;
-            min = y.min;
-        }
-        return *this;
-    }
-
     void create_timestamp( int h,  int m,  int s)
     {
         if (timestamp != 0 || timestamp != systemTime())
@@ -87,30 +75,16 @@ public:
         /*if (h != 0 && min != 0 && s != 0)
             create_timestamp(h, m, s);*/
     }
-    unsigned int getSec() const
-    {
-        return sc;
-    };
+    unsigned int getSec() const { return sc; }
 
-     int getMin() const
-    {
-        return min;
-    };
+    int getMin() const { return min; }
 
-     int getHour() const
-    {
-        return hr;
-    };
+    int getHour() const { return hr; }
 
-    int getTimestamp() const
-    {
-        return timestamp;
-    };
+    int getTimestamp() const { return timestamp; }
 
-    std::string curTime() const
-    {
-        return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc);
-    };
+    std::string curTime() const { return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc); }
+
     //void getFormat();
     void modificaOrario(int h = -1, int m = -1, int s = -1)
     {
@@ -124,6 +98,7 @@ public:
             throw orarioexp("I secondi devono avere valore fra le 1 e 60", s);
         sc = s;
     }
+
     static  int systemHour()
     {
         // Ottieni il timestamp corrente
@@ -170,8 +145,19 @@ public:
         // std::strftime(buffer, sizeof(buffer), "%H", localTime);
 
         return int(localTime);
-    };
-};
+    }
+
+    orario &operator=(orario &y) {
+        if (this != &y)
+        {
+            timestamp = y.timestamp;
+            sc = y.sc;
+            hr = y.hr;
+            min = y.min;
+        }
+        return *this;
+    }
+}; // fine classe orario
 
 bool operator==(orario &x, orario &y)
 {
@@ -287,7 +273,7 @@ public:
     friend bool operator==(const data &x, const data &y);
     friend bool operator>(const data &x, const data &y);
     friend bool operator<(const data &x, const data &y);
-};
+}; // fine classe data
 
 bool operator==(data &x, data &y)
 {
@@ -407,7 +393,7 @@ public:
     friend bool operator==(const mese &x, const mese &y);
     friend bool operator>(const mese &x, const mese &y);
     friend bool operator<(const mese &x, const mese &y);
-};
+}; // fine classe mese
 
 bool operator==(mese &x, mese &y)
 {
@@ -480,7 +466,7 @@ public:
     friend bool operator==(const anno &x, const anno &y);
     friend bool operator>(const anno &x, const anno &y);
     friend bool operator<(const anno &x, const anno &y);
-};
+}; // fine classe anno
 
 bool operator==(anno &x, anno &y)
 {
@@ -515,17 +501,19 @@ class dateTime : public orario, public data, public mese, public anno
 private:
     std::string dateT;
     // attributi ereditati
-
-    dateTime &operator=(dateTime &y)
-    {
-        if (this != &y)
-        {
-            dateT = y.dateT;
-        }
-        return *this;
-    }
-
 public:
+    dateTime &operator=(dateTime &y)
+        {
+
+            if (this != &y)
+            {
+                dateT = y.dateT;
+            }
+
+            return *this;
+        }
+
+
     dateTime( int an = systemYear(),  int m = systemMonth(),  int d = systemDay(),  int h = systemHour(),  int mn = systemMin(),  int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
     std::string getDateTime() const

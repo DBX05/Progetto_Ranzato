@@ -412,9 +412,6 @@ class dateTime : public orario, public data, public mese, public anno
 private:
     std::string dateT;
 
-    // Assegnamento privato
-    dateTime &operator=(const dateTime &y);
-
 public:
     // Costruttore: inizializza data-ora completa
     // Input: int an (anno, default = anno di sistema), int m (mese 0-11, default = mese sistema),
@@ -473,12 +470,10 @@ public:
 class dataNascita : public data, public mese, public anno
 {
 public:
-<<<<<<< HEAD
     dataNascita() = default;
     dataNascita(int giorno, int meseVal, int annoVal);
     dataNascita(const std::string& dateString);
     
-=======
     // Costruttore rimosso (deleted)
     dataNascita() = delete;
 
@@ -497,7 +492,6 @@ public:
     // Getter: restituisce la data di nascita formattata come stringa
     // Input: nessuno
     // Output: string data formattata (GG/MM/AAAA)
->>>>>>> 7234c7d0cd91e19eb423bd74b7077cde17a722df
     std::string getDataFormatted() const;
 
     // Getter: calcola l'età attuale della persona basata sulla data di nascita
