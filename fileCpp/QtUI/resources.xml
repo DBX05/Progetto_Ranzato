@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/birthday.png</file>
+    <file>icons/meeting.png</file>
+    <file>icons/group.png</file>
+  </qresource>
+</RCC>
