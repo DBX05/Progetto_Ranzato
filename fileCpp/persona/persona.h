@@ -33,18 +33,19 @@ public:
     // Input: nessuno
     // Output: const char* messaggio d'errore
     const char* what() const noexcept override;
-};
+}; // fine classe PersonaException
 
 /*
  * CLASSE: utente
  * Descrizione: Classe astratta base per utenti del sistema
  * 
  * ATTRIBUTI PROTECTED:
- *   - unsigned int id: identificativo univoco dell'utente (costante)
+ *   - const int id: identificativo univoco dell'utente (costante)
  *   - bool policy: stato di accettazione delle policy
  * 
  * METODI:
- *   - utente(unsigned int): costruttore
+ *   - utente() costruttore di default
+ *   - utente(const int&): costruttore con valore
  *   - virtual ~utente(): distruttore virtuale
  *   - getId(): restituisce ID
  *   - getPolicyStatus(): restituisce stato policy
@@ -56,15 +57,16 @@ class utente
 private:
     const int id;
     bool policy;
-
+ 
 public:
     // costruttore di default
     utente() = default;
+
     // costruttore con costruzione dei campi dato
-    utente(const int& );
+    utente(const int&);
 
     // Distruttore virtuale
-    virtual ~utente() = 0;
+    virtual ~utente();
 
     // Getter: restituisce l'ID univoco dell'utente
     // Input: nessuno
@@ -85,7 +87,7 @@ public:
     // Input: nessuno
     // Output: implementata dalle sottoclassi
     virtual void gestionePolicy() = 0;
-};
+}; // fine classe Utente
 
 /*
  * CLASSE: persona
@@ -140,16 +142,16 @@ private:
 
     // Calcola l'hash della password
     // Input: const string& password
-    // Output: string contenente l'hash (algoritmo semplificato per didattica)
+    // Output: string contenente l'hash
     static std::string hashPassword(const std::string& password);
 
 public:
     // Costruttore: inizializza persona con validazione completa di tutti i campi
-    // Input: unsigned int userId, const string& email (valida), const string& password (complessità),
-    //        const string& nome (non vuoto), const dataNascita& dataNas (valida)
+    // Input: const int& userId, const string& email (validata), const string& password (validata),
+    //        const string& nome (non vuoto), const dataNascita& dataNas (validata)
     // Output: oggetto persona inizializzato
     // Eccezioni: InvalidEmailException, InvalidPasswordException, invalid_argument
-    explicit persona(unsigned int userId, const std::string& email,
+    explicit persona(const int& userId, const std::string& email,
                      const std::string& password, const std::string& nome,
                      const dataNascita& dataNas);
 
@@ -219,7 +221,7 @@ public:
 
     // Implementazione del metodo astratto della classe base
     // Input: nessuno
-    // Output: gestisce policy utente (attualmente stub per implementazione Qt)
+    // Output: gestisce policy utente (da implementare con Qt)
     void gestionePolicy() override;
 
     /*
@@ -234,7 +236,7 @@ public:
         // Input: const string& email (email che ha causato l'errore)
         // Output: eccezione con messaggio descrittivo
         explicit InvalidEmailException(const std::string& email);
-    };
+    }; // fine classe InvalidEmailException
 
     /*
      * CLASSE ANNIDATA: InvalidPasswordException
@@ -248,7 +250,7 @@ public:
         // Input: const string& reason (motivo del rifiuto della password)
         // Output: eccezione con messaggio descrittivo
         explicit InvalidPasswordException(const std::string& reason);
-    };
-};
+    }; // fine classe InvalidPasswordException
+}; // fine classe Persona
 
 #endif // PERSONA_H
