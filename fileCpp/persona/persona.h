@@ -31,8 +31,8 @@ public:
 
     // Getter: restituisce il messaggio descrittivo dell'eccezione
     // Input: nessuno
-    // Output: const char* messaggio d'errore
-    const char* what() const noexcept override;
+    // Output: string messaggio d'errore
+    const std::string errore() const noexcept;
 }; // fine classe PersonaException
 
 /*
@@ -71,7 +71,7 @@ public:
     // Getter: restituisce l'ID univoco dell'utente
     // Input: nessuno
     // Output: unsigned int id
-    unsigned int getId() const;
+    const int getId() const;
 
     // Getter: restituisce lo stato di accettazione delle policy
     // Input: nessuno

@@ -1,8 +1,3 @@
-#include <string>
-#include <cstdint>
-#include <dataora.h>
-#include <dataora.cpp>
-
 /*
     File cpp gerarchia persona
         Prima stesura: 2 / 2 / 2026
@@ -13,43 +8,15 @@
     Finire:
         costruttori
 */ 
-class persona: public utente
-{
-    private:
-        std::string email;
-        std::string password;
-        std::string nome;
-        dateTime dataNascita;
 
-    public:
-        persona(std::string em = "",std::string p = "", std::string n = "", dateTime dt, const int& userID ): email(em), password(p), nome(n), dataNascita(dt.getDateTime() != "" ? dt : dateTime()), utente(userID) {};
-        std::string getEmail() const{
-            return email;
-        };
-        std::string getNome() const{
-            return nome;
-        };
-        std::string getDataNascita() const{
-            dataNascita.getDate();
-        };
-        
-        void modificaPersona(std::string em = "",std::string p = "", std::string n = "", dateTime dt ){
-            if(em != "") email = em;
-            if(p != "") password = p;
-            if(n != "") nome = n;
-            if(dt.getDateTime() != "") dataNascita = dt;
-
-        };
-
-        void gestionePolicy();
-        
-};
-#include "persona.h"
-#include "dataora.h"
+#include <persona.h>
+#include <dataora.h>
+#include <dataora.cpp>
+#include <dataNascita.cpp>
+#include <string>
 #include <regex>
 #include <sstream>
 #include <iomanip>
-#include <cstring>
 
 // ============================================================================
 // PersonaException - Implementazione
@@ -63,32 +30,29 @@ class persona: public utente
 PersonaException::PersonaException(const std::string& msg) : message(msg) {}
 
 /*!
-    \fn const char* PersonaException::what() const noexcept
+    \fn std::string PersonaException::errore() const noexcept
     \brief Restituisce il messaggio descrittivo dell'eccezione.
-    \return Stringa C con il messaggio d'errore.
+    \return Stringa con il messaggio d'errore, ovvero il campo dato "message" stesso.
 */
-const char* PersonaException::what() const noexcept
-{
-    return message.c_str();
-}
+const std::string PersonaException::errore() const noexcept { return message; }
 
 // ============================================================================
 // utente - Implementazione
 // ============================================================================
 
 /*!
-    \fn utente::utente(unsigned int userId)
+    \fn utente::utente(const int& userId)
     \brief Costruisce un utente base con ID e policy di default.
     \param userId ID univoco dell'utente.
 */
 utente::utente(const int& userId): id(userId), policy(false) { }
 
 /*!
-    \fn unsigned int utente::getId() const
+    \fn const int utente::getId() const
     \brief Restituisce l'ID univoco dell'utente.
     \return ID dell'utente.
 */
-unsigned int utente::getId() const { return id; }
+const int utente::getId() const { return id; }
 
 /*!
     \fn bool utente::getPolicyStatus() const
@@ -123,7 +87,7 @@ bool persona::isValidEmail(const std::string& email)
         return false;
     
     // Pattern regex per email: user@domain.extension
-    static const std::regex emailRegex(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
+    const std::regex emailRegex(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
     return std::regex_match(email, emailRegex);
 }
 
@@ -176,7 +140,7 @@ bool persona::isValidDateString(const std::string& date)
         return false;
     
     // Pattern: YYYY-MM-DD
-    static const std::regex dateRegex(R"(\d{4}-\d{2}-\d{2})");
+    const std::regex dateRegex(R"(\d{4}-\d{2}-\d{2})");
     if (!std::regex_match(date, dateRegex))
         return false;
     
@@ -262,23 +226,19 @@ std::string persona::hashPassword(const std::string& password)
     \throws persona::InvalidPasswordException Se la password non soddisfa i requisiti.
     \throws std::invalid_argument Se il nome \u00e8 vuoto o la data non \u00e8 valida.
 */
-persona::persona(unsigned int userId, const std::string& email, 
+persona::persona(const int& userId, const std::string& email, 
                  const std::string& password, const std::string& nome, 
                  const dataNascita& dataNas)
     : utente(userId), dataNascita_member(dataNas)
 {
-    if (!isValidEmail(email))
-        throw InvalidEmailException(email);
+    if (!isValidEmail(email)) throw InvalidEmailException(email);
     
-    if (!isValidPassword(password))
-        throw InvalidPasswordException("La password deve contenere almeno 8 caratteri, "
+    if (!isValidPassword(password)) throw InvalidPasswordException("La password deve contenere almeno 8 caratteri, "
                                       "una maiuscola, una minuscola, una cifra e un carattere speciale (!@#$%^&*)");
     
-    if (nome.empty())
-        throw std::invalid_argument("Il nome non può essere vuoto");
+    if (nome.empty()) throw std::invalid_argument("Il nome non può essere vuoto");
     
-    if (!dataNas.isValidBirthDate())
-        throw std::invalid_argument("La data di nascita non è valida");
+    if (!dataNas.isValidBirthDate()) throw std::invalid_argument("La data di nascita non è valida");
     
     this->email = email;
     this->passwordHash = hashPassword(password);
@@ -290,50 +250,35 @@ persona::persona(unsigned int userId, const std::string& email,
     \brief Restituisce l'email dell'utente.
     \return Email dell'utente.
 */
-std::string persona::getEmail() const
-{
-    return email;
-}
+std::string persona::getEmail() const { return email; }
 
 /*!
     \fn std::string persona::getNome() const
     \brief Restituisce il nome dell'utente.
     \return Nome completo dell'utente.
 */
-std::string persona::getNome() const
-{
-    return nome;
-}
+std::string persona::getNome() const { return nome; }
 
 /*!
     \fn dataNascita persona::getDataNascita() const
     \brief Restituisce la data di nascita dell'utente.
     \return Oggetto dataNascita con la data di nascita.
 */
-dataNascita persona::getDataNascita() const
-{
-    return dataNascita_member;
-}
+dataNascita persona::getDataNascita() const { return dataNascita_member; }
 
 /*!
     \fn std::string persona::getDataNascitaFormatted() const
     \brief Restituisce la data di nascita formattata come stringa.
     \return Data di nascita nel formato GG/MM/AAAA.
 */
-std::string persona::getDataNascitaFormatted() const
-{
-    return dataNascita_member.getDataFormatted();
-}
+std::string persona::getDataNascitaFormatted() const { return dataNascita_member.getDataFormatted(); }
 
 /*!
     \fn int persona::getEta() const
-    \brief Calcola l'et\u00e0 attuale dell'utente.
-    \return Et\u00e0 in anni.
+    \brief Calcola l'età attuale dell'utente.
+    \return Età in anni.
 */
-int persona::getEta() const
-{
-    return dataNascita_member.getEta();
-}
+int persona::getEta() const { return dataNascita_member.getEta(); }
 
 /*!
     \fn void persona::setEmail(const std::string& newEmail)
@@ -369,7 +314,7 @@ void persona::setPassword(const std::string& newPassword)
     \brief Modifica il nome dell'utente.
     \param newNome Nuovo nome (non può essere vuoto).
     
-    \throws std::invalid_argument Se il nome \u00e8 vuoto.
+    \throws std::invalid_argument Se il nome è vuoto.
 */
 void persona::setNome(const std::string& newNome)
 {
@@ -388,7 +333,7 @@ void persona::setNome(const std::string& newNome)
 void persona::setDataNascita(const dataNascita& newData)
 {
     if (!newData.isValidBirthDate())
-        throw std::invalid_argument("La data di nascita non \u00e8 valida");
+        throw std::invalid_argument("La data di nascita non è valida");
     dataNascita_member = newData;
 }
 
@@ -396,28 +341,25 @@ void persona::setDataNascita(const dataNascita& newData)
     \fn bool persona::verifyPassword(const std::string& password) const
     \brief Verifica se la password fornita corrisponde al record memorizzato.
     \param password Password da verificare.
-    \return \c true se la password \u00e8 corretta, \c false altrimenti.
+    \return \c true se la password è corretta, \c false altrimenti.
     
     Questo metodo dovrebbe essere usato per l'autenticazione dell'utente.
 */
-bool persona::verifyPassword(const std::string& password) const
-{
-    return hashPassword(password) == passwordHash;
-}
+bool persona::verifyPassword(const std::string& password) const { return hashPassword(password) == passwordHash; }
 
 /*!
     \fn void persona::updateProfile(const std::string& email, 
                                      const std::string& nome, 
                                      const dataNascita& dataNas)
-    \brief Aggiorna pi\u00f9 campi della persona in una sola chiamata.
+    \brief Aggiorna più campi della persona in una sola chiamata.
     \param email Nuova email (lasciare vuoto per non modificare).
     \param nome Nuovo nome (lasciare vuoto per non modificare).
     \param dataNas Nuova data di nascita (oggetto valido per modificare).
     
-    \throws persona::InvalidEmailException Se la nuova email non \u00e8 valida.
-    \throws std::invalid_argument Se il nuovo nome \u00e8 vuoto o la data non \u00e8 valida.
+    \throws persona::InvalidEmailException Se la nuova email non è valida.
+    \throws std::invalid_argument Se il nuovo nome è vuoto o la data non è valida.
     
-    Questo metodo \u00e8 particolarmente utile per i widget Qt di modifica profilo,
+    Questo metodo è particolarmente utile per i widget Qt di modifica profilo,
     poich\u00e9 permette di validare tutti i campi prima di applicare le modifiche.
 */
 void persona::updateProfile(const std::string& email, 
@@ -432,7 +374,7 @@ void persona::updateProfile(const std::string& email,
         throw std::invalid_argument("Il nome non può essere vuoto");
     
     if (dataNas != nullptr && !dataNas->isValidBirthDate())
-        throw std::invalid_argument("La data di nascita non \u00e8 valida");
+        throw std::invalid_argument("La data di nascita non è valida");
     
     // Applicazione delle modifiche
     if (!email.empty())
@@ -466,13 +408,11 @@ void persona::gestionePolicy()
     \brief Costruisce un'eccezione per email non valida.
     \param email Email che ha causato l'errore.
 */
-persona::InvalidEmailException::InvalidEmailException(const std::string& email)
-    : PersonaException("Email non valida: " + email) {}
+persona::InvalidEmailException::InvalidEmailException(const std::string& email): PersonaException("Email non valida: " + email) {}
 
 /*!
     \fn persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason)
     \brief Costruisce un'eccezione per password non valida.
     \param reason Motivo del rifiuto della password.
 */
-persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason)
-    : PersonaException("Password non valida: " + reason) {}
+persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason): PersonaException("Password non valida: " + reason) {}
