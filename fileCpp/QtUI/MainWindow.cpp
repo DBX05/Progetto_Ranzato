@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "EventModel.h"
-#include "NewEventDialog.h"
+#include "NewEventiDialog.h"
 #include "DayWeekView.h"
 
 #include <QVBoxLayout>

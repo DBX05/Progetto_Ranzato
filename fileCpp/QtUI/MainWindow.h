@@ -1,10 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QCalendarWidget>
-#include <QListView>
-#include <QComboBox>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QCalendarWidget>
+#include <QtWidgets/QListView>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QStatusBar>
+#include <QtGui/QAction>
+#include <QtCore/QDate>
 #include <memory>
 
 class EventModel;
