@@ -1,13 +1,3 @@
-/*
-    File cpp gerarchia persona
-        Prima stesura: 2 / 2 / 2026
-    
-    Controllare:
-        correttezza campi private e campi public.
-        Vogliamo garantire information hiding?
-    Finire:
-        costruttori
-*/ 
 
 #include <persona.h>
 #include <dataora.h>

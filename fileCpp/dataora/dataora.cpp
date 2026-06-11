@@ -7,25 +7,6 @@
 #include <stdexcept>
 #include <dataora.h>
 
-/*
-    File header gerarchia dataora
-        Prima stesura: 2 / 2 / 2026
-
-    Controllare:
-        correttezza campi private e campi public.
-        Vogliamo garantire information hiding?
-    Finire:
-        costruttori
-*/
-
-/*
-@Classe orario rappresentata come:
-int timestamp rapprenta il timestamp completo dell'intera data
-int sc rappresenta i secondi in sessantesimi
-int min rappresenta i minuti in sessantesimi
-int hr rappresenta le ore in sessantesimi
-*/
-
 // ==================== ECCEZIONI ====================
 orarioexp::orarioexp(std::string s, int st): errore(s), str(st) {};
 dataexp::dataexp(std::string s, int st): errore(s), str(st) {}

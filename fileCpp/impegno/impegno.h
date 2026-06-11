@@ -7,10 +7,7 @@
 #include <fileCpp/dataora/dataora.h>
 #include <fileCpp/persona/persona.h>
 
-/*
-    File header gerarchia impegno
-        Prima stesura: 2 / 2 / 2026
-    
+/*    
     Gerarchia di classi per gestire impegni di vario tipo:
     - impegno (base astratta)
     - evento (impegno con orari specifici)
@@ -314,7 +311,7 @@ class festivita: public eventoLungo
 {
     private:
         static const int id;
-        std::vector<std::string> festeItaliane;
+        static std::vector<std::string> festeItaliane;
 
     public:
         // Costruttore: inizializza una festivita
