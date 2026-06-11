@@ -3,7 +3,7 @@
 
 // ==================== ECCEZIONI ====================
 
-/*
+/* orarioexp
  * CLASSE: orarioexp
  * Descrizione: Eccezione per errori di validazione dell'orario
  * 
@@ -21,18 +21,18 @@ public:
     // Input: const string& s (messaggio errore), int st (valore errato)
     // Output: eccezione inizializzata
     orarioexp(std::string s, int st);
-};
+}; // fine classe orarioexp
 
 // ==================== CLASSE ORARIO ====================
 
-/*
+/* orario
  * CLASSE: orario
  * Descrizione: Rappresenta un orario composto da ore, minuti e secondi con timestamp Unix
  * 
  * ATTRIBUTI PRIVATE:
  *   - int timestamp: timestamp Unix completo dell'orario
- *   - int sc: secondi (0-60)
- *   - int min: minuti (0-60)
+ *   - int sc: secondi (0-59)
+ *   - int min: minuti (0-59)
  *   - int hr: ore (0-23)
  * 
  * METODI:
@@ -49,15 +49,13 @@ private:
     int timestamp;
     int sc, min, hr;
 
-    // Assegnamento privato (copy assignment)
-    orario &operator=(const orario &y);
-
     // Crea il timestamp Unix basato su ore, minuti, secondi
     // Input: int h (ore), int m (minuti), int s (secondi)
     // Output: aggiorna timestamp
     void create_timestamp(int h, int m, int s);
 
 public:
+
     // Costruttore: inizializza orario
     // Input: int s (secondi, default 0), int m (minuti, default 0), int h (ore, default 0), int tm (timestamp, default 0)
     // Output: oggetto orario inizializzato (valori negativi -> valori sistema)
@@ -119,11 +117,15 @@ public:
     friend bool operator==(const orario &x, const orario &y);  // Uguaglianza
     friend bool operator>(const orario &x, const orario &y);   // Maggior di
     friend bool operator<(const orario &x, const orario &y);   // Minor di
-};
+
+    // Assegnamento (copy assignment)
+    orario &operator=(const orario &y);
+
+}; // fine classe orario
 
 // ==================== CLASSE DATA ====================
 
-/*
+/* dataexp
  * CLASSE: dataexp
  * Descrizione: Eccezione per errori di validazione del giorno della settimana
  * 
@@ -141,9 +143,9 @@ public:
     // Input: const string& s (messaggio errore), int st (valore errato)
     // Output: eccezione inizializzata
     dataexp(std::string s, int st);
-};
+}; // fine classe dataexp
 
-/*
+/* data
  * CLASSE: data
  * Descrizione: Rappresenta un giorno della settimana come intero e stringa
  * 
@@ -158,7 +160,7 @@ public:
  *   - getDate: restituisce indice giorno
  *   - modificaData: cambia giorno con validazione
  *   - systemDay: ottiene giorno di sistema
- *   - ConfGrioni: confronta due giorni
+ *   - ConfGiorni: confronta due giorni
  *   - Operatori: =, ==, >, <
  */
 class data
@@ -208,11 +210,11 @@ public:
     friend bool operator==(const data &x, const data &y);  // Uguaglianza
     friend bool operator>(const data &x, const data &y);   // Maggior di
     friend bool operator<(const data &x, const data &y);   // Minor di
-};
+}; // fine classe data
 
 // ==================== CLASSE MESE ====================
 
-/*
+/* mesexp
  * CLASSE: mesexp
  * Descrizione: Eccezione per errori di validazione del mese
  * 
@@ -230,9 +232,9 @@ public:
     // Input: const string& s (messaggio errore), int st (valore errato)
     // Output: eccezione inizializzata
     mesexp(std::string s, int st);
-};
+}; // fine classe mesexp
 
-/*
+/* mese
  * CLASSE: mese
  * Descrizione: Rappresenta un mese dell'anno come intero e stringa
  * 
@@ -297,11 +299,11 @@ public:
     friend bool operator==(const mese &x, const mese &y);  // Uguaglianza
     friend bool operator>(const mese &x, const mese &y);   // Maggior di
     friend bool operator<(const mese &x, const mese &y);   // Minor di
-};
+}; // fine classe mese
 
 // ==================== CLASSE ANNO ====================
 
-/*
+/* annoexp
  * CLASSE: annoexp
  * Descrizione: Eccezione per errori di validazione dell'anno
  * 
@@ -319,9 +321,9 @@ public:
     // Input: const string& s (messaggio errore), int st (valore errato)
     // Output: eccezione inizializzata
     annoexp(std::string s, int st);
-};
+}; // fine classe annoexp
 
-/*
+/* anno
  * CLASSE: anno
  * Descrizione: Rappresenta un anno come valore intero
  * 
@@ -368,11 +370,11 @@ public:
     friend bool operator==(const anno &x, const anno &y);  // Uguaglianza
     friend bool operator>(const anno &x, const anno &y);   // Maggior di
     friend bool operator<(const anno &x, const anno &y);   // Minor di
-};
+}; // fine classe anno
 
 // ==================== CLASSE DATETIME ====================
 
-/*
+/* DateTimexp
  * CLASSE: DateTimexp
  * Descrizione: Eccezione per errori di validazione di data-ora
  * 
@@ -388,9 +390,9 @@ public:
     // Input: const string& s (messaggio errore)
     // Output: eccezione inizializzata
     DateTimexp(std::string s);
-};
+}; // fine classe DateTimexp
 
-/*
+/* dateTime
  * CLASSE: dateTime
  * Descrizione: Rappresenta una data e ora completa tramite ereditarietà multipla
  * Estende: orario, data, mese, anno
@@ -443,18 +445,19 @@ public:
     // Output: stringa data-ora di sistema (formato: giorno/mese/anno ore:minuti:secondi)
     std::string systemDateTime() const;
 
+    // Operatore di assegnamento
+    dateTime &operator=(const dateTime &y);
+
     // Operatori di confronto
     friend bool operator==(const dateTime &x, const dateTime &y);  // Uguaglianza
     friend bool operator>(const dateTime &x, const dateTime &y);   // Maggior di
     friend bool operator<(const dateTime &x, const dateTime &y);   // Minor di
 
-    // Operatore di assegnamento
-    dateTime &operator=(const dateTime &y);
-};
+}; // fine classe dateTime
 
 // ==================== CLASSE DATANASCITA ====================
 
-/*
+/* dataNascita
  * CLASSE: dataNascita
  * Descrizione: Rappresenta una data di nascita (data completa senza orario) con validazione robusta
  * Estende: data, mese, anno
@@ -470,24 +473,21 @@ public:
 class dataNascita : public data, public mese, public anno
 {
 public:
-    dataNascita() = default;
-    dataNascita(int giorno, int meseVal, int annoVal);
-    dataNascita(const std::string& dateString);
     
-    // Costruttore rimosso (deleted)
+    // Costruttore di default rimosso (deleted)
     dataNascita() = delete;
 
     // Costruttore: inizializza data di nascita con validazione
     // Input: int giorno (1-31), int meseVal (1-12), int annoVal (anno > 1900)
     // Output: oggetto dataNascita inizializzato
     // Eccezioni: invalid_argument se data non valida
-    explicit dataNascita(int giorno, int meseVal, int annoVal);
+    dataNascita(int giorno, int meseVal, int annoVal);
 
     // Costruttore: inizializza data di nascita da stringa nel formato YYYY-MM-DD
     // Input: const string& dateString (formato "YYYY-MM-DD")
     // Output: oggetto dataNascita inizializzato
     // Eccezioni: invalid_argument se stringa non nel formato corretto o data non valida
-    explicit dataNascita(const std::string& dateString);
+    dataNascita(const std::string& dateString);
 
     // Getter: restituisce la data di nascita formattata come stringa
     // Input: nessuno
@@ -508,4 +508,5 @@ public:
     friend bool operator==(const dataNascita &x, const dataNascita &y);  // Uguaglianza
     friend bool operator>(const dataNascita &x, const dataNascita &y);   // Maggior di
     friend bool operator<(const dataNascita &x, const dataNascita &y);   // Minor di
-};
+
+}; // fine classe dataNascita

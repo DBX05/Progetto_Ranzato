@@ -516,6 +516,7 @@ public:
 
     dateTime( int an = systemYear(),  int m = systemMonth(),  int d = systemDay(),  int h = systemHour(),  int mn = systemMin(),  int s = systemSecond())
         : orario(s, mn, h), data(d), mese(m), anno(an) {};
+        
     std::string getDateTime() const
     {
         return dateT;
