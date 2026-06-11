@@ -23,6 +23,85 @@ public:
     orarioexp(std::string s, int st);
 }; // fine classe orarioexp
 
+/* dataexp
+ * CLASSE: dataexp
+ * Descrizione: Eccezione per errori di validazione del giorno della settimana
+ * 
+ * ATTRIBUTI PUBLIC:
+ *   - std::string errore: messaggio descrittivo dell'errore
+ *   - int str: valore che ha causato l'errore
+ */
+class dataexp
+{
+public:
+    std::string errore;
+    int str;
+
+    // Costruttore: crea eccezione di data
+    // Input: const string& s (messaggio errore), int st (valore errato)
+    // Output: eccezione inizializzata
+    dataexp(std::string s, int st);
+}; // fine classe dataexp
+
+/* mesexp
+ * CLASSE: mesexp
+ * Descrizione: Eccezione per errori di validazione del mese
+ * 
+ * ATTRIBUTI PUBLIC:
+ *   - std::string errore: messaggio descrittivo dell'errore
+ *   - int str: valore che ha causato l'errore
+ */
+class mesexp
+{
+public:
+    std::string errore;
+    int str;
+
+    // Costruttore: crea eccezione di mese
+    // Input: const string& s (messaggio errore), int st (valore errato)
+    // Output: eccezione inizializzata
+    mesexp(std::string s, int st);
+}; // fine classe mesexp
+
+/* annoexp
+ * CLASSE: annoexp
+ * Descrizione: Eccezione per errori di validazione dell'anno
+ * 
+ * ATTRIBUTI PUBLIC:
+ *   - std::string errore: messaggio descrittivo dell'errore
+ *   - int str: valore che ha causato l'errore
+ */
+class annoexp
+{
+public:
+    std::string errore;
+    int str;
+
+    // Costruttore: crea eccezione di anno
+    // Input: const string& s (messaggio errore), int st (valore errato)
+    // Output: eccezione inizializzata
+    annoexp(std::string s, int st);
+}; // fine classe annoexp
+
+/* DateTimexp
+ * CLASSE: DateTimexp
+ * Descrizione: Eccezione per errori di validazione di data-ora
+ * 
+ * ATTRIBUTI PUBLIC:
+ *   - std::string errore: messaggio descrittivo dell'errore
+ */
+class DateTimexp
+{
+public:
+    std::string errore;
+
+    // Costruttore: crea eccezione di dateTime
+    // Input: const string& s (messaggio errore)
+    // Output: eccezione inizializzata
+    DateTimexp(std::string s);
+}; // fine classe DateTimexp
+
+
 // ==================== CLASSE ORARIO ====================
 
 /* orario
@@ -125,26 +204,6 @@ public:
 
 // ==================== CLASSE DATA ====================
 
-/* dataexp
- * CLASSE: dataexp
- * Descrizione: Eccezione per errori di validazione del giorno della settimana
- * 
- * ATTRIBUTI PUBLIC:
- *   - std::string errore: messaggio descrittivo dell'errore
- *   - int str: valore che ha causato l'errore
- */
-class dataexp
-{
-public:
-    std::string errore;
-    int str;
-
-    // Costruttore: crea eccezione di data
-    // Input: const string& s (messaggio errore), int st (valore errato)
-    // Output: eccezione inizializzata
-    dataexp(std::string s, int st);
-}; // fine classe dataexp
-
 /* data
  * CLASSE: data
  * Descrizione: Rappresenta un giorno della settimana come intero e stringa
@@ -213,26 +272,6 @@ public:
 }; // fine classe data
 
 // ==================== CLASSE MESE ====================
-
-/* mesexp
- * CLASSE: mesexp
- * Descrizione: Eccezione per errori di validazione del mese
- * 
- * ATTRIBUTI PUBLIC:
- *   - std::string errore: messaggio descrittivo dell'errore
- *   - int str: valore che ha causato l'errore
- */
-class mesexp
-{
-public:
-    std::string errore;
-    int str;
-
-    // Costruttore: crea eccezione di mese
-    // Input: const string& s (messaggio errore), int st (valore errato)
-    // Output: eccezione inizializzata
-    mesexp(std::string s, int st);
-}; // fine classe mesexp
 
 /* mese
  * CLASSE: mese
@@ -303,26 +342,6 @@ public:
 
 // ==================== CLASSE ANNO ====================
 
-/* annoexp
- * CLASSE: annoexp
- * Descrizione: Eccezione per errori di validazione dell'anno
- * 
- * ATTRIBUTI PUBLIC:
- *   - std::string errore: messaggio descrittivo dell'errore
- *   - int str: valore che ha causato l'errore
- */
-class annoexp
-{
-public:
-    std::string errore;
-    int str;
-
-    // Costruttore: crea eccezione di anno
-    // Input: const string& s (messaggio errore), int st (valore errato)
-    // Output: eccezione inizializzata
-    annoexp(std::string s, int st);
-}; // fine classe annoexp
-
 /* anno
  * CLASSE: anno
  * Descrizione: Rappresenta un anno come valore intero
@@ -373,24 +392,6 @@ public:
 }; // fine classe anno
 
 // ==================== CLASSE DATETIME ====================
-
-/* DateTimexp
- * CLASSE: DateTimexp
- * Descrizione: Eccezione per errori di validazione di data-ora
- * 
- * ATTRIBUTI PUBLIC:
- *   - std::string errore: messaggio descrittivo dell'errore
- */
-class DateTimexp
-{
-public:
-    std::string errore;
-
-    // Costruttore: crea eccezione di dateTime
-    // Input: const string& s (messaggio errore)
-    // Output: eccezione inizializzata
-    DateTimexp(std::string s);
-}; // fine classe DateTimexp
 
 /* dateTime
  * CLASSE: dateTime
