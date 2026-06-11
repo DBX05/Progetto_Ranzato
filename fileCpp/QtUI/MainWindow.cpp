@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QSplitter>
 #include <QLabel>
+#include <QStringListModel>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -68,9 +69,11 @@ void MainWindow::onAddEvent() {
     NewEventDialog dlg(this);
     if (dlg.exec() == QDialog::Accepted) {
         auto ev = dlg.createEvento();
-        m_model->addEvent(ev);
-        m_dayWeekView->update();
-        refreshListForDate(m_calendar->selectedDate());
+        if (auto longEv = std::dynamic_pointer_cast<eventoLungo>(ev)) {
+            m_model->addEvent(longEv);
+            m_dayWeekView->update();
+            refreshListForDate(m_calendar->selectedDate());
+        }
     }
 }
 
@@ -89,7 +92,7 @@ void MainWindow::populateSampleData() {
     // Event 1: meeting
     orario s1(0, 30, 9);
     orario e1(0, 0, 10);
-    auto ev1 = std::make_shared<evento>(1, now, 1, "Team Meeting", s1, e1);
+    auto ev1 = std::make_shared<eventoLungo>(1, now, 1, "Team Meeting", s1, e1);
     m_model->addEvent(ev1);
 
     // Event 2: birthday (assumes compleanno derives from eventoLungo and has getType()==1)
@@ -100,8 +103,9 @@ void MainWindow::populateSampleData() {
         auto bday = std::make_shared<compleanno>(dateTime(), 1, "Compleanno Marco", dateTime(), "Festeggia!", 5, s2, e2);
         m_model->addEvent(bday);
     } catch (...) {
-        auto ev2 = std::make_shared<evento>(2, now, 1, "Compleanno Marco", s2, e2);
-        m_model->addEvent(ev2);
+        // If compleanno/long-event types are not available or construction fails,
+        // skip adding the birthday rather than attempting to add a plain evento
+        // which may not convert to the long-event type expected by the model.
     }
 
     // Event 3: group block (raggruppa)
@@ -111,7 +115,7 @@ void MainWindow::populateSampleData() {
         auto group = std::make_shared<raggruppa>(3, dateTime(), 1, "Project Block", dateTime(), "Blocco di lavoro");
         m_model->addEvent(group);
     } catch (...) {
-        auto ev3 = std::make_shared<evento>(3, now, 1, "Project Block", s3, e3);
+        auto ev3 = std::make_shared<eventoLungo>(3, now, 1, "Project Block", s3, e3);
         m_model->addEvent(ev3);
     }
 }

@@ -1,4 +1,4 @@
-#include "NewEventDialog.h"
+#include "NewEventiDialog.h"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
