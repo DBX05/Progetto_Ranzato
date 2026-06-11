@@ -14,7 +14,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Make project root available for includes (so <fileCpp/...> works)
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/fileCpp
+    ${CMAKE_SOURCE_DIR}/fileCpp/dataora
+)
 
 # --- Trova Qt6 ---
 find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
@@ -56,17 +60,3 @@ install(TARGETS untitled
 )
 
 qt_finalize_executable(untitled)
-
-# ------------------------------------------------------------------
-# Additional target: AgendaQtExample (aligned to main project)
-# ------------------------------------------------------------------
-# Reuse project settings and Qt found above; keep a separate executable target.
-file(GLOB SRC src/*.cpp)
-
-add_executable(agenda_qt ${SRC})
-
-qt_add_resources(RESOURCES resources.qrc)
-
-target_sources(agenda_qt PRIVATE ${RESOURCES})
-
-target_link_libraries(agenda_qt PRIVATE Qt6::Widgets)
