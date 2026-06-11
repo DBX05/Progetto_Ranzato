@@ -4,8 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <stdexcept>
-
-class dataNascita;  // Forward declaration
+#include <dataora.h>
 
 /*
  * CLASSE: PersonaException
@@ -120,7 +119,7 @@ private:
     std::string email;
     std::string passwordHash;
     std::string nome;
-    dataNascita dataNascita_member;
+    dataNascita nascita;
 
     // Valida il formato di un'email
     // Input: const string& email
@@ -153,7 +152,7 @@ public:
     // Eccezioni: InvalidEmailException, InvalidPasswordException, invalid_argument
     explicit persona(const int& userId, const std::string& email,
                      const std::string& password, const std::string& nome,
-                     const dataNascita& dataNas);
+                     const dataNascita& nascita);
 
     // Getter: restituisce l'email dell'utente
     // Input: nessuno
@@ -217,7 +216,7 @@ public:
     // Eccezioni: InvalidEmailException, invalid_argument se dati non validi
     void updateProfile(const std::string& email = "",
                        const std::string& nome = "",
-                       const dataNascita* dataNas = nullptr);
+                       const dataNascita* nas = nullptr);
 
     // Implementazione del metodo astratto della classe base
     // Input: nessuno

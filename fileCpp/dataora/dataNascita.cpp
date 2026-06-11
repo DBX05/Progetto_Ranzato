@@ -4,26 +4,8 @@
 #include <sstream>
 #include <iomanip>
 
-/*!
-    \fn dataNascita::dataNascita(int giorno, int meseVal, int annoVal)
-    \brief Costruisce una data di nascita con validazione.
-    \param giorno Giorno della settimana (0-6, dove 0 è lunedì).
-    \param meseVal Mese (0-11, dove 0 è gennaio).
-    \param annoVal Anno (es. 1995).
-    
-    \throws dataexp Se il giorno non è valido.
-    \throws mesexp Se il mese non è valido.
-    \throws annoexp Se l'anno non è valido.
-*/
 dataNascita::dataNascita(int giorno, int meseVal, int annoVal): data(giorno), mese(meseVal), anno(annoVal) {}
 
-/*!
-    \fn dataNascita::dataNascita(const std::string& dateString)
-    \brief Costruisce una data di nascita da una stringa nel formato GG/MM/AAAA.
-    \param dateString Data nel formato GG/MM/AAAA.
-    
-    \throws dataexp Se la data non è valida.
-*/
 dataNascita::dataNascita(const std::string& dateString)
 {
     if (dateString.length() != 10 || dateString[2] != '/' || dateString[5] != '/')
@@ -51,11 +33,6 @@ dataNascita::dataNascita(const std::string& dateString)
     }
 }
 
-/*!
-    \fn std::string dataNascita::getDataFormatted() const
-    \brief Restituisce la data di nascita formattata.
-    \return Stringa nel formato DD/MM/YYYY.
-*/
 std::string dataNascita::getDataFormatted() const
 {
     std::stringstream ss;
@@ -66,11 +43,6 @@ std::string dataNascita::getDataFormatted() const
     return ss.str();
 }
 
-/*!
-    \fn int dataNascita::getEta() const
-    \brief Calcola l'età della persona in anni.
-    \return Età in anni.
-*/
 int dataNascita::getEta() const
 {
     int annoCorrente = anno::systemYear() + 1900;
@@ -94,16 +66,6 @@ int dataNascita::getEta() const
     return eta;
 }
 
-/*!
-    \fn bool dataNascita::isValidBirthDate() const
-    \brief Verifica se la data di nascita è valida.
-    \return \c true se la data è una data di nascita valida, \c false altrimenti.
-    
-    Controlli effettuati:
-    - Anno non può essere nel futuro
-    - Età minima ragionevole (> 0 anni)
-    - Età massima ragionevole (< 150 anni)
-*/
 bool dataNascita::isValidBirthDate() const
 {
     int annoCorrente = anno::systemYear();
@@ -121,14 +83,6 @@ bool dataNascita::isValidBirthDate() const
     return true;
 }
 
-/*!
-    \fn bool operator==(const dataNascita &x, const dataNascita &y)
-    \relates dataNascita
-    \brief Confronta due date di nascita per uguaglianza.
-    \param x Prima data di nascita.
-    \param y Seconda data di nascita.
-    \return \c true se le date sono identiche, \c false altrimenti.
-*/
 bool operator==(const dataNascita &x, const dataNascita &y)
 {
     return (x.getDate() == y.getDate() && 
@@ -136,14 +90,6 @@ bool operator==(const dataNascita &x, const dataNascita &y)
             x.getAnno() == y.getAnno());
 }
 
-/*!
-    \fn bool operator>(const dataNascita &x, const dataNascita &y)
-    \relates dataNascita
-    \brief Verifica se la prima data di nascita è posteriore alla seconda.
-    \param x Prima data di nascita.
-    \param y Seconda data di nascita.
-    \return \c true se x è più recente di y, \c false altrimenti.
-*/
 bool operator>(const dataNascita &x, const dataNascita &y)
 {
     if (x.getAnno() != y.getAnno())
@@ -153,14 +99,6 @@ bool operator>(const dataNascita &x, const dataNascita &y)
     return x.getDate() > y.getDate();
 }
 
-/*!
-    \fn bool operator<(const dataNascita &x, const dataNascita &y)
-    \relates dataNascita
-    \brief Verifica se la prima data di nascita è anteriore alla seconda.
-    \param x Prima data di nascita.
-    \param y Seconda data di nascita.
-    \return \c true se x è più antica di y, \c false altrimenti.
-*/
 bool operator<(const dataNascita &x, const dataNascita &y)
 {
     if (x.getAnno() != y.getAnno())

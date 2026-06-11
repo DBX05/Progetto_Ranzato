@@ -22,65 +22,26 @@
 // PersonaException - Implementazione
 // ============================================================================
 
-/*!
-    \fn PersonaException::PersonaException(const std::string& msg)
-    \brief Costruisce un'eccezione con messaggio descrittivo.
-    \param msg Messaggio descrittivo dell'errore.
-*/
 PersonaException::PersonaException(const std::string& msg) : message(msg) {}
 
-/*!
-    \fn std::string PersonaException::errore() const noexcept
-    \brief Restituisce il messaggio descrittivo dell'eccezione.
-    \return Stringa con il messaggio d'errore, ovvero il campo dato "message" stesso.
-*/
 const std::string PersonaException::errore() const noexcept { return message; }
 
 // ============================================================================
 // utente - Implementazione
 // ============================================================================
 
-/*!
-    \fn utente::utente(const int& userId)
-    \brief Costruisce un utente base con ID e policy di default.
-    \param userId ID univoco dell'utente.
-*/
 utente::utente(const int& userId): id(userId), policy(false) { }
 
-/*!
-    \fn const int utente::getId() const
-    \brief Restituisce l'ID univoco dell'utente.
-    \return ID dell'utente.
-*/
 const int utente::getId() const { return id; }
 
-/*!
-    \fn bool utente::getPolicyStatus() const
-    \brief Restituisce lo stato di accettazione delle policy.
-    \return \c true se le policy sono accettate, \c false altrimenti.
-*/
 bool utente::getPolicyStatus() const { return policy; }
 
-/*!
-    \fn void utente::setPolicyStatus(bool accepted)
-    \brief Imposta lo stato di accettazione delle policy.
-    \param accepted \c true per accettare, \c false per rifiutare.
-*/
 void utente::setPolicyStatus(bool accepted) { policy = accepted; }
 
 // ============================================================================
 // persona - Implementazione privata (Validazione)
 // ============================================================================
 
-/*!
-    \fn bool persona::isValidEmail(const std::string& email)
-    \brief Valida il formato di un'email.
-    \param email Email da validare.
-    \return \c true se l'email ha un formato valido, \c false altrimenti.
-    
-    Controlla che l'email rispetti il pattern: user@domain.extension
-    con lunghezza tra 5 e 254 caratteri.
-*/
 bool persona::isValidEmail(const std::string& email)
 {
     if (email.empty() || email.length() > 254 || email.length() < 5)
@@ -91,19 +52,6 @@ bool persona::isValidEmail(const std::string& email)
     return std::regex_match(email, emailRegex);
 }
 
-/*!
-    \fn bool persona::isValidPassword(const std::string& password)
-    \brief Valida la complessità di una password.
-    \param password Password da validare.
-    \return \c true se la password soddisfa i requisiti, \c false altrimenti.
-    
-    Requisiti minimi:
-    - Lunghezza: almeno 8 caratteri
-    - Contiene almeno una lettera maiuscola
-    - Contiene almeno una lettera minuscola
-    - Contiene almeno una cifra
-    - Contiene almeno un carattere speciale (!@#$%^&*)
-*/
 bool persona::isValidPassword(const std::string& password)
 {
     if (password.length() < 8)
@@ -122,18 +70,6 @@ bool persona::isValidPassword(const std::string& password)
     return hasUpper && hasLower && hasDigit && hasSpecial;
 }
 
-/*!
-    \fn bool persona::isValidDateString(const std::string& date)
-    \brief Valida una data nel formato YYYY-MM-DD.
-    \param date Data da validare.
-    \return \c true se la data ha un formato e valore valido, \c false altrimenti.
-    
-    Verifica:
-    - Formato: YYYY-MM-DD
-    - Anno: tra 1900 e anno corrente
-    - Mese: tra 01 e 12
-    - Giorno: valido per il mese specificato (considera anni bisestili)
-*/
 bool persona::isValidDateString(const std::string& date)
 {
     if (date.length() != 10)
@@ -176,18 +112,6 @@ bool persona::isValidDateString(const std::string& date)
     }
 }
 
-/*!
-    \fn std::string persona::hashPassword(const std::string& password)
-    \brief Calcola un hash semplice della password.
-    \param password Password da hashare.
-    \return Stringa contenente l'hash della password.
-    
-    \warning Questa \u00e8 un'implementazione semplificata per scopi didattici.
-    Per applicazioni in produzione, usare librerie crittografiche mature
-    come bcrypt, scrypt o Argon2.
-    
-    Attualmente usa un semplice algoritmo basato su XOR con salt.
-*/
 std::string persona::hashPassword(const std::string& password)
 {
     // Salt semplice (in produzione, usare salt random per ogni password)
@@ -211,25 +135,10 @@ std::string persona::hashPassword(const std::string& password)
 // persona - Implementazione pubblica
 // ============================================================================
 
-/*!
-    \fn persona::persona(unsigned int userId, const std::string& email, 
-                          const std::string& password, const std::string& nome, 
-                          const dataNascita& dataNas)
-    \brief Costruisce un oggetto persona con validazione completa.
-    \param userId ID univoco dell'utente.
-    \param email Email dell'utente (deve essere valida).
-    \param password Password dell'utente (deve soddisfare i requisiti).
-    \param nome Nome completo dell'utente (non vuoto).
-    \param dataNas Data di nascita (oggetto dataNascita validato).
-    
-    \throws persona::InvalidEmailException Se l'email non \u00e8 valida.
-    \throws persona::InvalidPasswordException Se la password non soddisfa i requisiti.
-    \throws std::invalid_argument Se il nome \u00e8 vuoto o la data non \u00e8 valida.
-*/
-persona::persona(const int& userId, const std::string& email, 
+explicit persona::persona(const int& userId, const std::string& email, 
                  const std::string& password, const std::string& nome, 
-                 const dataNascita& dataNas)
-    : utente(userId), dataNascita_member(dataNas)
+                 const dataNascita& nas)
+    : utente(userId), nascita(nas)
 {
     if (!isValidEmail(email)) throw InvalidEmailException(email);
     
@@ -238,55 +147,23 @@ persona::persona(const int& userId, const std::string& email,
     
     if (nome.empty()) throw std::invalid_argument("Il nome non può essere vuoto");
     
-    if (!dataNas.isValidBirthDate()) throw std::invalid_argument("La data di nascita non è valida");
+    if (!nas.isValidBirthDate()) throw std::invalid_argument("La data di nascita non è valida");
     
     this->email = email;
     this->passwordHash = hashPassword(password);
     this->nome = nome;
 }
 
-/*!
-    \fn std::string persona::getEmail() const
-    \brief Restituisce l'email dell'utente.
-    \return Email dell'utente.
-*/
 std::string persona::getEmail() const { return email; }
 
-/*!
-    \fn std::string persona::getNome() const
-    \brief Restituisce il nome dell'utente.
-    \return Nome completo dell'utente.
-*/
 std::string persona::getNome() const { return nome; }
 
-/*!
-    \fn dataNascita persona::getDataNascita() const
-    \brief Restituisce la data di nascita dell'utente.
-    \return Oggetto dataNascita con la data di nascita.
-*/
-dataNascita persona::getDataNascita() const { return dataNascita_member; }
+dataNascita persona::getDataNascita() const { return nascita; }
 
-/*!
-    \fn std::string persona::getDataNascitaFormatted() const
-    \brief Restituisce la data di nascita formattata come stringa.
-    \return Data di nascita nel formato GG/MM/AAAA.
-*/
-std::string persona::getDataNascitaFormatted() const { return dataNascita_member.getDataFormatted(); }
+std::string persona::getDataNascitaFormatted() const { return nascita.getDataFormatted(); }
 
-/*!
-    \fn int persona::getEta() const
-    \brief Calcola l'età attuale dell'utente.
-    \return Età in anni.
-*/
-int persona::getEta() const { return dataNascita_member.getEta(); }
+int persona::getEta() const { return nascita.getEta(); }
 
-/*!
-    \fn void persona::setEmail(const std::string& newEmail)
-    \brief Modifica l'email dell'utente con validazione.
-    \param newEmail Nuova email (deve essere valida).
-    
-    \throws persona::InvalidEmailException Se l'email non \u00e8 valida.
-*/
 void persona::setEmail(const std::string& newEmail)
 {
     if (!isValidEmail(newEmail))
@@ -294,13 +171,6 @@ void persona::setEmail(const std::string& newEmail)
     email = newEmail;
 }
 
-/*!
-    \fn void persona::setPassword(const std::string& newPassword)
-    \brief Modifica la password dell'utente con validazione.
-    \param newPassword Nuova password (deve soddisfare i requisiti).
-    
-    \throws persona::InvalidPasswordException Se la password non soddisfa i requisiti.
-*/
 void persona::setPassword(const std::string& newPassword)
 {
     if (!isValidPassword(newPassword))
@@ -309,13 +179,6 @@ void persona::setPassword(const std::string& newPassword)
     passwordHash = hashPassword(newPassword);
 }
 
-/*!
-    \fn void persona::setNome(const std::string& newNome)
-    \brief Modifica il nome dell'utente.
-    \param newNome Nuovo nome (non può essere vuoto).
-    
-    \throws std::invalid_argument Se il nome è vuoto.
-*/
 void persona::setNome(const std::string& newNome)
 {
     if (newNome.empty())
@@ -323,45 +186,15 @@ void persona::setNome(const std::string& newNome)
     nome = newNome;
 }
 
-/*!
-    \fn void persona::setDataNascita(const dataNascita& newData)
-    \brief Modifica la data di nascita dell'utente.
-    \param newData Nuova data di nascita (oggetto dataNascita validato).
-    
-    \throws std::invalid_argument Se la data non \u00e8 valida.
-*/
 void persona::setDataNascita(const dataNascita& newData)
 {
     if (!newData.isValidBirthDate())
         throw std::invalid_argument("La data di nascita non è valida");
-    dataNascita_member = newData;
+    nascita = newData;
 }
 
-/*!
-    \fn bool persona::verifyPassword(const std::string& password) const
-    \brief Verifica se la password fornita corrisponde al record memorizzato.
-    \param password Password da verificare.
-    \return \c true se la password è corretta, \c false altrimenti.
-    
-    Questo metodo dovrebbe essere usato per l'autenticazione dell'utente.
-*/
 bool persona::verifyPassword(const std::string& password) const { return hashPassword(password) == passwordHash; }
 
-/*!
-    \fn void persona::updateProfile(const std::string& email, 
-                                     const std::string& nome, 
-                                     const dataNascita& dataNas)
-    \brief Aggiorna più campi della persona in una sola chiamata.
-    \param email Nuova email (lasciare vuoto per non modificare).
-    \param nome Nuovo nome (lasciare vuoto per non modificare).
-    \param dataNas Nuova data di nascita (oggetto valido per modificare).
-    
-    \throws persona::InvalidEmailException Se la nuova email non è valida.
-    \throws std::invalid_argument Se il nuovo nome è vuoto o la data non è valida.
-    
-    Questo metodo è particolarmente utile per i widget Qt di modifica profilo,
-    poich\u00e9 permette di validare tutti i campi prima di applicare le modifiche.
-*/
 void persona::updateProfile(const std::string& email, 
                             const std::string& nome, 
                             const dataNascita* dataNas)
@@ -384,16 +217,9 @@ void persona::updateProfile(const std::string& email,
         this->nome = nome;
     
     if (dataNas != nullptr)
-        this->dataNascita_member = *dataNas;
+        this->nascita = *dataNas;
 }
 
-/*!
-    \fn void persona::gestionePolicy()
-    \brief Implementazione del metodo astratto della classe base.
-    
-    \note Attualmente implementato come stub. Dovrebbe mostrare
-    le policy all'utente e registrare l'accettazione.
-*/
 void persona::gestionePolicy()
 {
     // TODO: Implementare gestione policy con UI Qt
@@ -403,16 +229,6 @@ void persona::gestionePolicy()
 // Exception classes - Implementazioni
 // ============================================================================
 
-/*!
-    \fn persona::InvalidEmailException::InvalidEmailException(const std::string& email)
-    \brief Costruisce un'eccezione per email non valida.
-    \param email Email che ha causato l'errore.
-*/
 persona::InvalidEmailException::InvalidEmailException(const std::string& email): PersonaException("Email non valida: " + email) {}
 
-/*!
-    \fn persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason)
-    \brief Costruisce un'eccezione per password non valida.
-    \param reason Motivo del rifiuto della password.
-*/
 persona::InvalidPasswordException::InvalidPasswordException(const std::string& reason): PersonaException("Password non valida: " + reason) {}
