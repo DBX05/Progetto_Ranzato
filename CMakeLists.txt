@@ -21,11 +21,15 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
 
 set(TS_FILES untitled_it_IT.ts)
 
+file(GLOB QTUI_SOURCES
+    fileCpp/QtUI/*.cpp
+    fileCpp/QtUI/*.h
+    fileCpp/QtUI/*.ui
+    fileCpp/QtUI/*.xml
+)
+
 set(PROJECT_SOURCES
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
+    ${QTUI_SOURCES}
     ${TS_FILES}
 )
 
@@ -54,31 +58,12 @@ install(TARGETS untitled
 qt_finalize_executable(untitled)
 
 # ------------------------------------------------------------------
-# Additional target: AgendaQtExample (added per user request)
+# Additional target: AgendaQtExample (aligned to main project)
 # ------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.16)
-project(AgendaQtExample LANGUAGES CXX)
+# Reuse project settings and Qt found above; keep a separate executable target.
+file(GLOB SRC src/*.cpp)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
-
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR} # optional
-    # Expect existing domain headers at these paths:
-    # fileCpp/dataora/dataora.h
-    # fileCpp/impegni/eventi.h
-)
-
-file(GLOB SRC
-    src/*.cpp
-)
-
-add_executable(agenda_qt
-    ${SRC}
-)
+add_executable(agenda_qt ${SRC})
 
 qt_add_resources(RESOURCES resources.qrc)
 
