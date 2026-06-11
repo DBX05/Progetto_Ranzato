@@ -5,8 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
-// #include <QDateTimeEdit>
+#include <dataora.h>
 
 /*
     File header gerarchia dataora
@@ -20,11 +19,6 @@
 */
 
 /*
-    DOMANDE:
-        1) metodi system: implementati con librerie di sistema operativo?
-*/
-
-/*
 @Classe orario rappresentata come:
 int timestamp rapprenta il timestamp completo dell'intera data
 int sc rappresenta i secondi in sessantesimi
@@ -32,22 +26,17 @@ int min rappresenta i minuti in sessantesimi
 int hr rappresenta le ore in sessantesimi
 */
 
-class orarioexp
-{
-public:
-    std::string errore;
-    int str;
-    orarioexp(std::string s, int st) : errore(s), str(st) {};
-};
+// ==================== ECCEZIONI ====================
+orarioexp::orarioexp(std::string s, int st): errore(s), str(st) {};
+dataexp::dataexp(std::string s, int st): errore(s), str(st) {}
+mesexp::mesexp(std::string s, int st): errore(s), str(st) {}
+annoexp::annoexp(std::string s, int st): errore(s), str(st) {};
 
-class orario
-{
-private:
-    int timestamp;
-     int sc, min, hr;
 
-    void create_timestamp( int h,  int m,  int s)
-    {
+
+// ==================== CLASSE ORARIO ====================
+
+void orario::create_timestamp( int h,  int m,  int s) {
         if (timestamp != 0 || timestamp != systemTime())
         {
             std::time_t now = std::time(nullptr);
@@ -59,34 +48,19 @@ private:
             std::time_t t = std::mktime(&tm); // interpreta tm come ora locale
             timestamp = static_cast<long long int>(t);
         }
-    }
-
-public:
-    orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
+}
+orario::orario(int s = 0, int m = 0, int h = 0, int tm = 0) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
                                                           min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s)
     {
         if (h != 0 && min != 0 && s != 0)
             create_timestamp(h, m, s);
     }
-
-    orario(std::string ora)
-    {
-        
-        /*if (h != 0 && min != 0 && s != 0)
-            create_timestamp(h, m, s);*/
-    }
-    unsigned int getSec() const { return sc; }
-
-    int getMin() const { return min; }
-
-    int getHour() const { return hr; }
-
-    int getTimestamp() const { return timestamp; }
-
-    std::string curTime() const { return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc); }
-
-    //void getFormat();
-    void modificaOrario(int h = -1, int m = -1, int s = -1)
+int orario::getSec() const { return sc; }
+int orario::getMin() const { return min; }
+int orario::getHour() const { return hr; }
+int orario::getTimestamp() const { return timestamp; }
+std::string orario::curTime() const { return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc); }
+void orario::modificaOrario(int h = -1, int m = -1, int s = -1)
     {
         if (h < 0 || h > 23)
             throw orarioexp("Le ore devono avere valore fra le 1 e 23", h);
@@ -98,30 +72,27 @@ public:
             throw orarioexp("I secondi devono avere valore fra le 1 e 60", s);
         sc = s;
     }
+int orario::systemHour()
+{
+    // Ottieni il timestamp corrente
+    std::time_t now = std::time(nullptr);
 
-    static  int systemHour()
-    {
-        // Ottieni il timestamp corrente
-        std::time_t now = std::time(nullptr);
+    // Converti in struttura tm locale
+    std::tm *localTime = std::localtime(&now);
 
-        // Converti in struttura tm locale
-        std::tm *localTime = std::localtime(&now);
+    return int(localTime->tm_hour);
+};
+int orario::systemSecond()
+{
+    // Ottieni il timestamp corrente
+    std::time_t now = std::time(nullptr);
 
-        return int(localTime->tm_hour);
-    };
+    // Converti in struttura tm locale
+    std::tm *localTime = std::localtime(&now);
 
-    static  int systemSecond()
-    {
-        // Ottieni il timestamp corrente
-        std::time_t now = std::time(nullptr);
-
-        // Converti in struttura tm locale
-        std::tm *localTime = std::localtime(&now);
-
-        return int(localTime->tm_sec);
-    };
-
-    static  int systemMin()
+    return int(localTime->tm_sec);
+};
+int orario::systemMin()
     {
         // Ottieni il timestamp corrente
         std::time_t now = std::time(nullptr);
@@ -131,48 +102,39 @@ public:
 
         return int(localTime->tm_min);
     };
+int orario::systemTime()
+{
+    // Ottieni il timestamp corrente
+    std::time_t now = std::time(nullptr);
 
-    static int systemTime()
+    // Converti in struttura tm locale
+    std::tm *localTime = std::localtime(&now);
+
+    return int(localTime);
+}
+orario& orario::operator=(const orario &y)
+{
+    if (this != &y)
     {
-        // Ottieni il timestamp corrente
-        std::time_t now = std::time(nullptr);
-
-        // Converti in struttura tm locale
-        std::tm *localTime = std::localtime(&now);
-
-        // Estrai l'ora e formattala come stringa
-        // char buffer[3]; // 2 cifre + terminatore
-        // std::strftime(buffer, sizeof(buffer), "%H", localTime);
-
-        return int(localTime);
+        timestamp = y.timestamp;
+        sc = y.sc;
+        hr = y.hr;
+        min = y.min;
     }
-
-    orario &operator=(orario &y) {
-        if (this != &y)
-        {
-            timestamp = y.timestamp;
-            sc = y.sc;
-            hr = y.hr;
-            min = y.min;
-        }
-        return *this;
-    }
-}; // fine classe orario
-
+    return *this;
+}
 bool operator==(orario &x, orario &y)
 {
     if (&x != &y && x.getTimestamp() == y.getTimestamp())
         return true;
     return false;
 }
-
 bool operator>(orario &x, orario &y)
 {
     if (&x != &y && x.getTimestamp() > y.getTimestamp())
         return true;
     return false;
 }
-
 bool operator<(orario &x, orario &y)
 {
     if (&x != &y && x.getTimestamp() < y.getTimestamp())
@@ -180,87 +142,38 @@ bool operator<(orario &x, orario &y)
     return false;
 }
 
-/*
-@Classe data rappresenatta come:
-stringa stcor che rappresenta il valore in stringa del giorno corrente
- int st che rappresenta in valore intero il giorno corrente
-*/
+// ==================== CLASSE DATA ====================
 
-class dataexp
+const std::string settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
+data::data(int x): st((x - 1 > -1 || x - 1 < 8) ? x : -1)
 {
-public:
-    std::string errore;
-    int str;
-    dataexp(std::string s, int st) : errore(s), str(st) {};
+    if (st == -1) throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", st);
+    stcor = settimana[st];
+}
+std::string data::getGiorno() const { return settimana[st]; }
+int data::getDate() const { return st; };
+void data::modificaData(int x)
+{
+    if (x < 0 || x > 7)
+        throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", x);
+    st = x;
+    stcor = settimana[st];
+}
+int data::systemDay()
+{
+    time_t now = std::time(nullptr);
+    tm *timestamp = std::localtime(&now);
+    return (timestamp->tm_wday);
 };
-class data
+int data::ConfGiorni(int x) const
 {
-private:
-    // consiglio: se volessimo stampare il nome abbreviato alle prime 3 lettere, mettere una funzione di troncamento che stampa fino alla terza lettera
-    std::string Settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
-    int st;
-    std::string stcor;
-
-public:
-    /*
-    prende un intero con valore compreso da 0 e 6 compreso e default 0;
-    se il valore è valido inizializza l'oggetto;
-    altrimenti lancia un'eccezzione (da gestire).
-    */
-    data(int x = 0) : st((x - 1 > -1 || x - 1 < 8) ? x : -1)
-    {
-        if (st == -1)
-            throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", st);
-        stcor = Settimana[st];
-    };
-
-    // ritorna la data dell'oggetto corrente
-    std::string getGiorno() const
-    {
-        return Settimana[st];
-    };
-
-    int getDate() const
-    {
-        return st;
-    };
-
-    /*
-    cambia il valore dell'oggetto data
-    */
-    void modificaData(int x)
-    {
-        if (x < 0 || x > 7)
-            throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", x);
-        st = x;
-        stcor = Settimana[st];
-    };
-    static  int systemDay()
-    {
-        time_t now = std::time(nullptr);
-        tm *timestamp = std::localtime(&now);
-        return (timestamp->tm_wday);
-    };
-
-    /*
-    Prende in input un'oggetto di tipo data
-    Confronta i valori di due date
-    ritorna 0 se sono uguali
-    -1 se l'oggetto corretnte è maggiore
-    1 se l'oggetto corrente è minore
-    */
-
-    // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    int ConfGrioni(int x) const
-    {
-        if (st == x)
-            return 0;
-        if (st > x)
-            return -1;
-        return 1;
-    }
-
-    data &operator=(const data &y)
+    if (st == x)
+        return 0;
+    if (st > x)
+        return -1;
+    return 1;
+}
+data &data::operator=(const data &y)
     {
         if (this != &y)
         {
@@ -269,26 +182,18 @@ public:
         }
         return *this;
     }
-
-    friend bool operator==(const data &x, const data &y);
-    friend bool operator>(const data &x, const data &y);
-    friend bool operator<(const data &x, const data &y);
-}; // fine classe data
-
 bool operator==(data &x, data &y)
 {
     if (&x != &y && x.getDate() == y.getDate())
         return true;
     return false;
 }
-
 bool operator>(data &x, data &y)
 {
     if (&x != &y && x.getDate() > y.getDate())
         return true;
     return false;
 }
-
 bool operator<(data &x, data &y)
 {
     if (&x != &y && x.getDate() < y.getDate())
@@ -296,92 +201,38 @@ bool operator<(data &x, data &y)
     return false;
 }
 
-/*
-@Classe mese rappresenatta come:
-stringa mscor:  rappresenta il valore in stringa del mese corrente
- int ms: rappresenta in valore intero il mese corrente
-*/
+// ==================== CLASSE MESE ====================
 
-class mesexp
-{
-public:
-    std::string errore;
-    int str;
-    mesexp(std::string s, int st) : errore(s), str(st) {};
-};
-class mese
-{
-private:
-    // aggiungere funzione che passato il mese come parametro (o indice dell'enumMese) restituisce i giorni di quel mese?
-    std::string Mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
-     int ms;
-    std::string mscor; // variabile che tiene la stringa del mese, con scopo di velocizzare la stampa dello stesso (valuare l'utilità)
-
-public:
-    /*
-    prende un intero con valore compreso da 0 e 11 compreso e default 0;
-    se il valore è valido inizializza l'oggetto;
-    altrimenti lancia un'eccezzione (da gestire).
-    */
-
-    // Versione 1
-    // controllare assegnazione a ms: se x fosse per esempio 14, la prima condizione dell'or è falsa,
-    // ma la seconda è vera, quindi assegno 14 a ms e alla riga 232 assegno mscor = Mesi[14] ! out of bounds
-    // va messo && ?
-    mese( int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
+const std::string mese::mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
+mese::mese( int x = 0) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
     {
         if (ms == -1)
             throw mesexp("il mese deve avere valore compreso fra 1 e 12",ms);
-        mscor = Mesi[ms];
+        mscor = mesi[ms];
     };
-
-    unsigned int numMese() const
-    {
-        return ms;
-    }
-
-    // ritorna il mese dell'oggetto corrente
-    std::string getMese() const
-    {
-        return Mesi[ms];
-    };
-
-    /*
-    cambia il valore dell'oggetto mese
-    */
-    void modificaMese(int x)
-    {
+int mese::numMese() const { return ms; }
+std::string mese::getMese() const { return mesi[ms]; }
+void mese::modificaMese(int x) {
         if (x < 0 || x > 11)
             throw mesexp("il mese deve avere valore compreso fra 1 e 12", ms);
         ms = x;
-        mscor = Mesi[ms];
-    }
-    static  int systemMonth()
-    {
-        time_t now = std::time(nullptr);
-        tm *timestamp = std::localtime(&now);
-        return timestamp->tm_mon;
-    };
-
-    /*
-    Prende in input un oggetto di tipo mese
-    Confronta i valori di due mesi
-    ritorna 0 se sono uguali
-    -1 se l'oggetto corretnte è maggiore
-    1 se l'oggetto corrente è minore
-    */
-
-    // potrebbe essere portata esterna come overloading dell'operatore di confronto (da valutare)
-    int ConfMesi(int x) const
-    {
-        if (ms == x)
-            return 0;
-        if (ms > x)
-            return -1;
-        return 1;
-    }
-
-    mese &operator=(const mese &y)
+        mscor = mesi[ms];
+}
+int mese::systemMonth()
+{
+    time_t now = std::time(nullptr);
+    tm *timestamp = std::localtime(&now);
+    return timestamp->tm_mon;
+}
+int mese::ConfMesi(int x) const
+{
+    if (ms == x)
+        return 0;
+    if (ms > x)
+        return -1;
+    return 1;
+}
+mese &mese::operator=(const mese &y)
     {
         if (this != &y)
         {
@@ -390,42 +241,32 @@ public:
         }
         return *this;
     }
-    friend bool operator==(const mese &x, const mese &y);
-    friend bool operator>(const mese &x, const mese &y);
-    friend bool operator<(const mese &x, const mese &y);
-}; // fine classe mese
-
 bool operator==(mese &x, mese &y)
 {
     if (&x != &y && x.numMese() == y.numMese())
         return true;
     return false;
 }
-
 bool operator>(mese &x, mese &y)
 {
     if (&x != &y && x.numMese() > y.numMese())
         return true;
     return false;
 }
-
 bool operator<(mese &x, mese &y)
 {
     if (&x != &y && x.numMese() < y.numMese())
         return true;
     return false;
 }
-/*
-@Classe anno rappresenatta come:
- int annocr: rappresenta in valore intero l'anno corrente
-*/
-class annoexp
-{
-public:
-    std::string errore;
-    int str;
-    annoexp(std::string s, int st) : errore(s), str(st) {};
-};
+
+// ==================== CLASSE ANNO ====================
+
+
+
+
+
+
 class anno
 {
 private:

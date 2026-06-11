@@ -119,7 +119,7 @@ public:
     friend bool operator<(const orario &x, const orario &y);   // Minor di
 
     // Assegnamento (copy assignment)
-    orario &operator=(const orario &y);
+    orario& operator=(const orario &y);
 
 }; // fine classe orario
 
@@ -166,7 +166,7 @@ public:
 class data
 {
 private:
-    std::string Settimana[7];
+    static const std::string settimana[7];
     int st;
     std::string stcor;
 
@@ -201,7 +201,7 @@ public:
     // Confronta il giorno corrente con un altro giorno
     // Input: int x (giorno da confrontare 0-6)
     // Output: int (0=uguali, -1=questo > x, 1=questo < x)
-    int ConfGrioni(int x) const;
+    int ConfGiorni(int x) const;
 
     // Operatore di assegnamento
     data &operator=(const data &y);
@@ -255,7 +255,7 @@ public:
 class mese
 {
 private:
-    std::string Mesi[12];
+    static const std::string mesi[12];
     int ms;
     std::string mscor;
 
@@ -269,7 +269,7 @@ public:
     // Getter: restituisce l'indice numerico del mese (0-11)
     // Input: nessuno
     // Output: int indice mese
-    unsigned int numMese() const;
+    int numMese() const;
 
     // Getter: restituisce il nome del mese
     // Input: nessuno
@@ -438,7 +438,7 @@ public:
     // Formatta la data-ora secondo il pattern specificato
     // Input: const string& s (pattern di formato, vuoto = formato default "YYYY-MM-DD HH:MM:SS")
     // Output: stringa formattata secondo il pattern (es. "DD.MM.YYYY hh:mm:ss")
-    void FormatDate(std::string s = "");
+    void FormatDate(std::string s = " ");
 
     // Ottiene e stampa la data-ora corrente di sistema
     // Input: nessuno
