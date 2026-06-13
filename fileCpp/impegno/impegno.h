@@ -1,11 +1,16 @@
+#ifndef IMPEGNO_H
+#define IMPEGNO_H
+
+#pragma once
+
 #include <iostream>
 #include <cstdint>
 #include <string>
 #include <vector>
 
-// include personali
-#include <fileCpp/dataora/dataora.h>
-#include <fileCpp/persona/persona.h>
+
+#include "../dataora/dataora.h"
+#include "../persona/persona.h"
 
 /*    
     Gerarchia di classi per gestire impegni di vario tipo:
@@ -211,6 +216,11 @@ class eventoLungo: public evento
         // Output: oggetto eventoLungo inizializzato
         eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, orario inizio, orario fine);
 
+        // Costruttore overload: inizializza evento lungo usando solo orari di inizio/fine
+        // Input: int id, dateTime momentoInizio, unsigned int priorita, string nome, orario inizio, orario fine
+        // Output: oggetto eventoLungo inizializzato con data finale uguale alla data di inizio e descrizione di default
+        eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, orario inizio, orario fine);
+
         // Getter: restituisce il momento di fine dell'evento
         // Input: nessuno
         // Output: dateTime momentoFine
@@ -221,16 +231,20 @@ class eventoLungo: public evento
         // Output: std::string Descrizione
         std::string getDescrizione() const;
 
-        // Distruttore virtuale puro
-        virtual ~eventoLungo() = 0;
+        // Tipo evento per visualizzazione in UI
+        // 1 = compleanno, 2 = riunione, 3 = raggruppa, 0 = generico
+        virtual int getType() const;
+
+        // Distruttore virtuale
+        virtual ~eventoLungo();
 
         // Modifica parametri dell'evento lungo (momento inizio/fine, priorita, descrizione)
         // Input: dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, string nuovaDescrizione
         // Output: aggiorna i campi se validi (momentoFine non antecedente a inizio, descrizione non vuota)
         virtual void modificaEventoLungo(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, std::string nuovaDescrizione);
 
-        // Stampa dettagli evento lungo (metodo puro)
-        virtual void stampa() const = 0;
+        // Stampa dettagli evento lungo
+        virtual void stampa() const;
 };
 
 // ==================== QUARTO LIVELLO ====================
@@ -257,6 +271,7 @@ class raggruppa: public eventoLungo
         std::vector<evento*> eventiRaggruppati;
 
     public:
+        int getType() const override;
         // Costruttore: inizializza raggruppamento di eventi
         // Input: int id, dateTime momentoInizio, unsigned int priorita, string nome, dateTime momentoFine, string Descrizione
         // Output: oggetto raggruppa inizializzato
@@ -328,6 +343,7 @@ class festivita: public eventoLungo
         // Input: nessuno
         // Output: stampa ID, Nome, Descrizione, Priorita e lista festivita italiane
         void stampa() const override;
+        int getType() const override;
 };
 
 /*
@@ -353,6 +369,7 @@ class compleanno: public eventoLungo
         std::vector<std::string> NomePartecipanti;
 
     public:
+        int getType() const override;
         // Costruttore: inizializza compleanno con numero iniziale partecipanti
         // Input: dateTime momentoInizio, unsigned int priorita, string nome, dateTime momentoFine, string Descrizione, int partecipanti, orario inizio, orario fine
         // Output: oggetto compleanno inizializzato
@@ -392,6 +409,7 @@ class riunione: public eventoLungo
         std::vector<int> TelPartecipanti;
 
     public:
+        int getType() const override;
         // Costruttore: inizializza riunione con liste partecipanti
         // Input: dateTime momentoInizio, unsigned int priorita, string nome, dateTime momentoFine, string Descrizione, vector<string> mailPartecipanti, vector<int> TelPartecipanti
         // Output: oggetto riunione inizializzato
@@ -439,6 +457,7 @@ class altroTipo: public eventoLungo
         // Input: nessuno
         // Output: stampa ID, Nome, Descrizione, Priorita e Particolarita
         void stampa() const override;
+        int getType() const override;
 
         // Getter: restituisce la particolarita dell'evento
         // Input: nessuno
@@ -491,3 +510,5 @@ class categoriaPersona
         // Output: rimuove eventoR e aggiunge nuovoEvento se match trovato per ID
         void modificaCategoriaPersona(evento* eventoR, evento* nuovoEvento);
 };
+
+#endif // IMPEGNO_H

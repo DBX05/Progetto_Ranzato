@@ -26,8 +26,7 @@ QVariant EventModel::data(const QModelIndex& index, int role) const {
     case EndRole:
         return QString::fromStdString(ev->getMomentoFine().getDateTime());
     case TypeRole:
-        // eventoLungo does not provide getType(); return a default int for type
-        return 0;
+        return ev->getType();
     case DescriptionRole:
         return QString::fromStdString(ev->getDescrizione());
     case PriorityRole:

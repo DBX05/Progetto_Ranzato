@@ -1,3 +1,8 @@
+#ifndef DATAORA_H
+#define DATAORA_H
+
+#pragma once
+
 #include <string>
 #include <ctime>
 
@@ -225,7 +230,10 @@ public:
 class data
 {
 private:
-    static const std::string settimana[7];
+        const std::string data::settimana[7] = {
+    "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"
+};
+
     int st;
     std::string stcor;
 
@@ -511,3 +519,5 @@ public:
     friend bool operator<(const dataNascita &x, const dataNascita &y);   // Minor di
 
 }; // fine classe dataNascita
+
+#endif // DATAORA_H

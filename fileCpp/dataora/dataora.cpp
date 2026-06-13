@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <dataora.h>
+#include "dataora.h"
 
 // ==================== ECCEZIONI ====================
 orarioexp::orarioexp(std::string s, int st): errore(s), str(st) {};
@@ -92,7 +92,7 @@ int orario::systemTime()
     // Converti in struttura tm locale
     std::tm *localTime = std::localtime(&now);
 
-    return int(localTime);
+    return static_cast<int>(std::mktime(localTime));
 }
 orario& orario::operator=(const orario &y)
 {
@@ -105,19 +105,19 @@ orario& orario::operator=(const orario &y)
     }
     return *this;
 }
-bool operator==(orario &x, orario &y)
+bool operator==(const orario &x, const orario &y)
 {
     if (&x != &y && x.getTimestamp() == y.getTimestamp())
         return true;
     return false;
 }
-bool operator>(orario &x, orario &y)
+bool operator>(const orario &x, const orario &y)
 {
     if (&x != &y && x.getTimestamp() > y.getTimestamp())
         return true;
     return false;
 }
-bool operator<(orario &x, orario &y)
+bool operator<(const orario &x, const orario &y)
 {
     if (&x != &y && x.getTimestamp() < y.getTimestamp())
         return true;
@@ -308,16 +308,15 @@ void dateTime::FormatDate(std::string s)
     tm_ptr->tm_year = getAnno();
     tm_ptr->tm_mon = numMese();
     std::stringstream ss;
-    if (s == "")
+    if (s.empty())
     {
-        // QString formatted = dt.toString("dd.MM.yyyy hh:mm:ss"); // "21.05.2023 14:13:09"
         ss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S");
     }
     else
     {
-        // QString formatted = dt.toString(s); // "21.05.2023 14:13:09"
-        ss << std::put_time(tm_ptr, &s);
+        ss << std::put_time(tm_ptr, s.c_str());
     }
+    dateT = ss.str();
 }
 std::string dateTime::systemDateTime() const
 {
@@ -326,8 +325,9 @@ std::string dateTime::systemDateTime() const
 
     std::time(&rawtime);
     timeinfo = std::localtime(&rawtime);
-    printf("Current local time and date: %d%s%d%s%d%s%d%s%d%s%d", timeinfo->tm_mday, "/", timeinfo->tm_mon, "/", 1900 + timeinfo->tm_year, "/  ",
-           timeinfo->tm_hour, ":", timeinfo->tm_min, ":", timeinfo->tm_sec);
+    char buffer[32];
+    std::strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M:%S", timeinfo);
+    return std::string(buffer);
 }
 dateTime &dateTime::operator=(const dateTime &y) {
     if (this != &y) dateT = y.dateT; 

@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(untitled VERSION 0.1 LANGUAGES CXX)
 
-# --- Percorsi Qt per Windows MinGW ---
-set(CMAKE_PREFIX_PATH "C:/Qt/6.10.2/mingw_64/lib/cmake")
-set(Qt6_DIR "C:/Qt/6.10.2/mingw_64/lib/cmake/Qt6")
+# Percorso root di Qt (usa la cartella Qt, non la sottocartella lib/cmake)
+set(CMAKE_PREFIX_PATH "C:/Qt/6.10.2/mingw_64")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -13,45 +12,45 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Make project root available for includes (so <fileCpp/...> works)
-include_directories(
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/fileCpp
-    ${CMAKE_SOURCE_DIR}/fileCpp/dataora
-)
-
-# --- Trova Qt6 ---
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
-
-set(TS_FILES untitled_it_IT.ts)
-
-file(GLOB QTUI_SOURCES
-    fileCpp/QtUI/*.cpp
-    fileCpp/QtUI/*.h
+# Aggiungi include del progetto tramite target (più sicuro che include_directories)
+# I file sorgente e header del progetto dovrebbero essere sotto src/ o fileCpp/
+# Adatta i percorsi se la tua struttura è diversa.
+file(GLOB_RECURSE PROJECT_SOURCES
+    fileCpp/*.cpp
+    src/*.cpp
     fileCpp/QtUI/*.ui
-    fileCpp/QtUI/*.xml
 )
 
-set(PROJECT_SOURCES
-    ${QTUI_SOURCES}
-    ${TS_FILES}
-)
+# Trova Qt6 (Widgets e Sql se ti servono)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
-# --- Eseguibile Qt6 ---
+# Eseguibile
 qt_add_executable(untitled
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
 )
 
-qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+# Aggiungi include directories al target (non globalmente)
+target_include_directories(untitled PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/fileCpp
+    ${CMAKE_SOURCE_DIR}/fileCpp/dataora
+    ${CMAKE_SOURCE_DIR}/fileCpp/impegno
+    ${CMAKE_SOURCE_DIR}/fileCpp/persona
+    ${CMAKE_SOURCE_DIR}/fileCpp/Json
+    ${CMAKE_SOURCE_DIR}/fileCpp/db
+)
 
-target_link_libraries(untitled PRIVATE Qt6::Widgets)
+# Link a Qt
+target_link_libraries(untitled PRIVATE Qt6::Widgets Qt6::Sql)
 
+# Opzioni per Windows bundle
 set_target_properties(untitled PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
+# Install rules (opzionale)
 include(GNUInstallDirs)
 install(TARGETS untitled
     BUNDLE DESTINATION .

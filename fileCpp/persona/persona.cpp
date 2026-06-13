@@ -1,8 +1,6 @@
 
-#include <persona.h>
-#include <dataora.h>
-#include <dataora.cpp>
-#include <dataNascita.cpp>
+#include "persona.h"
+#include "../dataora/dataNascita.cpp"
 #include <string>
 #include <regex>
 #include <sstream>
@@ -125,7 +123,7 @@ std::string persona::hashPassword(const std::string& password)
 // persona - Implementazione pubblica
 // ============================================================================
 
-explicit persona::persona(const int& userId, const std::string& email, 
+persona::persona(const int& userId, const std::string& email, 
                  const std::string& password, const std::string& nome, 
                  const dataNascita& nas)
     : utente(userId), nascita(nas)

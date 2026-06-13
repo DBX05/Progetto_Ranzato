@@ -2,11 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <impegno.h>
-
-// include personali
-#include <fileCpp/dataora/dataora.h>
-#include <fileCpp/persona/persona.h>
+#include "impegno.h"
 
 // ==================== PRIMO LIVELLO ====================
 // ==================== CLASSE IMPEGNO ====================
@@ -54,13 +50,25 @@ void promemoria::stampa() const {
 }
 
 // ==================== CLASSE EVENTOLUNGO ====================
-eventoLungo::eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione,orario inizio, orario fine): evento(id, momentoInizio, priorita, nome,inizio,fine), momentoFine(momentoFine), Descrizione(Descrizione.empty() ? "Evento lungo senza descrizione" : Descrizione) {}
+eventoLungo::eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, orario inizio, orario fine): evento(id, momentoInizio, priorita, nome,inizio,fine), momentoFine(momentoFine), Descrizione(Descrizione.empty() ? "Evento lungo senza descrizione" : Descrizione) {}
+eventoLungo::eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, orario inizio, orario fine): evento(id, momentoInizio, priorita, nome, inizio, fine), momentoFine(momentoInizio), Descrizione("Evento lungo senza descrizione") {}
 dateTime eventoLungo::getMomentoFine() const { return momentoFine; }
 std::string eventoLungo::getDescrizione() const { return Descrizione; }
+int eventoLungo::getType() const { return 0; }
+eventoLungo::~eventoLungo() = default;
 void eventoLungo::modificaEventoLungo(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, std::string nuovaDescrizione) {
     modificaImpegno(nuovoMomentoInizio, nuovaPriorita);
     if(!(nuovoMomentoFine < nuovoMomentoInizio)) momentoFine = nuovoMomentoFine;
-    if(!nuovaDescrizione.empty()) Descrizione = nuovaDescrizione;;
+    if(!nuovaDescrizione.empty()) Descrizione = nuovaDescrizione;
+}
+void eventoLungo::stampa() const {
+    std::cout << "=== Evento Lungo ===" << std::endl;
+    std::cout << "ID: " << getId() << std::endl;
+    std::cout << "Nome: " << getNome() << std::endl;
+    std::cout << "Descrizione: " << getDescrizione() << std::endl;
+    std::cout << "Inizio: " << getInizio() << std::endl;
+    std::cout << "Fine: " << getMomentoFine().getDateTime() << std::endl;
+    std::cout << "Priorita: " << getPriorita() << std::endl;
 }
 
 // ==================== QUARTO LIVELLO ====================
@@ -124,6 +132,7 @@ void festivita::stampa() const {
         std::cout << "  - " << festeItaliane[i] << std::endl;
     }
 }
+int festivita::getType() const { return 0; }
 
 // ==================== CLASSE COMPLEANNO ====================
 compleanno::compleanno(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, int partecipanti,orario inizio, orario fine): eventoLungo(id, momentoInizio, priorita, nome, momentoFine, Descrizione,inizio,fine), partecipanti(partecipanti) {}
@@ -142,6 +151,7 @@ void compleanno::stampa() const {
         std::cout << "  - " << NomePartecipanti[i] << std::endl;
     }
 }
+int compleanno::getType() const { return 1; }
 
 // ==================== CLASSE RIUONIONE ====================
 riunione::riunione(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::vector<std::string> mailPartecipanti, std::vector<int> TelPartecipanti): eventoLungo(id, momentoInizio, priorita, nome, momentoFine, Descrizione, orario(0, 0), orario(23, 59)), mailPartecipanti(mailPartecipanti), TelPartecipanti(TelPartecipanti) {}
@@ -160,6 +170,7 @@ void riunione::stampa() const {
         std::cout << "  - Mail: " << mailPartecipanti[i] << " | Tel: " << TelPartecipanti[i] << std::endl;
     }
 }
+int riunione::getType() const { return 2; }
 
 // ==================== CLASSE ALTROTIPO ====================
 altroTipo::altroTipo(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::string Particolarita): eventoLungo(id, momentoInizio, priorita, nome, momentoFine, Descrizione, orario(0, 0), orario(23, 59)), Particolarita(Particolarita) {}
@@ -171,6 +182,7 @@ void altroTipo::stampa() const {
     std::cout << "Priorita: " << getPriorita() << std::endl;
     std::cout << "Particolarita: " << Particolarita << std::endl;
 }
+int altroTipo::getType() const { return 4; }
 std::string altroTipo::getParticolarita() const { return Particolarita; }
 void altroTipo::modificaParticolarita(std::string nuovaParticolarita){
     if(nuovaParticolarita.empty()) return;
@@ -190,6 +202,7 @@ void raggruppa::stampa() const {
     std::cout << "Descrizione: " << getDescrizione() << std::endl;
     std::cout << "Eventi raggruppati: " << eventiRaggruppati.size() << std::endl;
 }
+int raggruppa::getType() const { return 3; }
 void raggruppa::aggiungiEvento(evento* nuovoEvento){
     if(nuovoEvento == nullptr) return;
     eventiRaggruppati.push_back(nuovoEvento);
