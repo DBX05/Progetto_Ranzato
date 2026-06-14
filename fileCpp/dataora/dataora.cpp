@@ -1,97 +1,77 @@
+#include "dataora.h"
 #include <string>
 #include <ctime>
-#include <format>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
-#include "dataora.h"
 
 // ==================== ECCEZIONI ====================
-orarioexp::orarioexp(std::string s, int st): errore(s), str(st) {};
-dataexp::dataexp(std::string s, int st): errore(s), str(st) {}
-mesexp::mesexp(std::string s, int st): errore(s), str(st) {}
-annoexp::annoexp(std::string s, int st): errore(s), str(st) {};
-DateTimexp::DateTimexp(std::string s): errore(s) {};
-
-
+orarioexp::orarioexp(std::string s, int st): errore(std::move(s)), str(st) {}
+dataexp::dataexp(std::string s, int st): errore(std::move(s)), str(st) {}
+mesexp::mesexp(std::string s, int st): errore(std::move(s)), str(st) {}
+annoexp::annoexp(std::string s, int st): errore(std::move(s)), str(st) {}
+DateTimexp::DateTimexp(std::string s): errore(std::move(s)) {}
 
 // ==================== CLASSE ORARIO ====================
-
-void orario::create_timestamp( int h,  int m,  int s) {
-        if (timestamp != 0 || timestamp != systemTime())
-        {
-            std::time_t now = std::time(nullptr);
-            std::tm tm = *std::localtime(&now); // prende anno/mese/giorno correnti in locale
-            tm.tm_hour = h;
-            tm.tm_min = m;
-            tm.tm_sec = s;
-            tm.tm_isdst = -1;                 // lascia che mktime determini DST
-            std::time_t t = std::mktime(&tm); // interpreta tm come ora locale
-            timestamp = static_cast<long long int>(t);
-        }
+void orario::create_timestamp(int h, int m, int s) {
+    std::time_t now = std::time(nullptr);
+    std::tm tm = *std::localtime(&now);
+    tm.tm_hour = h;
+    tm.tm_min = m;
+    tm.tm_sec = s;
+    tm.tm_isdst = -1;
+    std::time_t t = std::mktime(&tm);
+    timestamp = static_cast<int>(t);
 }
-orario::orario(int s, int m, int h, int tm) : timestamp(tm < 0 ? systemTime() : tm), hr(h < 0 || h > 23 ? systemHour() : h),
-                                                          min(m < 0 || m > 60 ? systemMin() : m), sc(s < 0 || s > 60 ? systemSecond() : s)
-    {
-        if (h != 0 && min != 0 && s != 0)
-            create_timestamp(h, m, s);
-    }
+
+orario::orario(int s, int m, int h, int tm) :
+    timestamp(tm < 0 ? systemTime() : tm),
+    hr(h < 0 || h > 23 ? systemHour() : h),
+    min(m < 0 || m > 60 ? systemMin() : m),
+    sc(s < 0 || s > 60 ? systemSecond() : s)
+{
+    if (h != 0 || min != 0 || s != 0)
+        create_timestamp(h, m, s);
+}
+
 int orario::getSec() const { return sc; }
 int orario::getMin() const { return min; }
 int orario::getHour() const { return hr; }
 int orario::getTimestamp() const { return timestamp; }
-std::string orario::curTime() const { return std::to_string(hr) + ":" + std::to_string(min) + ":" + std::to_string(sc); }
+std::string orario::curTime() const {
+    std::ostringstream ss;
+    ss << std::setfill('0') << std::setw(2) << hr << ":" << std::setw(2) << min << ":" << std::setw(2) << sc;
+    return ss.str();
+}
 void orario::modificaOrario(int h, int m, int s)
-    {
-        if (h < 0 || h > 23)
-            throw orarioexp("Le ore devono avere valore fra le 1 e 23", h);
-        hr = h;
-        if (m < 0 || m > 60)
-            throw orarioexp("I minuti devono avere valore fra le 1 e 60", m);
-        min = m;
-        if (s < 0 || s > 60)
-            throw orarioexp("I secondi devono avere valore fra le 1 e 60", s);
-        sc = s;
-    }
+{
+    if (h < 0 || h > 23) throw orarioexp("Le ore devono avere valore fra le 0 e 23", h);
+    if (m < 0 || m > 60) throw orarioexp("I minuti devono avere valore fra le 0 e 60", m);
+    if (s < 0 || s > 60) throw orarioexp("I secondi devono avere valore fra le 0 e 60", s);
+    hr = h; min = m; sc = s;
+}
 int orario::systemHour()
 {
-    // Ottieni il timestamp corrente
     std::time_t now = std::time(nullptr);
-
-    // Converti in struttura tm locale
     std::tm *localTime = std::localtime(&now);
-
     return int(localTime->tm_hour);
-};
+}
 int orario::systemSecond()
 {
-    // Ottieni il timestamp corrente
     std::time_t now = std::time(nullptr);
-
-    // Converti in struttura tm locale
     std::tm *localTime = std::localtime(&now);
-
     return int(localTime->tm_sec);
-};
+}
 int orario::systemMin()
-    {
-        // Ottieni il timestamp corrente
-        std::time_t now = std::time(nullptr);
-
-        // Converti in struttura tm locale
-        std::tm *localTime = std::localtime(&now);
-
-        return int(localTime->tm_min);
-    };
+{
+    std::time_t now = std::time(nullptr);
+    std::tm *localTime = std::localtime(&now);
+    return int(localTime->tm_min);
+}
 int orario::systemTime()
 {
-    // Ottieni il timestamp corrente
     std::time_t now = std::time(nullptr);
-
-    // Converti in struttura tm locale
     std::tm *localTime = std::localtime(&now);
-
     return static_cast<int>(std::mktime(localTime));
 }
 orario& orario::operator=(const orario &y)
@@ -107,247 +87,199 @@ orario& orario::operator=(const orario &y)
 }
 bool operator==(const orario &x, const orario &y)
 {
-    if (&x != &y && x.getTimestamp() == y.getTimestamp())
-        return true;
-    return false;
+    return x.getTimestamp() == y.getTimestamp();
 }
 bool operator>(const orario &x, const orario &y)
 {
-    if (&x != &y && x.getTimestamp() > y.getTimestamp())
-        return true;
-    return false;
+    return x.getTimestamp() > y.getTimestamp();
 }
 bool operator<(const orario &x, const orario &y)
 {
-    if (&x != &y && x.getTimestamp() < y.getTimestamp())
-        return true;
-    return false;
+    return x.getTimestamp() < y.getTimestamp();
 }
 
 // ==================== CLASSE DATA ====================
+const std::string data::settimana[7] = {"lunedi","martedi","mercoledi","giovedi","venerdi","sabato","domenica"};
 
-const std::string settimana[7] = {"lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"};
-data::data(int x): st((x - 1 > -1 || x - 1 < 8) ? x : -1)
+data::data(int x): st((x >= 0 && x < 7) ? x : -1)
 {
-    if (st == -1) throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", st);
+    if (st == -1) throw dataexp("il giorno della settimana deve avere valore compreso fra 0 e 6", st);
     stcor = settimana[st];
 }
-std::string data::getGiorno() const { return settimana[st]; }
-int data::getDate() const { return st; };
+std::string data::getGiorno() const { return stcor; }
+int data::getDate() const { return st; }
 void data::modificaData(int x)
 {
-    if (x < 0 || x > 7)
-        throw dataexp("il giorno della settimana deve avere valore compreso fra 1 e 7", x);
+    if (x < 0 || x > 6) throw dataexp("il giorno della settimana deve avere valore compreso fra 0 e 6", x);
     st = x;
     stcor = settimana[st];
 }
 int data::systemDay()
 {
-    time_t now = std::time(nullptr);
-    tm *timestamp = std::localtime(&now);
-    return (timestamp->tm_wday);
-};
+    std::time_t now = std::time(nullptr);
+    std::tm *timestamp = std::localtime(&now);
+    return timestamp->tm_wday;
+}
 int data::ConfGiorni(int x) const
 {
-    if (st == x)
-        return 0;
-    if (st > x)
-        return -1;
+    if (st == x) return 0;
+    if (st > x) return -1;
     return 1;
 }
 data &data::operator=(const data &y)
+{
+    if (this != &y)
     {
-        if (this != &y)
-        {
-            st = y.st;
-            stcor = y.stcor;
-        }
-        return *this;
+        st = y.st;
+        stcor = y.stcor;
     }
-bool operator==(data &x, data &y)
-{
-    if (&x != &y && x.getDate() == y.getDate())
-        return true;
-    return false;
+    return *this;
 }
-bool operator>(data &x, data &y)
+bool operator==(const data &x, const data &y)
 {
-    if (&x != &y && x.getDate() > y.getDate())
-        return true;
-    return false;
+    return x.getDate() == y.getDate();
 }
-bool operator<(data &x, data &y)
+bool operator>(const data &x, const data &y)
 {
-    if (&x != &y && x.getDate() < y.getDate())
-        return true;
-    return false;
+    return x.getDate() > y.getDate();
+}
+bool operator<(const data &x, const data &y)
+{
+    return x.getDate() < y.getDate();
 }
 
 // ==================== CLASSE MESE ====================
+const std::string mese::mesi[12] = {"gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"};
 
-const std::string mese::mesi[12] = {"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"};
-mese::mese(int x) : ms((x - 1 < 12 || x - 1 > -1) ? x : -1)
-    {
-        if (ms == -1)
-            throw mesexp("il mese deve avere valore compreso fra 1 e 12",ms);
-        mscor = mesi[ms];
-    };
+mese::mese(int x) : ms((x >= 0 && x < 12) ? x : -1)
+{
+    if (ms == -1) throw mesexp("il mese deve avere valore compreso fra 0 e 11", ms);
+    mscor = mesi[ms];
+}
 int mese::numMese() const { return ms; }
-std::string mese::getMese() const { return mesi[ms]; }
+std::string mese::getMese() const { return mscor; }
 void mese::modificaMese(int x) {
-        if (x < 0 || x > 11)
-            throw mesexp("il mese deve avere valore compreso fra 1 e 12", ms);
-        ms = x;
-        mscor = mesi[ms];
+    if (x < 0 || x > 11) throw mesexp("il mese deve avere valore compreso fra 0 e 11", x);
+    ms = x;
+    mscor = mesi[ms];
 }
 int mese::systemMonth()
 {
-    time_t now = std::time(nullptr);
-    tm *timestamp = std::localtime(&now);
+    std::time_t now = std::time(nullptr);
+    std::tm *timestamp = std::localtime(&now);
     return timestamp->tm_mon;
 }
 int mese::ConfMesi(int x) const
 {
-    if (ms == x)
-        return 0;
-    if (ms > x)
-        return -1;
+    if (ms == x) return 0;
+    if (ms > x) return -1;
     return 1;
 }
 mese &mese::operator=(const mese &y)
+{
+    if (this != &y)
     {
-        if (this != &y)
-        {
-            ms = y.ms;
-            mscor = y.mscor;
-        }
-        return *this;
+        ms = y.ms;
+        mscor = y.mscor;
     }
-bool operator==(mese &x, mese &y)
-{
-    if (&x != &y && x.numMese() == y.numMese())
-        return true;
-    return false;
+    return *this;
 }
-bool operator>(mese &x, mese &y)
+bool operator==(const mese &x, const mese &y)
 {
-    if (&x != &y && x.numMese() > y.numMese())
-        return true;
-    return false;
+    return x.numMese() == y.numMese();
 }
-bool operator<(mese &x, mese &y)
+bool operator>(const mese &x, const mese &y)
 {
-    if (&x != &y && x.numMese() < y.numMese())
-        return true;
-    return false;
+    return x.numMese() > y.numMese();
+}
+bool operator<(const mese &x, const mese &y)
+{
+    return x.numMese() < y.numMese();
 }
 
 // ==================== CLASSE ANNO ====================
 anno::anno(int an) : annocr((an < 0) ? systemYear() : an) {}
 int anno::getAnno() const { return annocr; }
-void anno::modificaAnno(int x) { 
-    if (x > -1)
-        annocr = x;
-}
+void anno::modificaAnno(int x) { if (x > -1) annocr = x; }
 int anno::systemYear()
 {
-    time_t now = std::time(nullptr);
-    tm *timestamp = std::localtime(&now);
-    return timestamp->tm_year;
+    std::time_t now = std::time(nullptr);
+    std::tm *timestamp = std::localtime(&now);
+    return timestamp->tm_year + 1900;
 }
 anno &anno::operator=(const anno &y)
 {
     if (this != &y) annocr = y.annocr;
     return *this;
 }
-bool operator==(anno &x, anno &y)
+bool operator==(const anno &x, const anno &y)
 {
-    if (&x != &y && x.getAnno() == y.getAnno())
-        return true;
-    return false;
+    return x.getAnno() == y.getAnno();
 }
-bool operator>(anno &x, anno &y)
+bool operator>(const anno &x, const anno &y)
 {
-    if (&x != &y && x.getAnno() > y.getAnno())
-        return true;
-    return false;
+    return x.getAnno() > y.getAnno();
 }
-bool operator<(anno &x, anno &y)
+bool operator<(const anno &x, const anno &y)
 {
-    if (&x != &y && x.getAnno() < y.getAnno())
-        return true;
-    return false;
+    return x.getAnno() < y.getAnno();
 }
 
 // ==================== CLASSE DATETIME ====================
-dateTime::dateTime( int an,  int m,  int d,  int h,  int mn,  int s): orario(s, mn, h), data(d), mese(m), anno(an) {}
+dateTime::dateTime(int an, int m, int d, int h, int mn, int s)
+    : orario(s, mn, h), data(d), mese(m), anno(an) {}
+
 std::string dateTime::getDateTime() const { return dateT; }
+
 void dateTime::modificaDateTime(int an, int m, int d, int h, int mn, int s)
 {
-    if (an != 0)
-        modificaAnno(an);
-    if (m != -1)
-        modificaMese(m);
-    if (d != -1)
-        modificaData(d);
-    if (h != -1 || mn != -1 || s != -1)
-        modificaOrario(h, mn, s);
+    if (an != 0) modificaAnno(an);
+    if (m != -1) modificaMese(m);
+    if (d != -1) modificaData(d);
+    if (h != -1 || mn != -1 || s != -1) modificaOrario(h, mn, s);
 }
+
 void dateTime::FormatDate(std::string s)
 {
-    /*
-    versione con funzione di qt:
-    QDateTime dt(QDate(getAnno(), numMese(), getDate()), QTime(getHour(), getMin(), getSec()));
-    */
     std::time_t t = std::time(nullptr);
-    std::tm *tm_ptr = std::localtime(&t);
-    tm_ptr->tm_sec = getSec();
-    tm_ptr->tm_min = getMin();
-    tm_ptr->tm_hour = getHour();
-    tm_ptr->tm_mday = getDate();
-    tm_ptr->tm_year = getAnno();
-    tm_ptr->tm_mon = numMese();
-    std::stringstream ss;
-    if (s.empty())
-    {
-        ss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S");
-    }
-    else
-    {
-        ss << std::put_time(tm_ptr, s.c_str());
-    }
+    std::tm tm = *std::localtime(&t);
+    tm.tm_sec = getSec();
+    tm.tm_min = getMin();
+    tm.tm_hour = getHour();
+    tm.tm_mday = getDate();
+    tm.tm_year = getAnno() - 1900;
+    tm.tm_mon = numMese();
+    std::ostringstream ss;
+    if (s.empty()) ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    else ss << std::put_time(&tm, s.c_str());
     dateT = ss.str();
 }
+
 std::string dateTime::systemDateTime() const
 {
     time_t rawtime;
     struct tm *timeinfo;
-
     std::time(&rawtime);
     timeinfo = std::localtime(&rawtime);
     char buffer[32];
     std::strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M:%S", timeinfo);
     return std::string(buffer);
 }
+
 dateTime &dateTime::operator=(const dateTime &y) {
-    if (this != &y) dateT = y.dateT; 
+    if (this != &y) dateT = y.dateT;
     return *this;
 }
-bool operator==(dateTime &x, dateTime &y)
+
+bool operator==(const dateTime &x, const dateTime &y)
 {
-    if (&x != &y && x.getDateTime() == y.getDateTime())
-        return true;
-    return false;
+    return x.getDateTime() == y.getDateTime();
 }
-bool operator>(dateTime &x, dateTime &y)
+bool operator>(const dateTime &x, const dateTime &y)
 {
-    if (&x != &y && x.getDateTime() > y.getDateTime())
-        return true;
-    return false;
+    return x.getDateTime() > y.getDateTime();
 }
-bool operator<(dateTime &x, dateTime &y)
+bool operator<(const dateTime &x, const dateTime &y)
 {
-    if (&x != &y && x.getDateTime() < y.getDateTime())
-        return true;
-    return false;
+    return x.getDateTime() < y.getDateTime();
 }

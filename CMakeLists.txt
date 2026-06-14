@@ -18,8 +18,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE PROJECT_SOURCES
     fileCpp/*.cpp
     src/*.cpp
+)
+
+file(GLOB_RECURSE PROJECT_UIS
     fileCpp/QtUI/*.ui
 )
+
 
 # Trova Qt6 (Widgets e Sql se ti servono)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
@@ -28,6 +32,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 qt_add_executable(untitled
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    ${PROJECT_UIS}
 )
 
 # Aggiungi include directories al target (non globalmente)
