@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(untitled VERSION 0.1 LANGUAGES CXX)
 
-# Percorso root di Qt (usa la cartella Qt, non la sottocartella lib/cmake)
-set(CMAKE_PREFIX_PATH "C:/Qt/6.10.2/mingw_64")
+# Percorso root di Qt (adatta se usi versione diversa)
+set(CMAKE_PREFIX_PATH "C:/Qt/6.11.1/mingw_64")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -12,20 +12,26 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Aggiungi include del progetto tramite target (più sicuro che include_directories)
-# I file sorgente e header del progetto dovrebbero essere sotto src/ o fileCpp/
-# Adatta i percorsi se la tua struttura è diversa.
+# Sorgenti del progetto (includi fileCpp, src, auth, utils)
 file(GLOB_RECURSE PROJECT_SOURCES
     fileCpp/*.cpp
     src/*.cpp
+    auth/*.cpp
+    fileCpp/utils/*.cpp
+    fileCpp/db_connector/*.cpp
 )
 
+# UI files se presenti
 file(GLOB_RECURSE PROJECT_UIS
     fileCpp/QtUI/*.ui
 )
 
+# Risorse Qt (se hai .qrc)
+file(GLOB_RECURSE PROJECT_RCS
+    fileCpp/*.qrc
+)
 
-# Trova Qt6 (Widgets e Sql se ti servono)
+# Trova Qt6 (Widgets e Sql)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
 # Eseguibile
@@ -33,9 +39,10 @@ qt_add_executable(untitled
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
     ${PROJECT_UIS}
+    ${PROJECT_RCS}
 )
 
-# Aggiungi include directories al target (non globalmente)
+# Include directories per-target
 target_include_directories(untitled PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/fileCpp
@@ -43,13 +50,15 @@ target_include_directories(untitled PRIVATE
     ${CMAKE_SOURCE_DIR}/fileCpp/impegno
     ${CMAKE_SOURCE_DIR}/fileCpp/persona
     ${CMAKE_SOURCE_DIR}/fileCpp/Json
-    ${CMAKE_SOURCE_DIR}/fileCpp/db
+    ${CMAKE_SOURCE_DIR}/fileCpp/db_connector
+    ${CMAKE_SOURCE_DIR}/fileCpp/utils
+    ${CMAKE_SOURCE_DIR}/auth
 )
 
-# Link a Qt
+# Link a Qt (Widgets e Sql)
 target_link_libraries(untitled PRIVATE Qt6::Widgets Qt6::Sql)
 
-# Opzioni per Windows bundle
+# Windows bundle properties
 set_target_properties(untitled PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
