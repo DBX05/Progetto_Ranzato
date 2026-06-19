@@ -47,7 +47,8 @@ private:
     void loadEventsFromDb();
     void saveEventToDb(const std::shared_ptr<eventoLungo>& ev);
 
-    static std::shared_ptr<raggruppa> createGroupFromEvents(const std::vector<std::shared_ptr<eventoLungo>>& items, int generatedId);
+// MainWindow.h (inside private:)
+std::shared_ptr<raggruppa> createGroupFromEvents(const std::vector<std::shared_ptr<eventoLungo>>& items, int generatedId = -1);
 };
 
 #endif // MAINWINDOW_H
