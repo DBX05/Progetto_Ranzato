@@ -15,6 +15,16 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#include <map>
+#include <algorithm>
+#include <QDate>
+#include <QDebug>
+#include <QSqlQuery>
+#include <QSqlError>
+#include "fileCpp/impegno/impegno.h" // assicura che definisca eventoLungo, raggruppa, dateTime, orario
+#include "../utils/util_datetime.h"
+
+
 MainWindow::MainWindow(QSqlDatabase db, int userId, const QString& userName, const QString& userEmail, QWidget* parent)
     : QMainWindow(parent),
       m_calendar(new QCalendarWidget(this)),
@@ -115,6 +125,45 @@ void MainWindow::refreshListForDate(const QDate& date) {
     m_listView->setModel(model);
 }
 
+// Crea un oggetto raggruppa a partire da un vettore di eventoLungo
+static std::shared_ptr<raggruppa> createGroupFromEvents(const std::vector<std::shared_ptr<eventoLungo>>& items, int generatedId = -1) {
+    if (items.empty()) return nullptr;
+
+    // Trova inizio minimo e fine massimo
+    dateTime minStart = items.front()->getMomentoInizio();
+    dateTime maxEnd = items.front()->getMomentoFine();
+    unsigned int priority = 1;
+    std::string combinedName;
+    std::string combinedDesc;
+
+    for (const auto& ev : items) {
+        dateTime s = ev->getMomentoInizio();
+        dateTime e = ev->getMomentoFine();
+        // confronta (assumo che dateTime abbia getTimestamp() o confronto less-than; altrimenti confronta stringhe)
+        if (ev->getMomentoInizio().getTimestamp() < minStart.getTimestamp()) minStart = s;
+        if (ev->getMomentoFine().getTimestamp() > maxEnd.getTimestamp()) maxEnd = e;
+        priority = std::max<unsigned int>(priority, ev->getPriorita());
+        if (!combinedName.empty()) combinedName += " + ";
+        combinedName += ev->getNome();
+        if (!combinedDesc.empty()) combinedDesc += "\n";
+        combinedDesc += ev->getDescrizione();
+    }
+
+    // Costruisci nome e descrizione del gruppo
+    std::string groupName = std::string("Gruppo: ") + combinedName;
+    std::string groupDesc = std::string("Raggruppamento di ") + std::to_string(items.size()) + " eventi\n" + combinedDesc;
+
+    // Crea l'oggetto raggruppa. ADATTA la firma del costruttore se necessario.
+    // Firma ipotetica: raggruppa(int id, dateTime start, unsigned int priority, std::string name, dateTime end, std::string description)
+    auto group = std::make_shared<raggruppa>(generatedId, minStart, priority, groupName, maxEnd, groupDesc);
+
+    // Se la classe raggruppa supporta l'aggiunta di riferimenti agli eventi originali, aggiungili qui.
+    // Esempio ipotetico: group->addMember(ev->getId());
+    // ADATTA se la tua classe ha metodi per memorizzare i membri.
+
+    return group;
+}
+    
 // ---------------- DB integration ----------------
 void MainWindow::loadEventsFromDb() {
     if (!m_db.isValid() || !m_db.isOpen()) return;
@@ -125,6 +174,10 @@ void MainWindow::loadEventsFromDb() {
         qDebug() << "DB load error:" << q.lastError().text();
         return;
     }
+
+    // Vettore temporaneo di eventi caricati
+    std::vector<std::shared_ptr<eventoLungo>> loadedEvents;
+
     while (q.next()) {
         int id = q.value(0).toInt();
         QString name = q.value(1).toString();
@@ -141,10 +194,40 @@ void MainWindow::loadEventsFromDb() {
         orario oEnd(dtEnd.getSec(), dtEnd.getMin(), dtEnd.getHour());
 
         auto ev = std::make_shared<eventoLungo>(id, dtStart, static_cast<unsigned int>(priority), name.toStdString(), dtEnd, desc.toStdString(), oStart, oEnd);
+        loadedEvents.push_back(ev);
         m_model->addEvent(ev);
     }
+
+    // Ora creiamo raggruppamenti: esempio semplice -> raggruppa per giorno
+    // Mappa: QDate -> vector<eventoLungo>
+    std::map<QDate, std::vector<std::shared_ptr<eventoLungo>>> byDay;
+    for (const auto& ev : loadedEvents) {
+        // estrai la data di inizio
+        QString s = QString::fromStdString(ev->getMomentoInizio().getDateTime());
+        QDate d = QDate::fromString(s.mid(0,10), "yyyy-MM-dd");
+        if (!d.isValid()) d = QDate::currentDate();
+        byDay[d].push_back(ev);
+    }
+
+    // Per ogni giorno con più di 1 evento, crea un raggruppa
+    int nextGeneratedId = -1000; // id negativi per oggetti temporanei non ancora persistiti
+    for (auto& kv : byDay) {
+        auto& vec = kv.second;
+        if (vec.size() <= 1) continue; // niente da raggruppare
+        auto group = createGroupFromEvents(vec, nextGeneratedId--);
+        if (group) {
+            // imposta tipo 3 per raggruppa (se vuoi che venga colorato diversamente)
+            // Se raggruppa ha metodo setType, usalo; altrimenti assicurati che il costruttore imposti il tipo.
+            // group->setType(3); // ADATTA se disponibile
+
+            // Aggiungi il gruppo al modello così viene mostrato nella vista
+            m_model->addEvent(group);
+        }
+    }
+
     m_dayWeekView->update();
 }
+
 
 void MainWindow::saveEventToDb(const std::shared_ptr<eventoLungo>& ev) {
     if (!m_db.isValid() || !m_db.isOpen()) return;
@@ -175,3 +258,5 @@ void MainWindow::saveEventToDb(const std::shared_ptr<eventoLungo>& ev) {
         }
     }
 }
+
+

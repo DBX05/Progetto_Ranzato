@@ -1,8 +1,8 @@
 #include <QApplication>
 #include "MainWindow.h"
-#include "auth/DBConnectDialog.h"
-#include "auth/UserAuthDialog.h"
-#include "db_connector.h"
+#include "../auth/DBConnectDialog.h"
+#include "../auth/UserAuthDialog.h"
+#include "../db/db_connector.h"
 #include <QMessageBox>
 
 int main(int argc, char *argv[])

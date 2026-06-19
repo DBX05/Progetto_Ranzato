@@ -1,74 +1,71 @@
-// db_connector.cpp (MySQL)
-#include "db_connector.h"
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QDebug>
+// DBConnectDialog.cpp
+#include "DBConnectDialog.h"
 
-bool DBConnector::connect(const QString &host, int port, const QString &user, const QString &password, const QString &dbName, QSqlDatabase &outDb, QString &outError)
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QPushButton>
+
+DBConnectDialog::DBConnectDialog(QWidget* parent)
+    : QDialog(parent)
 {
-    // Controlla driver disponibile
-    QStringList drivers = QSqlDatabase::drivers();
-    if (!drivers.contains("QMYSQL")) {
-        outError = "QMYSQL driver not available. Install/enable Qt SQL MySQL plugin.";
-        return false;
-    }
+    setWindowTitle("Connessione al Database");
+    auto* layout = new QVBoxLayout(this);
 
-    // Nome connessione unico
-    const QString connName = "connector_connection_mysql";
-    if (QSqlDatabase::contains(connName)) {
-        QSqlDatabase::removeDatabase(connName);
-    }
+    auto* hostLayout = new QHBoxLayout;
+    hostLayout->addWidget(new QLabel("Host:"));
+    m_host = new QLineEdit("localhost", this);
+    hostLayout->addWidget(m_host);
+    layout->addLayout(hostLayout);
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL", connName);
-    db.setHostName(host.isEmpty() ? "127.0.0.1" : host);
-    if (port > 0) db.setPort(port);
-    db.setUserName(user);
-    db.setPassword(password);
-    db.setDatabaseName(dbName);
+    auto* portLayout = new QHBoxLayout;
+    portLayout->addWidget(new QLabel("Port:"));
+    m_port = new QSpinBox(this);
+    m_port->setRange(0, 65535);
+    m_port->setValue(3306); // default MySQL port
+    portLayout->addWidget(m_port);
+    layout->addLayout(portLayout);
 
-    if (!db.open()) {
-        outError = db.lastError().text();
-        qDebug() << "DB open error:" << outError;
-        return false;
-    }
+    auto* userLayout = new QHBoxLayout;
+    userLayout->addWidget(new QLabel("Username:"));
+    m_user = new QLineEdit(this);
+    userLayout->addWidget(m_user);
+    layout->addLayout(userLayout);
 
-    // Crea tabelle se non esistono (MySQL syntax)
-    QSqlQuery q(db);
-    const QString createUsers = QStringLiteral(
-        "CREATE TABLE IF NOT EXISTS users ("
-        "id INT AUTO_INCREMENT PRIMARY KEY,"
-        "name VARCHAR(255) NOT NULL,"
-        "email VARCHAR(255) NOT NULL UNIQUE,"
-        "password_hash VARCHAR(255) NOT NULL,"
-        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
-        ") ENGINE=InnoDB;"
-    );
-    if (!q.exec(createUsers)) {
-        outError = q.lastError().text();
-        db.close();
-        return false;
-    }
+    auto* passLayout = new QHBoxLayout;
+    passLayout->addWidget(new QLabel("Password:"));
+    m_password = new QLineEdit(this);
+    m_password->setEchoMode(QLineEdit::Password);
+    passLayout->addWidget(m_password);
+    layout->addLayout(passLayout);
 
-    const QString createEvents = QStringLiteral(
-        "CREATE TABLE IF NOT EXISTS events ("
-        "id INT AUTO_INCREMENT PRIMARY KEY,"
-        "user_id INT NOT NULL,"
-        "name VARCHAR(255) NOT NULL,"
-        "start_datetime DATETIME NOT NULL,"
-        "end_datetime DATETIME NOT NULL,"
-        "type INT NOT NULL DEFAULT 0,"
-        "description TEXT,"
-        "priority INT DEFAULT 1,"
-        "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
-        ") ENGINE=InnoDB;"
-    );
-    if (!q.exec(createEvents)) {
-        outError = q.lastError().text();
-        db.close();
-        return false;
-    }
+    auto* dbLayout = new QHBoxLayout;
+    dbLayout->addWidget(new QLabel("Database name / SQLite file:"));
+    m_dbName = new QLineEdit(this);
+    m_dbName->setText("agenda_db"); // suggerimento per MySQL
+    dbLayout->addWidget(m_dbName);
+    layout->addLayout(dbLayout);
 
-    outDb = db;
-    return true;
+    auto* btnLayout = new QHBoxLayout;
+    m_ok = new QPushButton("Connetti", this);
+    m_cancel = new QPushButton("Annulla", this);
+    btnLayout->addStretch();
+    btnLayout->addWidget(m_ok);
+    btnLayout->addWidget(m_cancel);
+    layout->addLayout(btnLayout);
+
+    connect(m_ok, &QPushButton::clicked, this, &QDialog::accept);
+    connect(m_cancel, &QPushButton::clicked, this, &QDialog::reject);
+}
+
+DBConnectParams DBConnectDialog::params() const {
+    DBConnectParams p;
+    p.host = m_host->text();
+    p.port = m_port->value();
+    p.user = m_user->text();
+    p.password = m_password->text();
+    p.dbName = m_dbName->text();
+    return p;
 }

@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE PROJECT_SOURCES
     fileCpp/*.cpp
     src/*.cpp
-    auth/*.cpp
+    fileCpp/auth/*.cpp
     fileCpp/utils/*.cpp
     fileCpp/db_connector/*.cpp
 )

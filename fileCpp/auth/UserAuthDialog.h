@@ -2,11 +2,11 @@
 #define USERAUTHDIALOG_H
 
 #include <QDialog>
+#include <QSqlDatabase>   // <<-- include necessario per usare QSqlDatabase come membro
 #include <memory>
 
 class QLineEdit;
 class QPushButton;
-class QSqlDatabase;
 
 struct AuthResult {
     int userId = -1;
@@ -29,7 +29,7 @@ private:
     QPushButton* m_ok;
     QPushButton* m_cancel;
     AuthResult m_result;
-    QSqlDatabase m_db;
+    QSqlDatabase m_db;   // ora il tipo è completo grazie all'include
 
     bool tryLogin();
     bool tryRegister();

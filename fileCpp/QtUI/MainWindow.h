@@ -10,6 +10,8 @@
 #include <memory>
 #include "./impegno/impegno.h"
 
+
+
 class EventModel;
 class DayWeekView;
 
@@ -44,6 +46,8 @@ private:
     // DB helpers
     void loadEventsFromDb();
     void saveEventToDb(const std::shared_ptr<eventoLungo>& ev);
+
+    static std::shared_ptr<raggruppa> createGroupFromEvents(const std::vector<std::shared_ptr<eventoLungo>>& items, int generatedId);
 };
 
 #endif // MAINWINDOW_H
