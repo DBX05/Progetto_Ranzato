@@ -6,6 +6,10 @@
 #include <optional>
 #include <chrono>
 
+
+namespace jm {
+
+    
 using dateTime = std::chrono::system_clock::time_point;
 
 struct Evento {
@@ -22,12 +26,9 @@ struct Evento {
 
 class JsonManager {
 public:
-    // Importa da file JSON; in caso di errore 'error' contiene il messaggio e il vettore restituito è vuoto.
     static std::vector<Evento> importFromFile(const std::string& filename, std::string& error);
-
-    // Esporta vettore di Eventi in file JSON; i campi opzionali vengono inclusi e possono essere null.
     static bool exportToFile(const std::string& filename, const std::vector<Evento>& eventi, std::string& error);
-
-    // Utility: converte vettore Eventi in stringa JSON (per test)
     static std::string toJsonString(const std::vector<Evento>& eventi);
 };
+
+} // namespace jm

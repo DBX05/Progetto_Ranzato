@@ -1,34 +1,64 @@
 #include <QApplication>
-#include "MainWindow.h"
+#include <QMessageBox>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+
 #include "../auth/DBConnectDialog.h"
 #include "../auth/UserAuthDialog.h"
 #include "../db/db_connector.h"
-#include <QMessageBox>
+#include "MainWindow.h"
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // 1) chiedi parametri DB
-    DBConnectDialog dbDlg;
-    if (dbDlg.exec() != QDialog::Accepted) return 0;
-    DBConnectParams params = dbDlg.params();
-
-    // 2) connetti DB
     QSqlDatabase db;
     QString err;
-    if (!DBConnector::connect(params.host, params.port, params.user, params.password, params.dbName, db, err)) {
-        QMessageBox::critical(nullptr, "DB Error", "Connessione fallita: " + err);
-        return 1;
+
+    // --- CICLO DI CONNESSIONE ---
+    while (true) {
+        DBConnectDialog dlg;
+        if (dlg.exec() != QDialog::Accepted) {
+            return 0; // utente ha annullato
+        }
+
+        DBConnectParams params = dlg.params();
+
+        if (!DBConnector::connect(params.host,
+                                  params.port,
+                                  params.user,
+                                  params.password,
+                                  params.dbName,
+                                  db,
+                                  err))
+        {
+            QMessageBox::warning(nullptr,
+                                 "Errore connessione",
+                                 "Connessione fallita. Riprova.");
+            continue;
+        }
+
+        break; // connessione riuscita
     }
 
-    // 3) chiedi credenziali utente (login/registrazione)
-    UserAuthDialog authDlg(db);
-    if (authDlg.exec() != QDialog::Accepted) return 0;
-    AuthResult user = authDlg.result();
+    // --- LOGIN / REGISTRAZIONE UTENTE ---
+UserAuthDialog authDlg(db);
+if (authDlg.exec() != QDialog::Accepted) {
+    return 0;
+}
 
-    // 4) apri MainWindow e passa DB e user info
-    MainWindow w(db, user.userId, user.name, user.email);
-    w.show();
+AuthResult ar = authDlg.result();
+int userId = ensureUserExists(db, ar.name, ar.email, ar.password);
+if (userId < 0) {
+    QMessageBox::warning(nullptr, "Errore", "Impossibile verificare o creare l'utente.");
+    return 0;
+}
+
+MainWindow w(db, userId, ar.name, ar.email);
+w.show();
+
+
     return a.exec();
 }

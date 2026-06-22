@@ -16,7 +16,7 @@ class impegno
 {
 private:
     dateTime momentoInizio;
-    const int id;
+    int id;
     unsigned int priorita;
 
 public:
@@ -28,6 +28,10 @@ public:
     virtual int getId() const;
     virtual void modificaImpegno(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita);
     virtual void stampa() const = 0;
+    void setId(int x);
+
+
+
 };
 
 // ==================== SECONDO LIVELLO ====================
@@ -43,6 +47,9 @@ public:
     std::string getNome() const;
     std::string getInizio() const;
     std::string getFine() const;
+    orario getInizioOR() const;
+    orario getFineOR() const;
+
     void modificaName(std::string nuovoNome);
     void stampa() const override;
     ~evento();

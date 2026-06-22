@@ -18,6 +18,7 @@ void impegno::modificaImpegno(dateTime nuovoMomentoInizio, unsigned int nuovaPri
     momentoInizio = nuovoMomentoInizio;
     priorita = nuovaPriorita;
 }
+void impegno::setId(int x) { id = x; }
 
 // ==================== evento ====================
 evento::evento(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, orario inizio, orario fine)
@@ -31,6 +32,10 @@ evento::evento(int id, dateTime momentoInizio, unsigned int priorita, std::strin
 std::string evento::getNome() const { return nome; }
 std::string evento::getInizio() const { return inizio.curTime(); }
 std::string evento::getFine() const { return fine.curTime(); }
+orario evento::getInizioOR() const { return inizio; }
+orario evento::getFineOR() const { return fine; }
+
+
 void evento::modificaName(std::string nuovoNome) { if (!nuovoNome.empty()) nome = std::move(nuovoNome); }
 void evento::stampa() const {
     std::cout << "=== Evento ===\nID: " << getId() << "\nNome: " << nome
@@ -131,43 +136,22 @@ std::vector<std::string> festivita::festeItaliane = {
 
 std::vector<eventoLungo*> festivita::createFeste(){
     std::vector<eventoLungo*> festivitaItaliane;
-    for (int i = 0; i < static_cast<int>(festeItaliane.size()); ++i) {
-        festivita* festa = nullptr;
-        switch(i){
-            case 0:
-                festa = new festivita(dateTime(0, 12, 25), 0, "Natale", dateTime(0, 12, 25), "Festa di Natale", orario(0, 0), orario(23, 59));
-                break;
-            case 1:
-                festa = new festivita(dateTime(0, 4, 4), 0, "Pasqua", dateTime(0, 4, 4), "Festa di Pasqua", orario(0, 0), orario(23, 59));
-                break;
-            case 2:
-                festa = new festivita(dateTime(0, 1, 1), 0, "Capodanno", dateTime(0, 1, 1), "Festa di Capodanno", orario(0, 0), orario(23, 59));
-                break;
-            case 3:
-                festa = new festivita(dateTime(0, 8, 15), 0, "Ferragosto", dateTime(0, 8, 15), "Festa di Ferragosto", orario(0, 0), orario(23, 59));
-                break;
-            case 4:
-                festa = new festivita(dateTime(0, 11, 1), 0, "Ognissanti", dateTime(0, 11, 1), "Festa di Ognissanti", orario(0, 0), orario(23, 59));
-                break;
-            case 5:
-                festa = new festivita(dateTime(0, 1, 6), 0, "Epifania", dateTime(0, 1, 6), "Festa di Epifania", orario(0, 0), orario(23, 59));
-                break;
-            case 6:
-                festa = new festivita(dateTime(0, 2, 14), 0, "San Valentino", dateTime(0, 2, 14), "Festa di San Valentino", orario(0, 0), orario(23, 59));
-                break;
-            case 7:
-                festa = new festivita(dateTime(0, 3, 8), 0, "Festa della mamma", dateTime(0, 3, 8), "Festa della mamma", orario(0, 0), orario(23, 59));
-                break;
-            case 8:
-                festa = new festivita(dateTime(0, 3, 19), 0, "Festa del papà", dateTime(0, 3, 19), "Festa del papà", orario(0, 0), orario(23, 59));
-                break;
-            default:
-                break;
-        }
-        if (festa) festivitaItaliane.push_back(festa);
+    int year = anno::systemYear();
+    struct Holiday { int month; int day; const char* name; };
+    Holiday list[] = {
+        {12,25,"Natale"}, {4,4,"Pasqua"}, {1,1,"Capodanno"}, {8,15,"Ferragosto"},
+        {11,1,"Ognissanti"}, {1,6,"Epifania"}, {2,14,"San Valentino"},
+        {3,8,"Festa della mamma"}, {3,19,"Festa del papà"}
+    };
+    for (const auto& h : list) {
+        dateTime start(year, h.month - 1, h.day, 0, 0, 0);
+        dateTime end = start;
+        auto* festa = new festivita(start, 0, h.name, end, std::string("Festa di ") + h.name, orario(0,0), orario(23,59));
+        festivitaItaliane.push_back(festa);
     }
     return festivitaItaliane;
 }
+
 // implementazione mancante: getType per festivita
 int festivita::getType() const {
     return 0; // oppure il codice che preferisci per il tipo (es. 0 = generico)

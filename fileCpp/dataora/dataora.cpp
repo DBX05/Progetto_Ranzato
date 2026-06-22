@@ -227,7 +227,8 @@ bool operator<(const anno &x, const anno &y)
 
 // ==================== CLASSE DATETIME ====================
 dateTime::dateTime(int an, int m, int d, int h, int mn, int s)
-    : orario(s, mn, h), data(d), mese(m), anno(an) {}
+    : orario(s, mn, h), data(d), mese(m), anno(an) {FormatDate("%Y-%m-%d %H:%M:%S");
+}
 
 std::string dateTime::getDateTime() const { return dateT; }
 
@@ -266,6 +267,19 @@ std::string dateTime::systemDateTime() const
     return std::string(buffer);
 }
 
+time_t dateTime::toTimestamp() const {
+    std::tm tm = {};
+    tm.tm_year = getAnno() - 1900;
+    tm.tm_mon  = numMese();
+    tm.tm_mday = getDate();
+    tm.tm_hour = getHour();
+    tm.tm_min  = getMin();
+    tm.tm_sec  = getSec();
+    tm.tm_isdst = -1;
+    return std::mktime(&tm);
+}
+
+
 dateTime &dateTime::operator=(const dateTime &y) {
     if (this != &y) dateT = y.dateT;
     return *this;
@@ -282,4 +296,15 @@ bool operator>(const dateTime &x, const dateTime &y)
 bool operator<(const dateTime &x, const dateTime &y)
 {
     return x.getDateTime() < y.getDateTime();
+}
+
+orario orarioFromString(const std::string& s)
+{
+    if (s.size() < 8) return orario(0,0,0);
+
+    int h = std::stoi(s.substr(0,2));
+    int m = std::stoi(s.substr(3,2));
+    int s2 = std::stoi(s.substr(6,2));
+
+    return orario(s2, m, h); // ordine: secondi, minuti, ore
 }

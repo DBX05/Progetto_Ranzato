@@ -6,6 +6,7 @@
 class QLineEdit;
 class QSpinBox;
 class QPushButton;
+class QLabel;
 
 struct DBConnectParams {
     QString host;
@@ -21,6 +22,9 @@ public:
     explicit DBConnectDialog(QWidget* parent = nullptr);
     DBConnectParams params() const;
 
+private slots:
+    void validateInputs();
+
 private:
     QLineEdit* m_host;
     QSpinBox* m_port;
@@ -29,6 +33,7 @@ private:
     QLineEdit* m_dbName;
     QPushButton* m_ok;
     QPushButton* m_cancel;
+    QLabel* m_errorLabel;
 };
 
 #endif // DBCONNECTDIALOG_H

@@ -11,7 +11,7 @@ bool DBConnector::connect(const QString &host, int /*port*/, const QString &user
     Q_UNUSED(password);
 
     QString filePath = dbName;
-    if (filePath.isEmpty()) filePath = "agenda_local.db";
+    if (filePath.isEmpty()) filePath = "agendadb.db";
 
     // Usa connessione con nome unico per evitare conflitti
     const QString connName = "connector_connection";
@@ -27,7 +27,7 @@ bool DBConnector::connect(const QString &host, int /*port*/, const QString &user
         return false;
     }
 
-    // Crea tabelle se non esistono: users e events
+ /*   // Crea tabelle se non esistono: users e events
     QSqlQuery q(db);
     const QString createUsers = QStringLiteral(
         "CREATE TABLE IF NOT EXISTS users ("
@@ -62,7 +62,7 @@ bool DBConnector::connect(const QString &host, int /*port*/, const QString &user
         db.close();
         return false;
     }
-
+*/
     outDb = db;
     return true;
 }

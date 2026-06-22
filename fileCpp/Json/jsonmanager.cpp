@@ -11,6 +11,8 @@
 #include <ctime>
 #include <iostream>
 
+namespace jm {
+
 using json = nlohmann::json;
 
 // --- helper ISO8601 (YYYY-MM-DDTHH:MM:SS) <-> dateTime ---
@@ -256,4 +258,5 @@ std::string JsonManager::toJsonString(const std::vector<Evento>& eventi) {
         j.push_back(item);
     }
     return j.dump(4);
+}
 }

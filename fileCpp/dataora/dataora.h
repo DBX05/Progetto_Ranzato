@@ -64,6 +64,7 @@ public:
     std::string curTime() const;
     void modificaOrario(int h = -1, int m = -1, int s = -1);
 
+
     static int systemHour();
     static int systemSecond();
     static int systemMin();
@@ -161,6 +162,7 @@ public:
     void modificaDateTime(int an = 0, int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1);
     void FormatDate(std::string s = " ");
     std::string systemDateTime() const;
+    time_t toTimestamp() const;
     dateTime &operator=(const dateTime &y);
 
     friend bool operator==(const dateTime &x, const dateTime &y);
@@ -169,6 +171,7 @@ public:
 };
 
 // Dichiarazione della classe dataNascita (definizione in dataNascita.h)
+orario orarioFromString(const std::string& s);
 
 
 #endif // DATAORA_H

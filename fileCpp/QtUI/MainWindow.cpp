@@ -2,264 +2,332 @@
 #include "EventModel.h"
 #include "NewEventiDialog.h"
 #include "DayWeekView.h"
-#include "util_dateTime.h"
+#include "util_datetime.h"
+#include "../json/jsonManager.hpp"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QSplitter>
-#include <QLabel>
-#include <QStringListModel>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QDebug>
+#include <QMenuBar>
+#include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QMessageBox>
-
-#include <map>
-#include <algorithm>
-#include <QDate>
-#include <QDebug>
 #include <QSqlQuery>
 #include <QSqlError>
-#include "fileCpp/impegno/impegno.h" // assicura che definisca eventoLungo, raggruppa, dateTime, orario
-#include "../utils/util_datetime.h"
 
-// MainWindow.cpp (definizione membro)
-#include <algorithm>
-#include <vector>
-#include <memory>
-#include "../fileCpp/impegno/impegno.h" // assicurati che definisca raggruppa, eventoLungo, dateTime, orario
-
-std::shared_ptr<raggruppa> MainWindow::createGroupFromEvents(const std::vector<std::shared_ptr<eventoLungo>>& items, int generatedId)
-{
-    if (items.empty()) return nullptr;
-
-    // Inizializza con il primo evento
-    dateTime minStart = items.front()->getMomentoInizio();
-    dateTime maxEnd = items.front()->getMomentoFine();
-    unsigned int priority = items.front()->getPriorita();
-    std::string combinedName = items.front()->getNome();
-    std::string combinedDesc = items.front()->getDescrizione();
-
-    for (size_t i = 1; i < items.size(); ++i) {
-        const auto& ev = items[i];
-        // Confronto tramite timestamp (adatta se la tua classe non ha getTimestamp)
-        if (ev->getMomentoInizio().getTimestamp() < minStart.getTimestamp()) minStart = ev->getMomentoInizio();
-        if (ev->getMomentoFine().getTimestamp() > maxEnd.getTimestamp()) maxEnd = ev->getMomentoFine();
-        priority = std::max<unsigned int>(priority, ev->getPriorita());
-        combinedName += " + " + ev->getNome();
-        if (!ev->getDescrizione().empty()) {
-            if (!combinedDesc.empty()) combinedDesc += "\n";
-            combinedDesc += ev->getDescrizione();
-        }
-    }
-
-    std::string groupName = std::string("Gruppo: ") + combinedName;
-    std::string groupDesc = std::string("Raggruppamento di ") + std::to_string(items.size()) + " eventi\n" + combinedDesc;
-
-    // ADATTA la chiamata al costruttore di raggruppa se la firma è diversa
-    auto group = std::make_shared<raggruppa>(generatedId, minStart, priority, groupName, maxEnd, groupDesc);
-
-    return group;
-}
-
-
-
-MainWindow::MainWindow(QSqlDatabase db, int userId, const QString& userName, const QString& userEmail, QWidget* parent)
+MainWindow::MainWindow(QSqlDatabase db, int userId,
+                       const QString& name, const QString& email,
+                       QWidget* parent)
     : QMainWindow(parent),
-      m_calendar(new QCalendarWidget(this)),
-      m_listView(new QListView(this)),
-      m_modeCombo(new QComboBox(this)),
-      m_dayWeekView(new DayWeekView(this)),
-      m_model(new EventModel(this)),
       m_db(db),
       m_userId(userId),
-      m_userName(userName),
-      m_userEmail(userEmail)
+      m_userName(name),
+      m_userEmail(email)
 {
-    setWindowTitle("Agenda Qt - Day/Week View Example");
+    m_eventModel = new EventModel(this);
+    m_dayWeekView = new DayWeekView(this);
+    m_dayWeekView->setModel(m_eventModel);
 
-    m_listView->setModel(m_model);
+    setCentralWidget(m_dayWeekView);
 
-    m_modeCombo->addItem("Day");
-    m_modeCombo->addItem("Week");
-    m_modeCombo->setCurrentIndex(0);
+    QMenu* fileMenu = menuBar()->addMenu("File");
+    m_importJsonAction = new QAction("Importa eventi JSON", this);
+    fileMenu->addAction(m_importJsonAction);
 
-    auto* addBtn = new QPushButton("Nuovo evento", this);
-    connect(addBtn, &QPushButton::clicked, this, &MainWindow::onAddEvent);
-    connect(m_calendar, &QCalendarWidget::selectionChanged, this, [this](){
-        onCalendarSelectionChanged(m_calendar->selectedDate());
-    });
-    connect(m_modeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onModeChanged);
+    connect(m_importJsonAction, &QAction::triggered,
+            this, &MainWindow::onImportJson);
 
-    m_dayWeekView->setModel(m_model);
-    m_dayWeekView->setDate(m_calendar->selectedDate());
-
-    auto* leftLayout = new QVBoxLayout;
-    leftLayout->addWidget(new QLabel("Calendario"));
-    leftLayout->addWidget(m_calendar);
-    leftLayout->addWidget(addBtn);
-    leftLayout->addWidget(m_modeCombo);
-
-    auto* leftWidget = new QWidget;
-    leftWidget->setLayout(leftLayout);
-
-    auto* rightLayout = new QVBoxLayout;
-    rightLayout->addWidget(new QLabel("Vista Giorno/Settimana"));
-    rightLayout->addWidget(m_dayWeekView);
-    rightLayout->addWidget(new QLabel("Eventi del giorno"));
-    rightLayout->addWidget(m_listView);
-
-    auto* rightWidget = new QWidget;
-    rightWidget->setLayout(rightLayout);
-
-    auto* splitter = new QSplitter;
-    splitter->addWidget(leftWidget);
-    splitter->addWidget(rightWidget);
-    splitter->setStretchFactor(1, 1);
-
-    setCentralWidget(splitter);
-
-    // Carica eventi dal DB per l'utente autenticato
-    loadEventsFromDb();
-    refreshListForDate(m_calendar->selectedDate());
+    loadEventsForDate(QDate::currentDate());
 }
 
-void MainWindow::onAddEvent() {
-    NewEventDialog dlg(this);
-    if (dlg.exec() == QDialog::Accepted) {
-        auto ev = dlg.createEvento();
-        if (auto longEv = std::dynamic_pointer_cast<eventoLungo>(ev)) {
-            // imposta user_id se la classe lo supporta; qui salviamo nel DB con userId
-            m_model->addEvent(longEv);
-            saveEventToDb(longEv);
-            m_dayWeekView->update();
-            refreshListForDate(m_calendar->selectedDate());
-        }
-    }
+QString MainWindow::sqlDate(const dateTime& dt) const
+{
+    QString s = QString::fromStdString(dt.getDateTime());
+    return s.mid(0, 10);
 }
 
-void MainWindow::onCalendarSelectionChanged(const QDate& date) {
-    m_dayWeekView->setDate(date);
-    refreshListForDate(date);
+QString MainWindow::sqlTime(const orario& o) const
+{
+    return QString("%1:%2:%3")
+        .arg(o.getHour(), 2, 10, QChar('0'))
+        .arg(o.getMin(),  2, 10, QChar('0'))
+        .arg(o.getSec(),  2, 10, QChar('0'));
 }
 
-void MainWindow::onModeChanged(int index) {
-    m_dayWeekView->setMode(index == 0 ? DayWeekView::Day : DayWeekView::Week);
-}
+bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
+{
+    auto el = std::dynamic_pointer_cast<eventoLungo>(baseEv);
+    if (!el) return false;
 
-void MainWindow::populateSampleData() {
-    // non usato: i dati vengono caricati dal DB
-}
+    dateTime dtStart = el->getMomentoInizio();
+    dateTime dtEnd   = el->getMomentoFine();
+    orario oStart    = el->getInizioOR();
+    orario oEnd      = el->getFineOR();
 
-void MainWindow::refreshListForDate(const QDate& date) {
-    auto events = m_model->eventsForDate(date);
-    QStringList list;
-    for (const auto& ev : events) {
-        QString line = QString::fromStdString(ev->getNome()) + "  " +
-                       QString::fromStdString(ev->getMomentoInizio().getDateTime()).mid(11,5) + " - " +
-                       QString::fromStdString(ev->getMomentoFine().getDateTime()).mid(11,5);
-        list << line;
-    }
-    auto* model = new QStringListModel(list, this);
-    m_listView->setModel(model);
-}
-
-// Crea un oggetto raggruppa a partire da un vettore di eventoLungo
-    
-// ---------------- DB integration ----------------
-void MainWindow::loadEventsFromDb() {
-    if (!m_db.isValid() || !m_db.isOpen()) return;
     QSqlQuery q(m_db);
-    q.prepare("SELECT id, name, start_datetime, end_datetime, type, description, priority FROM events WHERE user_id = ? ORDER BY start_datetime");
+    q.prepare(R"(
+        INSERT INTO impegni
+        (DataInizio, DataFine, Priorita, Nome, Descrizione,
+         OrarioInizio, OrarioFine, Proprietario)
+        VALUES (:di, :df, :prio, :nome, :desc, :oi, :of, :uid)
+    )");
+
+    q.bindValue(":di", sqlDate(dtStart));
+    q.bindValue(":df", sqlDate(dtEnd));
+    q.bindValue(":prio", (int)el->getPriorita());
+    q.bindValue(":nome", QString::fromStdString(el->getNome()));
+    q.bindValue(":desc", QString::fromStdString(el->getDescrizione()));
+    q.bindValue(":oi", sqlTime(oStart));
+    q.bindValue(":of", sqlTime(oEnd));
+    q.bindValue(":uid", m_userId);
+
+    if (!q.exec()) {
+        QMessageBox::warning(this, "Errore", "Errore inserimento evento:\n" + q.lastError().text());
+        return false;
+    }
+
+    int newId = q.lastInsertId().toInt();
+    el->setId(newId);
+
+    m_eventModel->addEvent(el);
+    return true;
+}
+
+void MainWindow::loadEventsForDate(const QDate& date)
+{
+    m_eventModel->clear();
+
+    QSqlQuery q(m_db);
+    q.prepare(R"(
+        SELECT Id, DataInizio, DataFine, Priorita, Nome, Descrizione,
+               OrarioInizio, OrarioFine
+        FROM impegni
+        WHERE Proprietario = :uid
+          AND DataInizio <= :d
+          AND DataFine >= :d
+    )");
+    q.bindValue(":uid", m_userId);
+    q.bindValue(":d", date.toString("yyyy-MM-dd"));
+
+    if (!q.exec()) {
+        QMessageBox::warning(this, "Errore", "Errore caricamento eventi:\n" + q.lastError().text());
+        return;
+    }
+
+    while (q.next()) {
+        QString di = q.value("DataInizio").toString();
+        QString df = q.value("DataFine").toString();
+        QString oi = q.value("OrarioInizio").toString();
+        QString of = q.value("OrarioFine").toString();
+
+        dateTime dtStart = qStringToDateTime(di + " " + oi);
+        dateTime dtEnd   = qStringToDateTime(df + " " + of);
+
+        orario oStart(
+            oi.mid(0,2).toInt(),
+            oi.mid(3,2).toInt(),
+            oi.mid(6,2).toInt()
+        );
+        orario oEnd(
+            of.mid(0,2).toInt(),
+            of.mid(3,2).toInt(),
+            of.mid(6,2).toInt()
+        );
+
+        auto ev = std::make_shared<eventoLungo>(
+            q.value("Id").toInt(),
+            dtStart,
+            q.value("Priorita").toUInt(),
+            q.value("Nome").toString().toStdString(),
+            dtEnd,
+            q.value("Descrizione").toString().toStdString(),
+            oStart,
+            oEnd
+        );
+
+        m_eventModel->addEvent(ev);
+    }
+
+    dateTime d(date.year(), date.month(), date.day(), 0, 0, 0);
+    m_dayWeekView->setDate(d);
+}
+
+static dateTime chronoToDateTime(const jm::dateTime& tp)
+{
+    std::time_t tt = std::chrono::system_clock::to_time_t(tp);
+    std::tm* tm = std::localtime(&tt);
+
+    return dateTime(
+        tm->tm_year + 1900,
+        tm->tm_mon,
+        tm->tm_mday,
+        tm->tm_hour,
+        tm->tm_min,
+        tm->tm_sec
+    );
+}
+
+static orario orarioFromOptional(const std::optional<std::string>& s)
+{
+    if (!s.has_value()) return orario(0,0,0);
+    return orarioFromString(*s);
+}
+
+void MainWindow::loadEventsFromDb()
+{
+    if (!m_db.isValid() || !m_db.isOpen())
+        return;
+
+    m_eventModel->clear();
+
+    QSqlQuery q(m_db);
+    q.prepare("SELECT id, name, start_datetime, end_datetime, type, description, priority "
+              "FROM events WHERE user_id = ? ORDER BY start_datetime");
     q.addBindValue(m_userId);
+
     if (!q.exec()) {
         qDebug() << "DB load error:" << q.lastError().text();
         return;
     }
-
-    // Vettore temporaneo di eventi caricati
-    std::vector<std::shared_ptr<eventoLungo>> loadedEvents;
 
     while (q.next()) {
         int id = q.value(0).toInt();
         QString name = q.value(1).toString();
         QString start = q.value(2).toString();
         QString end = q.value(3).toString();
-        int type = q.value(4).toInt();
         QString desc = q.value(5).toString();
         int priority = q.value(6).toInt();
 
+        // Conversione stringa → dateTime
         dateTime dtStart = qStringToDateTime(start);
-        dateTime dtEnd = qStringToDateTime(end);
+        dateTime dtEnd   = qStringToDateTime(end);
 
+        // Conversione dateTime → orario
         orario oStart(dtStart.getSec(), dtStart.getMin(), dtStart.getHour());
         orario oEnd(dtEnd.getSec(), dtEnd.getMin(), dtEnd.getHour());
 
-        auto ev = std::make_shared<eventoLungo>(id, dtStart, static_cast<unsigned int>(priority), name.toStdString(), dtEnd, desc.toStdString(), oStart, oEnd);
-        loadedEvents.push_back(ev);
-        m_model->addEvent(ev);
+        auto ev = std::make_shared<eventoLungo>(
+            id,
+            dtStart,
+            static_cast<unsigned int>(priority),
+            name.toStdString(),
+            dtEnd,
+            desc.toStdString(),
+            oStart,
+            oEnd
+        );
+
+        m_eventModel->addEvent(ev);
     }
 
-    // Ora creiamo raggruppamenti: esempio semplice -> raggruppa per giorno
-    // Mappa: QDate -> vector<eventoLungo>
-    std::map<QDate, std::vector<std::shared_ptr<eventoLungo>>> byDay;
-    for (const auto& ev : loadedEvents) {
-        // estrai la data di inizio
-        QString s = QString::fromStdString(ev->getMomentoInizio().getDateTime());
-        QDate d = QDate::fromString(s.mid(0,10), "yyyy-MM-dd");
-        if (!d.isValid()) d = QDate::currentDate();
-        byDay[d].push_back(ev);
-    }
-
-    // Per ogni giorno con più di 1 evento, crea un raggruppa
-    int nextGeneratedId = -1000; // id negativi per oggetti temporanei non ancora persistiti
-    for (auto& kv : byDay) {
-        auto& vec = kv.second;
-        if (vec.size() <= 1) continue; // niente da raggruppare
-        auto group = createGroupFromEvents(vec, nextGeneratedId--);
-        if (group) {
-            // imposta tipo 3 per raggruppa (se vuoi che venga colorato diversamente)
-            // Se raggruppa ha metodo setType, usalo; altrimenti assicurati che il costruttore imposti il tipo.
-            // group->setType(3); // ADATTA se disponibile
-
-            // Aggiungi il gruppo al modello così viene mostrato nella vista
-            m_model->addEvent(group);
-        }
-    }
-
-    m_dayWeekView->update();
+    m_dayWeekView->updateView();
 }
 
 
-void MainWindow::saveEventToDb(const std::shared_ptr<eventoLungo>& ev) {
-    if (!m_db.isValid() || !m_db.isOpen()) return;
-    QSqlQuery q(m_db);
-    QString start = dateTimeToQString(ev->getMomentoInizio());
-    QString end = dateTimeToQString(ev->getMomentoFine());
-    QString name = QString::fromStdString(ev->getNome());
-    QString desc = QString::fromStdString(ev->getDescrizione());
-    int type = ev->getType();
-    int priority = static_cast<int>(ev->getPriorita());
 
-    // Inserimento con user_id
-    q.prepare("INSERT INTO events (user_id, name, start_datetime, end_datetime, type, description, priority) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    q.addBindValue(m_userId);
-    q.addBindValue(name);
-    q.addBindValue(start);
-    q.addBindValue(end);
-    q.addBindValue(type);
-    q.addBindValue(desc);
-    q.addBindValue(priority);
+
+
+void MainWindow::onImportJson()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this, "Importa JSON", QString(), "JSON (*.json)"
+    );
+    if (fileName.isEmpty()) return;
+
+    std::string error;
+    auto eventi = jm::JsonManager::importFromFile(fileName.toStdString(), error);
+
+    if (!error.empty()) {
+        QMessageBox::warning(this, "Errore JSON", QString::fromStdString(error));
+        return;
+    }
+
+    int imported = 0;
+
+    for (const auto& ev : eventi)
+    {
+        dateTime dtStart = chronoToDateTime(ev.momentoInizio);
+
+        dateTime dtEnd = dtStart;
+        if (ev.momentoFine.has_value())
+            dtEnd = chronoToDateTime(*ev.momentoFine);
+
+        orario oStart = orarioFromOptional(ev.inizio);
+        orario oEnd   = orarioFromOptional(ev.fine);
+
+        std::string desc = ev.Descrizione.has_value() ? *ev.Descrizione : "";
+
+        auto nuovo = std::make_shared<eventoLungo>(
+            -1,
+            dtStart,
+            ev.priorita,
+            ev.nome,
+            dtEnd,
+            desc,
+            oStart,
+            oEnd
+        );
+
+        if (insertEvento(nuovo))
+            imported++;
+    }
+
+    QMessageBox::information(
+        this,
+        "Importazione completata",
+        QString("%1 eventi importati").arg(imported)
+    );
+
+    loadEventsFromDb();
+}
+
+int ensureUserExists(QSqlDatabase& db, const QString& name, const QString& email, const QString& password)
+{
+    if (!db.isOpen()) {
+        qDebug() << "ensureUserExists: database non aperto";
+        return -1;
+    }
+
+QSqlQuery q(db);
+q.prepare("SELECT Id FROM Persona WHERE Email = \":email\"");
+q.bindValue(":email", email);
+
     if (!q.exec()) {
-        qDebug() << "DB insert error:" << q.lastError().text();
-    } else {
-        // opzionale: recupera id e aggiorna oggetto se necessario
-        QVariant lastId = q.lastInsertId();
-        if (lastId.isValid()) {
-            // se la classe eventoLungo avesse setId, chiamala qui
-        }
-    }
+    qDebug() << "Query:" << q.lastQuery();
+    qDebug() << "Errore SQL:" << q.lastError().text();
+    return -2;
 }
 
+
+    if (q.next()) {
+        int id = q.value(0).toInt();
+        QMessageBox::information(nullptr, "Accesso", "Bentornato, " + name + "!");
+        return id;
+    }
+
+    QSqlQuery ins(db);
+    ins.prepare("INSERT INTO persona (Nome, Email, Password) VALUES (\"?\", \"?\", \"?\")");
+    ins.bindValue(0, name);
+    ins.bindValue(1, email);
+    ins.bindValue(2, password);
+
+    if (!ins.exec()) {
+        qDebug() << "ensureUserExists: INSERT fallita -" << ins.lastError().text();
+        return -3;
+    }
+
+    QVariant lastId = ins.lastInsertId();
+    if (lastId.isValid()) {
+        QMessageBox::information(nullptr, "Registrazione", "Utente creato con successo.");
+        return lastId.toInt();
+    }
+
+    // fallback
+    QSqlQuery q2(db);
+    q2.prepare("SELECT Id FROM persona WHERE Email = \"?\"");
+    q2.addBindValue(email);
+    if (q2.exec() && q2.next()) return q2.value(0).toInt();
+
+    qDebug() << "ensureUserExists: impossibile ottenere lastInsertId e SELECT fallback fallita";
+    return -4;
+}
 

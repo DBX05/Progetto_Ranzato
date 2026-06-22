@@ -2,38 +2,36 @@
 #define USERAUTHDIALOG_H
 
 #include <QDialog>
-#include <QSqlDatabase>   // <<-- include necessario per usare QSqlDatabase come membro
-#include <memory>
+#include <QSqlDatabase>
 
 class QLineEdit;
-class QPushButton;
 
 struct AuthResult {
     int userId = -1;
     QString name;
     QString email;
+    QString password; 
 };
 
-class UserAuthDialog : public QDialog {
+
+class UserAuthDialog : public QDialog
+{
     Q_OBJECT
 public:
-    explicit UserAuthDialog(QSqlDatabase db, QWidget* parent = nullptr);
-
-    // Se autenticazione ok, restituisce AuthResult con userId>0
+    explicit UserAuthDialog(const QSqlDatabase& db, QWidget* parent = nullptr);
     AuthResult result() const;
 
-private:
-    QLineEdit* m_name;
-    QLineEdit* m_email;
-    QLineEdit* m_password;
-    QPushButton* m_ok;
-    QPushButton* m_cancel;
-    AuthResult m_result;
-    QSqlDatabase m_db;   // ora il tipo è completo grazie all'include
+private slots:
+    void onAccept();
 
-    bool tryLogin();
-    bool tryRegister();
-    QString hashPassword(const QString& plain) const;
+private:
+    QLineEdit* m_nameEdit = nullptr;
+    QLineEdit* m_emailEdit = nullptr;
+    QLineEdit* m_passwordEdit = nullptr;
+
+    AuthResult m_result;
+    const QSqlDatabase& m_db;
 };
+
 
 #endif // USERAUTHDIALOG_H

@@ -9,6 +9,8 @@
 class QLineEdit;
 class QTimeEdit;
 class QDialogButtonBox;
+class QDateEdit;
+class QComboBox;
 
 class NewEventDialog : public QDialog
 {
@@ -17,13 +19,18 @@ class NewEventDialog : public QDialog
 public:
     explicit NewEventDialog(QWidget* parent = nullptr);
 
-    // Create a new evento shared_ptr using dialog inputs
+    // Crea un evento (eventoLungo) con i dati inseriti
     std::shared_ptr<evento> createEvento() const;
+
+    // Accessori per mostrare i dettagli dopo la creazione
+    QString summary() const;
 
 private:
     QLineEdit* m_nameEdit;
     QTimeEdit* m_startEdit;
     QTimeEdit* m_endEdit;
+    QDateEdit* m_dateEdit;
+    QComboBox* m_typeCombo;
     QDialogButtonBox* m_buttons;
 };
 
