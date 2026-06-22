@@ -14,7 +14,7 @@ dateTime qStringToDateTime(const QString& s) {
         qdt = QDateTime::currentDateTime();
 
     int an  = qdt.date().year();
-    int mo  = qdt.date().month();
+    int mo  = qdt.date().month() - 1;
     int day = qdt.date().day();
     int hr  = qdt.time().hour();
     int mn  = qdt.time().minute();
