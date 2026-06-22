@@ -1,89 +1,225 @@
 #include "DayWeekView.h"
 #include "EventModel.h"
-#include "util_datetime.h"
+
 #include <QPainter>
 #include <QMouseEvent>
+#include <QDate>
+#include <QLocale>
 
 DayWeekView::DayWeekView(QWidget* parent)
     : QWidget(parent),
       m_model(nullptr),
-      m_mode(Mode::Day)
+      m_mode(Mode::Week),
+      m_currentDate(QDate::currentDate()),
+      m_selectedDate(QDate::currentDate())
 {
 }
 
 void DayWeekView::setModel(EventModel* model)
 {
     m_model = model;
-    if (m_model) {
-        connect(m_model, &EventModel::eventsChanged,
-                this, &DayWeekView::updateView);
-    }
 }
 
 void DayWeekView::setMode(Mode mode)
 {
     m_mode = mode;
-    updateView();
+    update();
 }
 
 void DayWeekView::setDate(const dateTime& dt)
 {
-    m_date = dt;
-    updateView();
-}
+    m_currentDate = QDate(
+        dt.getAnno(),   // <-- corretto
+        dt.numMese(),  // <-- corretto
+        dt.getDate()     // <-- corretto
+    );
 
-void DayWeekView::updateView()
-{
-    if (!m_model) return;
-    m_visibleEvents = m_model->eventsForDate(m_date);
+    m_selectedDate = m_currentDate;
     update();
 }
+
 
 void DayWeekView::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     p.fillRect(rect(), Qt::white);
 
-    // griglia oraria semplice
-    int h = height();
-    int w = width();
-    int hours = 24;
-    for (int i = 0; i <= hours; ++i) {
-        int y = h * i / hours;
-        p.setPen(QColor(220, 220, 220));
-        p.drawLine(0, y, w, y);
+    switch (m_mode) {
+    case Mode::Day:   drawDay(p);   break;
+    case Mode::Week:  drawWeek(p);  break;
+    case Mode::Month: drawMonth(p); break;
+    case Mode::Year:  drawYear(p);  break;
+    }
+}
+
+bool DayWeekView::hasEventsOn(const QDate& d) const
+{
+    if (!m_model) return false;
+
+    int rows = m_model->rowCount();
+    for (int i = 0; i < rows; ++i) {
+        QModelIndex idx = m_model->index(i, 0);
+
+        QString startStr = m_model->data(idx, EventModel::StartRole).toString();
+        QString endStr   = m_model->data(idx, EventModel::EndRole).toString();
+
+        QDate ds = QDate::fromString(startStr.mid(0,10), "yyyy-MM-dd");
+        QDate de = QDate::fromString(endStr.mid(0,10), "yyyy-MM-dd");
+
+        if (d >= ds && d <= de)
+            return true;
+    }
+    return false;
+}
+
+void DayWeekView::drawMonth(QPainter& p)
+{
+    QDate base = m_currentDate.isValid() ? m_currentDate : QDate::currentDate();
+    QDate first(base.year(), base.month(), 1);
+
+    int startCol = first.dayOfWeek() - 1;   // Lunedì=0, Domenica=6
+    int days = first.daysInMonth();
+
+    int cellW = width() / 7;
+    int cellH = height() / 6;
+
+    p.setFont(QFont("Arial", 10));
+
+    int day = 1;
+    for (int row = 0; row < 6; row++) {
+        for (int col = 0; col < 7; col++) {
+
+            int x = col * cellW;
+            int y = row * cellH;
+            QRect cellRect(x, y, cellW, cellH);
+
+            p.setPen(Qt::black);
+            p.drawRect(cellRect);
+
+            if (row == 0 && col < startCol) continue;
+            if (day > days) continue;
+
+            QDate current(base.year(), base.month(), day);
+
+            if (hasEventsOn(current)) {
+                p.fillRect(cellRect.adjusted(1,1,-1,-1), QColor(220,240,255));
+            }
+
+            if (current == m_selectedDate) {
+                p.fillRect(cellRect.adjusted(1,1,-1,-1), QColor(200,220,255));
+                p.setPen(Qt::blue);
+            } else {
+                p.setPen(Qt::black);
+            }
+
+            p.drawText(x + 5, y + 15, QString::number(day));
+            day++;
+        }
+    }
+}
+
+void DayWeekView::drawYear(QPainter& p)
+{
+    int cellW = width() / 4;
+    int cellH = height() / 3;
+
+    p.setFont(QFont("Arial", 9));
+
+    QDate base = m_currentDate.isValid() ? m_currentDate : QDate::currentDate();
+    int year = base.year();
+
+    for (int m = 1; m <= 12; m++) {
+
+        int row = (m - 1) / 4;
+        int col = (m - 1) % 4;
+
+        int x0 = col * cellW;
+        int y0 = row * cellH;
+
+        QRect outerRect(x0, y0, cellW, cellH);
         p.setPen(Qt::black);
-        p.drawText(5, y - 2, QString("%1:00").arg(i, 2, 10, QChar('0')));
+        p.drawRect(outerRect);
+        p.drawText(x0 + 5, y0 + 15, QLocale().monthName(m));
+
+
+        QDate first(year, m, 1);
+        int startCol = first.dayOfWeek() - 1;
+        int days = first.daysInMonth();
+
+        int miniW = cellW / 7;
+        int miniH = (cellH - 20) / 6;
+
+        int day = 1;
+        for (int r = 0; r < 6; r++) {
+            for (int c = 0; c < 7; c++) {
+
+                int xx = x0 + c * miniW;
+                int yy = y0 + 20 + r * miniH;
+
+                QRect cellRect(xx, yy, miniW, miniH);
+                p.drawRect(cellRect);
+
+                if (r == 0 && c < startCol) continue;
+                if (day > days) continue;
+
+                QDate current(year, m, day);
+
+                if (hasEventsOn(current)) {
+                    p.fillRect(cellRect.adjusted(1,1,-1,-1), QColor(220,240,255));
+                }
+
+                if (current == m_selectedDate) {
+                    p.fillRect(cellRect.adjusted(1,1,-1,-1), QColor(200,220,255));
+                    p.setPen(Qt::blue);
+                } else {
+                    p.setPen(Qt::black);
+                }
+
+                p.drawText(xx + 2, yy + 12, QString::number(day));
+                day++;
+            }
+        }
+    }
+}
+
+void DayWeekView::mousePressEvent(QMouseEvent* event)
+{
+    if (m_mode != Mode::Month) {
+        QWidget::mousePressEvent(event);
+        return;
     }
 
-    // eventi
-    for (const auto& ev : m_visibleEvents) {
-        QString sdt = QString::fromStdString(ev->getMomentoInizio().getDateTime());
-        QString edt = QString::fromStdString(ev->getMomentoFine().getDateTime());
+    int cellW = width() / 7;
+    int cellH = height() / 6;
 
-        QDateTime qStart = QDateTime::fromString(sdt, "yyyy-MM-dd HH:mm:ss");
-        QDateTime qEnd   = QDateTime::fromString(edt, "yyyy-MM-dd HH:mm:ss");
-        if (!qStart.isValid() || !qEnd.isValid()) continue;
+    int col = event->pos().x() / cellW;
+    int row = event->pos().y() / cellH;
 
-        int startMin = qStart.time().hour() * 60 + qStart.time().minute();
-        int endMin   = qEnd.time().hour() * 60 + qEnd.time().minute();
-        if (endMin <= startMin) endMin = startMin + 30;
+    QDate base = m_currentDate.isValid() ? m_currentDate : QDate::currentDate();
+    QDate first(base.year(), base.month(), 1);
+    int startCol = first.dayOfWeek() - 1;
+    int days = first.daysInMonth();
 
-        double startRatio = startMin / (24.0 * 60.0);
-        double endRatio   = endMin   / (24.0 * 60.0);
+    int index = row * 7 + col;
+    int day = index - startCol + 1;
 
-        QRect r(80,
-                int(startRatio * h),
-                w - 100,
-                int((endRatio - startRatio) * h));
-
-        p.setBrush(QColor(100, 150, 250, 180));
-        p.setPen(Qt::NoPen);
-        p.drawRect(r);
-
-        p.setPen(Qt::white);
-        p.drawText(r.adjusted(4, 4, -4, -4),
-                   Qt::AlignLeft | Qt::AlignTop,
-                   QString::fromStdString(ev->getNome()));
+    if (day < 1 || day > days) {
+        QWidget::mousePressEvent(event);
+        return;
     }
+
+    m_selectedDate = QDate(base.year(), base.month(), day);
+
+    emit daySelected(m_selectedDate);
+    update();
+}
+
+void DayWeekView::drawDay(QPainter& p)
+{
+    p.drawText(20, 20, "Vista Giorno (da implementare)");
+}
+
+void DayWeekView::drawWeek(QPainter& p)
+{
+    p.drawText(20, 20, "Vista Settimana (da implementare)");
 }

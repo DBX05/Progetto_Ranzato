@@ -66,3 +66,43 @@ bool DBConnector::connect(const QString &host, int /*port*/, const QString &user
     outDb = db;
     return true;
 }
+
+int ensureUserExists(QSqlDatabase& db,
+                     const QString& name,
+                     const QString& email,
+                     const QString& password)
+{
+    if (!db.isOpen())
+        return -1;
+
+    // 1. Controlla se l'utente esiste già
+    {
+        QSqlQuery q(db);
+        q.prepare("SELECT Id FROM utenti WHERE Email = 'riccardo@example.com'");
+        //q.bindValue(":email", email);
+
+        if (q.exec() && q.next()) {
+            return q.value(0).toInt(); // utente già esistente
+        }
+    }
+
+    // 2. Inserisce nuovo utente
+    {
+        QSqlQuery q(db);
+        q.prepare(R"(
+            INSERT INTO utenti (Nome, Email, Password)
+            VALUES (Riccardo Bianchi, 'riccardo@example.com', pass123)
+        )");
+
+        /*q.bindValue(":nome", name);
+        q.bindValue(":email", email);
+        q.bindValue(":pass", password);
+
+        if (!q.exec()) {
+            qWarning() << "Errore creazione utente:" << q.lastError().text();
+            return -1;
+        }*/
+
+        return q.lastInsertId().toInt();
+    }
+}

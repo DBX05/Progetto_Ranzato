@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>Agenda</string>
   </property>
+
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -24,6 +25,7 @@
       <!-- LEFT PANE -->
       <widget class="QWidget" name="leftPane">
        <layout class="QVBoxLayout" name="leftLayout">
+
         <item>
          <widget class="QLabel" name="labelCalendar">
           <property name="text">
@@ -31,9 +33,11 @@
           </property>
          </widget>
         </item>
+
         <item>
          <widget class="QCalendarWidget" name="calendarWidget"/>
         </item>
+
         <item>
          <widget class="QPushButton" name="addEventButton">
           <property name="text">
@@ -41,6 +45,7 @@
           </property>
          </widget>
         </item>
+
         <item>
          <widget class="QComboBox" name="modeCombo">
           <item>
@@ -53,21 +58,34 @@
             <string>Week</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Month</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Year</string>
+           </property>
+          </item>
          </widget>
         </item>
+
        </layout>
       </widget>
 
       <!-- RIGHT PANE -->
       <widget class="QWidget" name="rightPane">
        <layout class="QVBoxLayout" name="rightLayout">
+
         <item>
          <widget class="QLabel" name="labelView">
           <property name="text">
-           <string>Vista Giorno/Settimana</string>
+           <string>Vista Giorno/Settimana/Mese/Anno</string>
           </property>
          </widget>
         </item>
+
         <item>
          <!-- Placeholder promoted to DayWeekView -->
          <widget class="DayWeekView" name="dayWeekPlaceholder">
@@ -79,6 +97,7 @@
           </property>
          </widget>
         </item>
+
         <item>
          <widget class="QLabel" name="labelEvents">
           <property name="text">
@@ -86,9 +105,11 @@
           </property>
          </widget>
         </item>
+
         <item>
          <widget class="QListView" name="eventsListView"/>
         </item>
+
        </layout>
       </widget>
 
@@ -97,17 +118,9 @@
    </layout>
   </widget>
 
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1000</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
+  <widget class="QMenuBar" name="menubar"/>
   <widget class="QStatusBar" name="statusbar"/>
+
  </widget>
 
  <customwidgets>

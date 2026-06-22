@@ -5,9 +5,10 @@ project(untitled VERSION 0.1 LANGUAGES CXX)
 # Percorso root di Qt (adatta se usi versione diversa)
 set(CMAKE_PREFIX_PATH "C:/Qt/6.11.1/mingw_64")
 
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
+
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,6 +54,8 @@ target_include_directories(untitled PRIVATE
     ${CMAKE_SOURCE_DIR}/fileCpp/db_connector
     ${CMAKE_SOURCE_DIR}/fileCpp/utils
     ${CMAKE_SOURCE_DIR}/auth
+    ${CMAKE_SOURCE_DIR}/fileCpp/QtUI
+
 )
 
 # Link a Qt (Widgets e Sql)

@@ -12,4 +12,9 @@ public:
     static bool connect(const QString &host, int port, const QString &user, const QString &password, const QString &dbName, QSqlDatabase &outDb, QString &outError);
 };
 
+int ensureUserExists(QSqlDatabase& db,
+                     const QString& name,
+                     const QString& email,
+                     const QString& password);
+
 #endif // DB_CONNECTOR_H

@@ -9,10 +9,13 @@
 #include "../db/db_connector.h"
 #include "MainWindow.h"
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // Rimuove eventuali connessioni precedenti
+    if (QSqlDatabase::contains("connector_connection"))
+        QSqlDatabase::removeDatabase("connector_connection");
 
     QSqlDatabase db;
     QString err;
@@ -44,21 +47,21 @@ int main(int argc, char *argv[])
     }
 
     // --- LOGIN / REGISTRAZIONE UTENTE ---
-UserAuthDialog authDlg(db);
-if (authDlg.exec() != QDialog::Accepted) {
-    return 0;
-}
+    UserAuthDialog authDlg(db);
+    if (authDlg.exec() != QDialog::Accepted) {
+        return 0;
+    }
 
-AuthResult ar = authDlg.result();
-int userId = ensureUserExists(db, ar.name, ar.email, ar.password);
-if (userId < 0) {
-    QMessageBox::warning(nullptr, "Errore", "Impossibile verificare o creare l'utente.");
-    return 0;
-}
+    AuthResult ar = authDlg.result();
 
-MainWindow w(db, userId, ar.name, ar.email);
-w.show();
+    int userId = ensureUserExists(db, ar.name, ar.email, ar.password);
+    if (userId < 0) {
+        QMessageBox::warning(nullptr, "Errore", "Impossibile verificare o creare l'utente.");
+        return 0;
+    }
 
+    MainWindow w(db, userId, ar.name, ar.email);
+    w.show();
 
     return a.exec();
 }
