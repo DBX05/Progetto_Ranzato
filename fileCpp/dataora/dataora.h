@@ -83,14 +83,18 @@ class data
 private:
     static const std::string settimana[7];
     int st;
+    int gms;
     std::string stcor;
 
 public:
-    data(int x = 0);
+    data(int x = 0, int y=0);
 
     std::string getGiorno() const;
     int getDate() const;
+
+    int getGiorniMese() const;
     void modificaData(int x);
+    void modificaGiorniMese(int x);
 
     static int systemDay();
 
@@ -155,11 +159,11 @@ private:
     std::string dateT;
 
 public:
-    dateTime(int an = systemYear(), int m = systemMonth(), int d = systemDay(),
+    dateTime(int an = systemYear(), int m = systemMonth(), int gms = 0, int d = systemDay(),
              int h = systemHour(), int mn = systemMin(), int s = systemSecond());
 
     std::string getDateTime() const;
-    void modificaDateTime(int an = 0, int m = -1, int d = -1, int h = -1, int mn = -1, int s = -1);
+    void modificaDateTime(int an = 0, int m = -1, int gms = -1, int d = -1, int h = -1, int mn = -1, int s = -1);
     void FormatDate(std::string s = " ");
     std::string systemDateTime() const;
     time_t toTimestamp() const;

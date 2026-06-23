@@ -20,7 +20,7 @@ DBConnectDialog::DBConnectDialog(QWidget* parent)
 
     auto* hostLayout = new QHBoxLayout;
     hostLayout->addWidget(new QLabel("Host:"));
-    m_host = new QLineEdit("localhost", this);
+    m_host = new QLineEdit("", this);
     hostLayout->addWidget(m_host);
     layout->addLayout(hostLayout);
 
@@ -28,14 +28,14 @@ DBConnectDialog::DBConnectDialog(QWidget* parent)
     portLayout->addWidget(new QLabel("Port:"));
     m_port = new QSpinBox(this);
     m_port->setRange(0, 65535);
-    m_port->setValue(3306); // default MySQL port
+    //m_port->setValue(3306); // default MySQL port
     portLayout->addWidget(m_port);
     layout->addLayout(portLayout);
 
     auto* userLayout = new QHBoxLayout;
     userLayout->addWidget(new QLabel("Username:"));
     m_user = new QLineEdit(this);
-    m_user->setText("root");
+    //m_user->setText("root");
     userLayout->addWidget(m_user);
     layout->addLayout(userLayout);
 
@@ -73,13 +73,13 @@ DBConnectDialog::DBConnectDialog(QWidget* parent)
     connect(m_cancel, &QPushButton::clicked, this, &QDialog::reject);
 
     // Validazione live: ogni modifica richiama validateInputs()
-    connect(m_host, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    connect(m_user, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    connect(m_dbName, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    connect(m_port, QOverload<int>::of(&QSpinBox::valueChanged), this, &DBConnectDialog::validateInputs);
+    //connect(m_host, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
+    //connect(m_user, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
+    //connect(m_dbName, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
+    //connect(m_port, QOverload<int>::of(&QSpinBox::valueChanged), this, &DBConnectDialog::validateInputs);
 
     // Esegui validazione iniziale
-    validateInputs();
+    //validateInputs();
 }
 
 DBConnectParams DBConnectDialog::params() const {

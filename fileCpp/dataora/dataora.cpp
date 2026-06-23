@@ -101,18 +101,28 @@ bool operator<(const orario &x, const orario &y)
 // ==================== CLASSE DATA ====================
 const std::string data::settimana[7] = {"lunedi","martedi","mercoledi","giovedi","venerdi","sabato","domenica"};
 
-data::data(int x): st((x >= 0 && x < 7) ? x : -1)
+data::data(int x, int y): st((x >= 0 && x < 7) ? x : -1), gms(y >= 0 && y <= 31 ? y : -1)
 {
     if (st == -1) throw dataexp("il giorno della settimana deve avere valore compreso fra 0 e 6", st);
     stcor = settimana[st];
 }
 std::string data::getGiorno() const { return stcor; }
 int data::getDate() const { return st; }
+
+int data::getGiorniMese() const {
+    return gms;
+    }
 void data::modificaData(int x)
 {
     if (x < 0 || x > 6) throw dataexp("il giorno della settimana deve avere valore compreso fra 0 e 6", x);
     st = x;
     stcor = settimana[st];
+}
+
+void data::modificaGiorniMese(int x)
+{
+    if (x < 0 || x > 31) throw dataexp("il giorno del mese deve avere valore compreso fra 0 e 31", x);
+    gms = x;
 }
 int data::systemDay()
 {
@@ -226,17 +236,18 @@ bool operator<(const anno &x, const anno &y)
 }
 
 // ==================== CLASSE DATETIME ====================
-dateTime::dateTime(int an, int m, int d, int h, int mn, int s)
-    : orario(s, mn, h), data(d), mese(m), anno(an) {FormatDate("%Y-%m-%d %H:%M:%S");
+dateTime::dateTime(int an, int m, int gms, int d, int h, int mn, int s)
+    : orario(s, mn, h), data(d, gms), mese(m), anno(an) {FormatDate("%Y-%m-%d %H:%M:%S");
 }
 
 std::string dateTime::getDateTime() const { return dateT; }
 
-void dateTime::modificaDateTime(int an, int m, int d, int h, int mn, int s)
+void dateTime::modificaDateTime(int an, int m, int gms, int d, int h, int mn, int s)
 {
     if (an != 0) modificaAnno(an);
     if (m != -1) modificaMese(m);
     if (d != -1) modificaData(d);
+    if (gms != -1) data::modificaGiorniMese(gms); // Assuming data has a method to modify the day
     if (h != -1 || mn != -1 || s != -1) modificaOrario(h, mn, s);
 }
 
@@ -247,8 +258,8 @@ void dateTime::FormatDate(std::string s)
     tm.tm_sec = getSec();
     tm.tm_min = getMin();
     tm.tm_hour = getHour();
-    tm.tm_mday = getDate();
-    tm.tm_year = getAnno() - 1900;
+    tm.tm_mday = getGiorniMese();
+    tm.tm_year = getAnno();
     tm.tm_mon = numMese();
     std::ostringstream ss;
     if (s.empty()) ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -269,9 +280,9 @@ std::string dateTime::systemDateTime() const
 
 time_t dateTime::toTimestamp() const {
     std::tm tm = {};
-    tm.tm_year = getAnno() - 1900;
+    tm.tm_year = getAnno();
     tm.tm_mon  = numMese();
-    tm.tm_mday = getDate();
+    tm.tm_mday = getGiorniMese();
     tm.tm_hour = getHour();
     tm.tm_min  = getMin();
     tm.tm_sec  = getSec();

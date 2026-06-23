@@ -91,7 +91,7 @@ bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
 
     QSqlQuery q(m_db);
     q.prepare(R"(
-        INSERT INTO impegni
+        INSERT INTO events
         (DataInizio, DataFine, Priorita, Nome, Descrizione,
          OrarioInizio, OrarioFine, Proprietario)
         VALUES (:di, :df, :prio, :nome, :desc, :oi, :of, :uid)
@@ -126,31 +126,80 @@ void MainWindow::loadEventsFromDb()
     m_eventModel->clear();
 
     QSqlQuery q(m_db);
-    q.prepare("SELECT Id, DataInizio, DataFine, Priorita, Nome, Descrizione, OrarioInizio, OrarioFine "
-              "FROM impegni WHERE Proprietario = 1 ORDER BY DataInizio");
-    //q.bindValue(":uid", m_userId);
+    q.prepare(R"(
+        SELECT id, start_datetime, end_datetime, priority, name, description
+        FROM events
+        WHERE user_id = :uid
+        ORDER BY start_datetime
+    )");
 
-    /*if (!q.exec()) {
+    q.bindValue(":uid", m_userId);
+
+    if (!q.exec()) {
         qDebug() << "DB load error:" << q.lastError().text();
         return;
-    }*/
+    }
 
     while (q.next()) {
-       //int id = q.value("Id").toInt();
-       int id = 1;
-        QString di = q.value("DataInizio").toString();
-        QString df = q.value("DataFine").toString();
-        QString oi = q.value("OrarioInizio").toString();
-        QString of = q.value("OrarioFine").toString();
-        QString desc = q.value("Descrizione").toString();
-        QString name = q.value("Nome").toString();
-        int priority = q.value("Priorita").toInt();
 
-        dateTime dtStart = qStringToDateTime(di + " " + oi);
-        dateTime dtEnd   = qStringToDateTime(df + " " + of);
+        QString start = q.value("start_datetime").toString();
+        QString end   = q.value("end_datetime").toString();
+        QString name  = q.value("name").toString();
+        QString desc  = q.value("description").toString();
+        int priority  = q.value("priority").toInt();
+        int id        = q.value("id").toInt();
 
-        orario oStart(oi.mid(6,2).toInt(), oi.mid(3,2).toInt(), oi.mid(0,2).toInt());
-        orario oEnd  (of.mid(6,2).toInt(), of.mid(3,2).toInt(), of.mid(0,2).toInt());
+        qDebug() << "Start:" << start << "End:" << end;
+
+        auto fixDate = [](QString s) -> QString {
+            QString trimmed = s.trimmed();
+
+            // Se vuota → data corrente
+            if (trimmed.isEmpty()) {
+                qDebug() << "Data vuota, imposto data corrente";
+                return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+            }
+
+            // Formato standard
+            QDateTime dt = QDateTime::fromString(trimmed, "yyyy-MM-dd HH:mm:ss");
+
+            // Prova ISO
+            if (!dt.isValid())
+                dt = QDateTime::fromString(trimmed, Qt::ISODate);
+
+            // Se ancora invalida → correggi automaticamente
+            if (!dt.isValid()) {
+                qDebug() << "Data malformata, correggo automaticamente:" << trimmed;
+                dt = QDateTime::currentDateTime();
+            }
+
+            return dt.toString("yyyy-MM-dd HH:mm:ss");
+        };
+
+
+        start = fixDate(start);
+        end   = fixDate(end);
+
+
+        dateTime dtStart = qStringToDateTime(start);
+        dateTime dtEnd   = qStringToDateTime(end);
+
+
+        if (dtEnd < dtStart) {
+            qDebug() << "Correzione: end < start, aggiungo 1 ora";
+            dtEnd = dtStart;
+            dtEnd.modificaDateTime(
+                dtStart.getAnno(),
+                dtStart.numMese(),
+                dtStart.getGiorniMese(),
+                dtStart.getHour() + 1,
+                dtStart.getMin(),
+                dtStart.getSec()
+            );
+        }
+
+        orario oStart(dtStart.getSec(), dtStart.getMin(), dtStart.getHour());
+        orario oEnd(dtEnd.getSec(), dtEnd.getMin(), dtEnd.getHour());
 
         auto ev = std::make_shared<eventoLungo>(
             id,
@@ -169,10 +218,12 @@ void MainWindow::loadEventsFromDb()
     m_dayWeekView->update();
 }
 
+
+
 void MainWindow::loadEventsForDate(const QDate& date)
 {
     Q_UNUSED(date);
-    m_dayWeekView->setDate(dateTime(date.year(), date.month(), date.day(), 0, 0, 0));
+    m_dayWeekView->setDate(dateTime(date.year(), date.month()-1, date.day(), 0, 0, 0));
     m_dayWeekView->update();
 }
 
@@ -206,7 +257,7 @@ void MainWindow::onModeChanged(int index)
 void MainWindow::onCalendarDateChanged()
 {
     QDate d = ui->calendarWidget->selectedDate();
-    m_dayWeekView->setDate(dateTime(d.year(), d.month(), d.day(), 0, 0, 0));
+    m_dayWeekView->setDate(dateTime(d.year(), d.month()-1, d.day(), 0, 0, 0));
     m_dayWeekView->update();
 }
 

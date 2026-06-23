@@ -27,42 +27,33 @@ bool DBConnector::connect(const QString &host, int /*port*/, const QString &user
         return false;
     }
 
- /*   // Crea tabelle se non esistono: users e events
-    QSqlQuery q(db);
-    const QString createUsers = QStringLiteral(
-        "CREATE TABLE IF NOT EXISTS users ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "name TEXT NOT NULL,"
-        "email TEXT NOT NULL UNIQUE,"
-        "password_hash TEXT NOT NULL,"
-        "created_at TEXT DEFAULT CURRENT_TIMESTAMP"
-        ");"
-    );
-    if (!q.exec(createUsers)) {
-        outError = q.lastError().text();
-        db.close();
-        return false;
-    }
+   // Crea tabelle se non esistono: users e events
+QSqlQuery q(db);
 
-    const QString createEvents = QStringLiteral(
-        "CREATE TABLE IF NOT EXISTS events ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "user_id INTEGER NOT NULL,"
-        "name TEXT NOT NULL,"
-        "start_datetime TEXT NOT NULL,"
-        "end_datetime TEXT NOT NULL,"
-        "type INTEGER NOT NULL DEFAULT 0,"
-        "description TEXT,"
-        "priority INTEGER DEFAULT 1,"
-        "FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE"
-        ");"
-    );
-    if (!q.exec(createEvents)) {
-        outError = q.lastError().text();
-        db.close();
-        return false;
-    }
-*/
+q.exec(R"(
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+)");
+
+q.exec(R"(
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    start_datetime TEXT NOT NULL,
+    end_datetime TEXT NOT NULL,
+    type INTEGER NOT NULL DEFAULT 0,
+    description TEXT,
+    priority INTEGER DEFAULT 1,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+)");
+
     outDb = db;
     return true;
 }
@@ -78,8 +69,8 @@ int ensureUserExists(QSqlDatabase& db,
     // 1. Controlla se l'utente esiste già
     {
         QSqlQuery q(db);
-        q.prepare("SELECT Id FROM utenti WHERE Email = 'riccardo@example.com'");
-        //q.bindValue(":email", email);
+        q.prepare("SELECT id FROM users WHERE email = :email");
+        q.bindValue(":email", email);
 
         if (q.exec() && q.next()) {
             return q.value(0).toInt(); // utente già esistente
@@ -90,18 +81,18 @@ int ensureUserExists(QSqlDatabase& db,
     {
         QSqlQuery q(db);
         q.prepare(R"(
-            INSERT INTO utenti (Nome, Email, Password)
-            VALUES (Riccardo Bianchi, 'riccardo@example.com', pass123)
+            INSERT INTO users (name, email, password_hash)
+            VALUES (:name, :email, :password_hash)
         )");
 
-        /*q.bindValue(":nome", name);
+        q.bindValue(":name", name);
         q.bindValue(":email", email);
-        q.bindValue(":pass", password);
+        q.bindValue(":password_hash", password);
 
         if (!q.exec()) {
             qWarning() << "Errore creazione utente:" << q.lastError().text();
             return -1;
-        }*/
+        }
 
         return q.lastInsertId().toInt();
     }

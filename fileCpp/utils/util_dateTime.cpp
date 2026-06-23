@@ -8,20 +8,33 @@ QString dateTimeToQString(const dateTime& dt) {
     return s.mid(0, 19);
 }
 
-dateTime qStringToDateTime(const QString& s) {
-    QDateTime qdt = QDateTime::fromString(s.trimmed(), "yyyy-MM-dd HH:mm:ss");
+dateTime qStringToDateTime(const QString& s)
+{
+    QDateTime qdt = QDateTime::fromString(s, "yyyy-MM-dd HH:mm:ss");
     if (!qdt.isValid())
         qdt = QDateTime::currentDateTime();
 
-    int an  = qdt.date().year();
-    int mo  = qdt.date().month() - 1;
-    int day = qdt.date().day();
-    int hr  = qdt.time().hour();
-    int mn  = qdt.time().minute();
-    int sc  = qdt.time().second();
+    int year  = qdt.date().year();
+    int month = qdt.date().month() - 1;      // 0–11
+    int day   = qdt.date().day();            // 1–31
+    int dow   = qdt.date().dayOfWeek() - 1;  // 0–6
 
-    return dateTime(an, mo, day, hr, mn, sc);
+    // clamp mese
+    if (month < 0) month = 0;
+    if (month > 11) month = 11;
+
+    // clamp giorno del mese
+    if (day < 1) day = 1;
+    if (day > 31) day = 31;
+
+    // clamp giorno della settimana
+    if (dow < 0) dow = 0;
+    if (dow > 6) dow = 6;
+
+    return dateTime(year, month, day, qdt.time().hour(), qdt.time().minute(), qdt.time().second());
 }
+
+
 
 dateTime chronoToDateTime(const std::chrono::system_clock::time_point& tp)
 {
@@ -29,8 +42,8 @@ dateTime chronoToDateTime(const std::chrono::system_clock::time_point& tp)
     std::tm* tm = std::localtime(&tt);
 
     return dateTime(
-        tm->tm_year + 1900,
-        tm->tm_mon + 1,
+        tm->tm_year,
+        tm->tm_mon,
         tm->tm_mday,
         tm->tm_hour,
         tm->tm_min,
