@@ -61,12 +61,14 @@ std::shared_ptr<evento> NewEventDialog::createEvento() const {
     QString sStr = QString("%1-%2-%3 %4:%5:00")
                        .arg(date.year(),4,10,QChar('0'))
                        .arg(date.month(),2,10,QChar('0'))
+                       .arg(date.daysInMonth(),2,10,QChar('0'))
                        .arg(date.day(),2,10,QChar('0'))
                        .arg(s.hour(),2,10,QChar('0'))
                        .arg(s.minute(),2,10,QChar('0'));
     QString eStr = QString("%1-%2-%3 %4:%5:00")
                        .arg(date.year(),4,10,QChar('0'))
                        .arg(date.month(),2,10,QChar('0'))
+                       .arg(date.daysInMonth(),2,10,QChar('0'))
                        .arg(date.day(),2,10,QChar('0'))
                        .arg(e.hour(),2,10,QChar('0'))
                        .arg(e.minute(),2,10,QChar('0'));

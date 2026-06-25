@@ -6,6 +6,7 @@
 #include <QDate>
 #include "../dataora/dataora.h"
 #include "../impegno/impegno.h"
+#include "DayWeekView.h"
 
 class EventModel;
 class DayWeekView;
@@ -39,6 +40,22 @@ private:
     bool insertEvento(const std::shared_ptr<evento>& baseEv);
     void loadEventsFromDb();
     void loadEventsForDate(const QDate& date);
+
+    void on_calendarWidget_currentPageChanged(int year, int month);
+    void updateCalendarLabel(const QDate& date);
+    void updateCalendarLabelMode(DayWeekView::Mode mode, const QDate& date);
+    void updateCalendarLabelColor(const QDate& date);
+
+    bool monthHasEvents(const QDate& date);
+
+    void updateEventsForCurrentMode();
+    void updateLabelEvents(const QDate& date);
+
+    void updateModeFeedback();
+
+    void updateAllLabelsForCurrentMode();
+
+    void onLabelCalendarClicked();
 
     Ui::MainWindow* ui;
 

@@ -4,8 +4,10 @@
 #include "EventModel.h"
 #include "NewEventiDialog.h"
 #include "DayWeekView.h"
-#include "../utils/util_datetime.h"
+#include "../utils/util_DateTime.h"
 #include "../json/jsonManager.hpp"
+#include "EventDelegate.h"
+#include "DayWeekView.h"
 
 
 #include <QFileDialog>
@@ -24,6 +26,8 @@ MainWindow::MainWindow(QSqlDatabase db, int userId,
       m_userName(name),
       m_userEmail(email)
 {
+    qDebug() << "[MainWindow] Inizio costruttore";
+
     ui->setupUi(this);
 
     // MODEL
@@ -32,9 +36,17 @@ MainWindow::MainWindow(QSqlDatabase db, int userId,
     // DAYWEEKVIEW (promosso da UI)
     m_dayWeekView = ui->dayWeekPlaceholder;
     m_dayWeekView->setModel(m_eventModel);
+    //connect(ui->QCalendarWidget, &QCalendarWidget::clicked,
+     //   this, &MainWindow::onLabelCalendarClicked);
+
 
     // LISTA EVENTI
     ui->eventsListView->setModel(m_eventModel);
+    ui->eventsListView->setItemDelegate(new EventDelegate(this));
+    ui->eventsListView->setSpacing(6);
+    ui->eventsListView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->eventsListView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
 
     // SIGNALS
     connect(ui->addEventButton, &QPushButton::clicked,
@@ -79,7 +91,7 @@ QString MainWindow::sqlTime(const orario& o) const
         .arg(o.getSec(),  2, 10, QChar('0'));
 }
 
-bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
+/*bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
 {
     auto el = std::dynamic_pointer_cast<eventoLungo>(baseEv);
     if (!el) return false;
@@ -116,114 +128,98 @@ bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
 
     m_eventModel->addEvent(el);
     return true;
-}
+}*/
 
-void MainWindow::loadEventsFromDb()
+    void MainWindow::loadEventsFromDb()
 {
-    if (!m_db.isValid() || !m_db.isOpen())
+    if (!m_db.isOpen()) {
+        qDebug() << "[loadEventsFromDb] DB non aperto";
         return;
+    }
 
     m_eventModel->clear();
 
     QSqlQuery q(m_db);
-    q.prepare(R"(
-        SELECT id, start_datetime, end_datetime, priority, name, description
-        FROM events
-        WHERE user_id = :uid
-        ORDER BY start_datetime
-    )");
-
+    q.prepare("SELECT id, name, start_datetime, end_datetime "
+              "FROM events WHERE user_id = :uid ORDER BY start_datetime");
     q.bindValue(":uid", m_userId);
 
     if (!q.exec()) {
-        qDebug() << "DB load error:" << q.lastError().text();
+        qDebug() << "[loadEventsFromDb] ERRORE QUERY:" << q.lastError().text();
         return;
+    }else {
+        qDebug() << "[loadEventsFromDb] QUERY=" << q.lastQuery();
     }
 
     while (q.next()) {
-
+        int id = q.value("id").toInt();
+        QString name = q.value("name").toString();
         QString start = q.value("start_datetime").toString();
         QString end   = q.value("end_datetime").toString();
-        QString name  = q.value("name").toString();
-        QString desc  = q.value("description").toString();
-        int priority  = q.value("priority").toInt();
-        int id        = q.value("id").toInt();
-
-        qDebug() << "Start:" << start << "End:" << end;
-
-        auto fixDate = [](QString s) -> QString {
-            QString trimmed = s.trimmed();
-
-            // Se vuota → data corrente
-            if (trimmed.isEmpty()) {
-                qDebug() << "Data vuota, imposto data corrente";
-                return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
-            }
-
-            // Formato standard
-            QDateTime dt = QDateTime::fromString(trimmed, "yyyy-MM-dd HH:mm:ss");
-
-            // Prova ISO
-            if (!dt.isValid())
-                dt = QDateTime::fromString(trimmed, Qt::ISODate);
-
-            // Se ancora invalida → correggi automaticamente
-            if (!dt.isValid()) {
-                qDebug() << "Data malformata, correggo automaticamente:" << trimmed;
-                dt = QDateTime::currentDateTime();
-            }
-
-            return dt.toString("yyyy-MM-dd HH:mm:ss");
-        };
-
-
-        start = fixDate(start);
-        end   = fixDate(end);
-
 
         dateTime dtStart = qStringToDateTime(start);
         dateTime dtEnd   = qStringToDateTime(end);
 
-
-        if (dtEnd < dtStart) {
-            qDebug() << "Correzione: end < start, aggiungo 1 ora";
-            dtEnd = dtStart;
-            dtEnd.modificaDateTime(
-                dtStart.getAnno(),
-                dtStart.numMese(),
-                dtStart.getGiorniMese(),
-                dtStart.getHour() + 1,
-                dtStart.getMin(),
-                dtStart.getSec()
-            );
-        }
-
-        orario oStart(dtStart.getSec(), dtStart.getMin(), dtStart.getHour());
-        orario oEnd(dtEnd.getSec(), dtEnd.getMin(), dtEnd.getHour());
+        orario oStart(0,0,0);
+        orario oEnd(0,0,0);
 
         auto ev = std::make_shared<eventoLungo>(
             id,
             dtStart,
-            static_cast<unsigned int>(priority),
+            1, // priorità fissa (non esiste nel DB)
             name.toStdString(),
             dtEnd,
-            desc.toStdString(),
+            "", // descrizione non esiste nel DB
             oStart,
             oEnd
         );
 
         m_eventModel->addEvent(ev);
     }
-
+    qDebug() << "[LoadEventsFromDb] caricamento eseguito = " << m_db.isOpen();
     m_dayWeekView->update();
+}
+
+
+bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
+{
+    auto el = std::dynamic_pointer_cast<eventoLungo>(baseEv);
+    if (!el) return false;
+
+    dateTime dtStart = el->getMomentoInizio();
+    dateTime dtEnd   = el->getMomentoFine();
+
+    QString startStr = QString::fromStdString(dtStart.getDateTime());
+    QString endStr   = QString::fromStdString(dtEnd.getDateTime());
+    qDebug() << "[insertEvento] startStr = " << startStr;
+    qDebug() << "[insertEvento] endStr = " << endStr;
+
+    QSqlQuery q(m_db);
+    q.prepare("INSERT INTO events (user_id, name, start_datetime, end_datetime) "
+              "VALUES (:uid, :name, :start, :end)");
+
+    q.bindValue(":uid", m_userId);
+    q.bindValue(":name", QString::fromStdString(el->getNome()));
+    q.bindValue(":start", startStr);
+    q.bindValue(":end", endStr);
+
+    if (!q.exec()) {
+        QMessageBox::warning(this, "Errore", "Errore inserimento evento:\n" + q.lastError().text());
+        return false;
+    }
+
+    el->setId(q.lastInsertId().toInt());
+    m_eventModel->addEvent(el);
+    return true;
 }
 
 
 
 void MainWindow::loadEventsForDate(const QDate& date)
 {
-    Q_UNUSED(date);
-    m_dayWeekView->setDate(dateTime(date.year(), date.month()-1, date.day(), 0, 0, 0));
+    m_dayWeekView->setDate(
+        dateTime(date.year(), date.month() - 1, date.day(), 0, 0, 0)
+    );
     m_dayWeekView->update();
 }
 
@@ -239,33 +235,90 @@ void MainWindow::onNewEvent()
     }
 }
 
+
 void MainWindow::onModeChanged(int index)
 {
+    qDebug() << "[FLOW] Cambio modalità:" << index;
+
     QString text = ui->modeCombo->itemText(index);
-    if (text == "Day") {
-        m_dayWeekView->setMode(DayWeekView::Mode::Day);
-    } else if (text == "Week") {
-        m_dayWeekView->setMode(DayWeekView::Mode::Week);
-    } else if (text == "Month") {
-        m_dayWeekView->setMode(DayWeekView::Mode::Month);
-    } else if (text == "Year") {
-        m_dayWeekView->setMode(DayWeekView::Mode::Year);
-    }
+
+    if (text == "Day")      m_dayWeekView->setMode(DayWeekView::Mode::Day);
+    else if (text == "Week")  m_dayWeekView->setMode(DayWeekView::Mode::Week);
+    else if (text == "Month") m_dayWeekView->setMode(DayWeekView::Mode::Month);
+    else if (text == "Year")  m_dayWeekView->setMode(DayWeekView::Mode::Year);
+
     m_dayWeekView->update();
+
+    m_dayWeekView->setMode(static_cast<DayWeekView::Mode>(index));
+    qDebug() << "[UPDATE] DayWeekView modalità impostata";
+
+    updateAllLabelsForCurrentMode();
+    qDebug() << "[UPDATE] Tutte le label aggiornate dopo cambio modalità";
 }
+
+void MainWindow::on_calendarWidget_currentPageChanged(int year, int month)
+{
+    qDebug() << "[FLOW] Cambio mese nel QCalendarWidget:" << year << month;
+
+    QDate d(year, month, 1);
+    m_dayWeekView->setDate(dateTime(year, month, 1, 0, 0, 0));
+    qDebug() << "[UPDATE] DayWeekView impostato al primo giorno del mese"<< month;
+
+    updateAllLabelsForCurrentMode();
+    qDebug() << "[UPDATE] Tutte le label aggiornate per la modalità corrente";
+}
+
+
+
 
 void MainWindow::onCalendarDateChanged()
 {
     QDate d = ui->calendarWidget->selectedDate();
-    m_dayWeekView->setDate(dateTime(d.year(), d.month()-1, d.day(), 0, 0, 0));
-    m_dayWeekView->update();
+    loadEventsForDate(d);
 }
+
 
 void MainWindow::onDaySelectedFromView(const QDate& date)
 {
-    ui->calendarWidget->setSelectedDate(date);
-    loadEventsForDate(date);
+    qDebug() << "[FLOW] Giorno selezionato nella DayWeekView:" << date;
+    // Aggiorna labelCalendar
+    updateCalendarLabel(date);
+        qDebug() << "[UPDATE] labelCalendar aggiornato a:" << ui->labelCalendar->text();
+
+    // Aggiorna labelView (sincronizzata con labelCalendar)
+    ui->labelView->setText(ui->labelCalendar->text());
+
+    // --- AGGIORNA labelEvents ---
+    QString formatted = date.toString("dd MMMM yyyy");
+    if (!formatted.isEmpty())
+        formatted[0] = formatted[0].toUpper();
+
+
+    updateLabelEvents(date);
+    qDebug() << "[UPDATE] labelEvents aggiornato";
+
+    ui->labelView->setText(ui->labelCalendar->text());
+    qDebug() << "[UPDATE] labelView sincronizzato con labelCalendar";
+
+    m_dayWeekView->setDate(dateTime(date.year(), date.month(), date.day(), 0, 0, 0));
+    qDebug() << "[UPDATE] DayWeekView aggiornato alla data selezionata";
+
+    // Recupera gli eventi del giorno
+    dateTime dt(date.year(), date.month(), date.day(), 0, 0, 0);
+    auto events = m_eventModel->eventsForDate(dt);
+
+    if (events.empty()) {
+        ui->labelEvents->setText("Nessun evento per " + formatted);
+    } else {
+        ui->labelEvents->setText(
+            QString("Eventi del %1 (%2)")
+                .arg(formatted)
+                .arg(events.size())
+        );
+    }
 }
+
+
 
 void MainWindow::onImportJson()
 {
@@ -287,15 +340,9 @@ void MainWindow::onImportJson()
     for (const auto& ev : eventi)
     {
         dateTime dtStart = chronoToDateTime(ev.momentoInizio);
-
-        dateTime dtEnd = dtStart;
-        if (ev.momentoFine.has_value())
-            dtEnd = chronoToDateTime(*ev.momentoFine);
-
-        orario oStart = orarioFromOptional(ev.inizio);
-        orario oEnd   = orarioFromOptional(ev.fine);
-
-        std::string desc = ev.Descrizione.has_value() ? *ev.Descrizione : "";
+        dateTime dtEnd   = ev.momentoFine.has_value()
+                           ? chronoToDateTime(*ev.momentoFine)
+                           : dtStart;
 
         auto nuovo = std::make_shared<eventoLungo>(
             -1,
@@ -303,9 +350,9 @@ void MainWindow::onImportJson()
             ev.priorita,
             ev.nome,
             dtEnd,
-            desc,
-            oStart,
-            oEnd
+            "",
+            orario(0,0,0),
+            orario(0,0,0)
         );
 
         if (insertEvento(nuovo))
@@ -320,4 +367,229 @@ void MainWindow::onImportJson()
 
     loadEventsFromDb();
     onCalendarDateChanged();
+}
+
+void MainWindow::updateCalendarLabel(const QDate& date)
+{
+    QString formatted = date.toString("dddd dd MMMM yyyy");
+    formatted[0] = formatted[0].toUpper(); // Prima lettera maiuscola
+
+    
+    QString text = "📅  " + formatted;
+
+    ui->labelCalendar->setText(text);
+    ui->labelView->setText(text);
+    ui->labelView->setText(ui->labelCalendar->text());
+}
+
+void MainWindow::updateCalendarLabelMode(DayWeekView::Mode mode, const QDate& date)
+{
+    QString icon;
+    QString text;
+
+    switch (mode) {
+    case DayWeekView::Mode::Day:
+        icon = "📅";
+        text = date.toString("dddd dd MMMM yyyy");
+        break;
+
+    case DayWeekView::Mode::Week:
+        icon = "🗓️";
+        text = QString("Settimana %1 - %2")
+               .arg(date.addDays(-(date.dayOfWeek()-1)).toString("dd MMM"))
+               .arg(date.addDays(7 - date.dayOfWeek()).toString("dd MMM yyyy"));
+        break;
+
+    case DayWeekView::Mode::Month:
+        icon = "📆";
+        text = date.toString("MMMM yyyy");
+        break;
+
+    case DayWeekView::Mode::Year:
+        icon = "📘";
+        text = QString::number(date.year());
+        break;
+    }
+    QString final = icon + "  " + text;
+
+    ui->labelCalendar->setText(final);
+    ui->labelView->setText(final); 
+
+    // colore dinamico solo in vista mese
+    if (mode == DayWeekView::Mode::Month) {
+        const bool hasEv = monthHasEvents(date);
+        const QString style = hasEv
+            ? "QLabel { color: #0A74DA; font-weight: bold; }"
+            : "QLabel { color: #555; }";
+
+        ui->labelCalendar->setStyleSheet(style);
+        ui->labelView->setStyleSheet(style);
+    }
+
+    ui->labelView->setText(ui->labelCalendar->text());
+
+}
+
+void MainWindow::updateCalendarLabelColor(const QDate& date)
+{
+    bool hasEvents = false;
+
+    if (m_eventModel) {
+        dateTime dt(date.year(), date.month(), date.day(), 0, 0, 0);
+        auto events = m_eventModel->eventsForDate(dt);
+        hasEvents = !events.empty();
+    }
+
+    if (hasEvents) {
+        ui->labelCalendar->setStyleSheet(
+            "QLabel { color: #0A74DA; font-weight: bold; }"
+        );
+    } else {
+        ui->labelCalendar->setStyleSheet(
+            "QLabel { color: #555; }"
+        );
+    }
+}
+
+bool MainWindow::monthHasEvents(const QDate& date)
+{
+    if (!m_eventModel) return false;
+
+    int year  = date.year();
+    int month = date.month();
+    int days  = QDate(year, month, 1).daysInMonth();
+
+    for (int d = 1; d <= days; ++d) {
+        dateTime dt(year, month, d, 0, 0, 0);
+        if (!m_eventModel->eventsForDate(dt).empty())
+            return true;
+    }
+    return false;
+}
+void MainWindow::updateEventsForCurrentMode()
+{
+    DayWeekView::Mode m = m_dayWeekView->mode();
+    QDate base = m_dayWeekView->selectedDate();
+
+    switch (m) {
+
+    case DayWeekView::Mode::Day:
+        updateLabelEvents(base);
+        break;
+
+    case DayWeekView::Mode::Week: {
+        QDate monday = base.addDays(-(base.dayOfWeek() - 1));
+        updateLabelEvents(monday);
+        break;
+    }
+
+    case DayWeekView::Mode::Month: {
+        QDate first(base.year(), base.month(), 1);
+        updateLabelEvents(first);
+        break;
+    }
+
+    case DayWeekView::Mode::Year: {
+        QDate first(base.year(), 1, 1);
+        updateLabelEvents(first);
+        break;
+    }
+    }
+}
+
+
+void MainWindow::updateLabelEvents(const QDate& date)
+{
+    dateTime dt(date.year(), date.month(), date.day(), 0, 0, 0);
+    auto events = m_eventModel->eventsForDate(dt);
+
+    QString formatted = date.toString("dd MMMM yyyy");
+    if (!formatted.isEmpty())
+        formatted[0] = formatted[0].toUpper();
+
+    if (events.empty()) {
+        ui->labelEvents->setText("Nessun evento per " + formatted);
+    } else {
+        ui->labelEvents->setText(
+            QString("Eventi del %1 (%2)")
+                .arg(formatted)
+                .arg(events.size())
+        );
+    }
+}
+
+void MainWindow::updateModeFeedback()
+{
+    DayWeekView::Mode m = m_dayWeekView->mode();
+    QDate d = m_dayWeekView->selectedDate();
+
+    QString modeText;
+    QString icon;
+
+    switch (m) {
+    case DayWeekView::Mode::Day:
+        icon = "📅";
+        modeText = "Giorno aggiornato a " + d.toString("MMMM yyyy");
+        break;
+
+    case DayWeekView::Mode::Week:
+        icon = "🗓️";
+        modeText = "Settimana aggiornata a " + d.toString("MMMM yyyy");
+        break;
+
+    case DayWeekView::Mode::Month:
+        icon = "📆";
+        modeText = "Mese aggiornato a " + d.toString("MMMM yyyy");
+        break;
+
+    case DayWeekView::Mode::Year:
+        icon = "📘";
+        modeText = "Anno aggiornato a " + QString::number(d.year());
+        break;
+    }
+
+    // Feedback visivo su labelView
+    ui->labelView->setText(icon + "  " + modeText);
+
+    // Colore dinamico se il mese ha eventi
+    if (monthHasEvents(d)) {
+        ui->labelView->setStyleSheet("color: #0A74DA; font-weight: bold;");
+    } else {
+        ui->labelView->setStyleSheet("color: #555;");
+    }
+}
+
+void MainWindow::updateAllLabelsForCurrentMode()
+{
+    qDebug() << "[FLOW] updateAllLabelsForCurrentMode()";
+
+    DayWeekView::Mode m = m_dayWeekView->mode();
+    QDate d = m_dayWeekView->selectedDate();
+
+    // --- Aggiorna labelCalendar e labelView ---
+    updateCalendarLabelMode(m, d);
+    qDebug() << "[UPDATE] labelCalendar aggiornato per modalità:" << ui->labelCalendar->text();;
+
+    ui->labelView->setText(ui->labelCalendar->text());
+    qDebug() << "[UPDATE] labelView sincronizzato";
+
+    updateLabelEvents(d);
+    qDebug() << "[UPDATE] labelEvents aggiornato";
+}
+
+void MainWindow::onLabelCalendarClicked()
+{
+    QDate d = m_dayWeekView->selectedDate();
+
+    if (!d.isValid())
+        d = QDate::currentDate();
+
+    // esempio: vai al mese successivo
+    QDate next = d.addMonths(1);
+
+    ui->calendarWidget->setCurrentPage(next.year(), next.month());
+
+    // forza l’aggiornamento completo
+    m_dayWeekView->setDate(dateTime(next.year(), next.month(), 1, 0, 0, 0));
+    updateAllLabelsForCurrentMode();
 }

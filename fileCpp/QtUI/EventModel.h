@@ -18,7 +18,9 @@ public:
         StartRole,
         EndRole,
         PriorityRole,
-        DescriptionRole
+        DescriptionRole,
+        ColorRole,   // <--- AGGIUNGI QUESTO
+        IconRole 
     };
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;

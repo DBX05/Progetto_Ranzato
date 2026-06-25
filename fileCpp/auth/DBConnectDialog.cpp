@@ -1,5 +1,6 @@
 // DBConnectDialog.cpp
 #include "DBConnectDialog.h"
+#include "../db/db_connector.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -10,46 +11,22 @@
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <QSqlDatabase>
+#include <QMessageBox>
 
 
 DBConnectDialog::DBConnectDialog(QWidget* parent)
     : QDialog(parent)
 {
+
+
+
     setWindowTitle("Connessione al Database");
     auto* layout = new QVBoxLayout(this);
-
-    auto* hostLayout = new QHBoxLayout;
-    hostLayout->addWidget(new QLabel("Host:"));
-    m_host = new QLineEdit("", this);
-    hostLayout->addWidget(m_host);
-    layout->addLayout(hostLayout);
-
-    auto* portLayout = new QHBoxLayout;
-    portLayout->addWidget(new QLabel("Port:"));
-    m_port = new QSpinBox(this);
-    m_port->setRange(0, 65535);
-    //m_port->setValue(3306); // default MySQL port
-    portLayout->addWidget(m_port);
-    layout->addLayout(portLayout);
-
-    auto* userLayout = new QHBoxLayout;
-    userLayout->addWidget(new QLabel("Username:"));
-    m_user = new QLineEdit(this);
-    //m_user->setText("root");
-    userLayout->addWidget(m_user);
-    layout->addLayout(userLayout);
-
-    auto* passLayout = new QHBoxLayout;
-    passLayout->addWidget(new QLabel("Password:"));
-    m_password = new QLineEdit(this);
-    m_password->setEchoMode(QLineEdit::Password);
-    passLayout->addWidget(m_password);
-    layout->addLayout(passLayout);
 
     auto* dbLayout = new QHBoxLayout;
     dbLayout->addWidget(new QLabel("Database name / SQLite file:"));
     m_dbName = new QLineEdit(this);
-    m_dbName->setText("agendadb"); 
+    m_dbName->setText("agendadb.db"); 
     dbLayout->addWidget(m_dbName);
     layout->addLayout(dbLayout);
 
@@ -68,18 +45,31 @@ DBConnectDialog::DBConnectDialog(QWidget* parent)
     btnLayout->addWidget(m_cancel);
     layout->addLayout(btnLayout);
 
-    // Connessioni
-    connect(m_ok, &QPushButton::clicked, this, &QDialog::accept);
     connect(m_cancel, &QPushButton::clicked, this, &QDialog::reject);
 
-    // Validazione live: ogni modifica richiama validateInputs()
-    //connect(m_host, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    //connect(m_user, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    //connect(m_dbName, &QLineEdit::textChanged, this, &DBConnectDialog::validateInputs);
-    //connect(m_port, QOverload<int>::of(&QSpinBox::valueChanged), this, &DBConnectDialog::validateInputs);
+    connect(m_ok, &QPushButton::clicked, this, [this]() {
 
-    // Esegui validazione iniziale
-    //validateInputs();
+        QString dbName = m_dbName->text().trimmed();
+        if (dbName.isEmpty()) {
+            QMessageBox::warning(this, "Errore", "Inserisci un nome di database valido.");
+            return;
+        }
+
+        QSqlDatabase db;
+        QString err;
+
+        // CHIAMATA CORRETTA AL TUO DBConnector
+        if (!DBConnector::connect(dbName, db, err)) {
+            QMessageBox::warning(this, "Errore connessione", err);
+            return;     // NON chiudere il dialogo
+        }
+        qDebug() << "CONNESSIONE OK";
+
+
+        // Connessione riuscita
+        accept();
+    });
+
 }
 
 DBConnectParams DBConnectDialog::params() const {

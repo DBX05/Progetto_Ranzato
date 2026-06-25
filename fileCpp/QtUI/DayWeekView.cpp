@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <QDate>
 #include <QLocale>
+#include <../impegno/impegno.h>
 
 DayWeekView::DayWeekView(QWidget* parent)
     : QWidget(parent),
@@ -14,6 +15,7 @@ DayWeekView::DayWeekView(QWidget* parent)
       m_selectedDate(QDate::currentDate())
 {
 }
+
 
 void DayWeekView::setModel(EventModel* model)
 {
@@ -114,6 +116,24 @@ void DayWeekView::drawMonth(QPainter& p)
 
             p.drawText(x + 5, y + 15, QString::number(day));
             day++;
+
+            auto evs = eventsFor(current);
+int offset = 30;
+
+p.setFont(QFont("Arial", 7));
+
+for (auto& ev : evs) {
+    QString name = QString::fromStdString(ev->getNome());
+    QString desc = QString::fromStdString(ev->getDescrizione());
+
+    QString line = name;
+    if (!desc.isEmpty())
+        line += " - " + desc;
+
+    p.drawText(x + 5, y + offset, line.left(25)); // evita overflow
+    offset += 12;
+}
+
         }
     }
 }
@@ -196,17 +216,18 @@ void DayWeekView::mousePressEvent(QMouseEvent* event)
     int row = event->pos().y() / cellH;
 
     QDate base = m_currentDate.isValid() ? m_currentDate : QDate::currentDate();
+
+    // CORRETTO: mese corrente, NON month()-1
     QDate first(base.year(), base.month(), 1);
+
     int startCol = first.dayOfWeek() - 1;
     int days = first.daysInMonth();
 
     int index = row * 7 + col;
     int day = index - startCol + 1;
 
-    if (day < 1 || day > days) {
-        QWidget::mousePressEvent(event);
+    if (day < 1 || day > days)
         return;
-    }
 
     m_selectedDate = QDate(base.year(), base.month(), day);
 
@@ -214,12 +235,152 @@ void DayWeekView::mousePressEvent(QMouseEvent* event)
     update();
 }
 
+
+std::vector<std::shared_ptr<eventoLungo>> DayWeekView::eventsFor(const QDate& d) const
+{
+    if (!m_model) return {};
+
+    dateTime dt(d.year(), d.month(), d.day(), 0, 0, 0);
+    return m_model->eventsForDate(dt);
+}
+
+
 void DayWeekView::drawDay(QPainter& p)
 {
-    p.drawText(20, 20, "Vista Giorno (da implementare)");
+    QDate d = m_selectedDate.isValid() ? m_selectedDate : QDate::currentDate();
+
+    // intestazione
+    p.setFont(QFont("Arial", 14, QFont::Bold));
+    p.drawText(20, 30, d.toString("dddd dd MMMM yyyy"));
+
+    int top = 50;
+    int left = 60;
+    int hourHeight = (height() - top - 20) / (m_hourEnd - m_hourStart);
+    int w = width() - left - 20;
+
+    // griglia oraria
+    p.setFont(QFont("Arial", 10));
+    for (int h = m_hourStart; h <= m_hourEnd; ++h) {
+        int y = top + (h - m_hourStart) * hourHeight;
+
+        p.setPen(QColor(200,200,200));
+        p.drawLine(left, y, width() - 10, y);
+
+        p.setPen(Qt::black);
+        p.drawText(10, y + 5, QString("%1:00").arg(h, 2, 10, QChar('0')));
+    }
+
+    // eventi del giorno
+    auto evs = eventsFor(d);
+
+    for (auto& ev : evs) {
+        auto start = ev->getMomentoInizio();
+        auto end   = ev->getMomentoFine();
+
+        int sh = start.getSec();
+        int eh = end.getSec();
+        int sm = start.getMin();
+        int em = end.getMin();
+
+        double startPos = (sh - m_hourStart) * hourHeight + (sm / 60.0) * hourHeight;
+        double endPos   = (eh - m_hourStart) * hourHeight + (em / 60.0) * hourHeight;
+
+        QRect r(left + 5, top + startPos, w - 10, endPos - startPos);
+
+        p.fillRect(r, QColor(180, 210, 255));
+        p.setPen(Qt::blue);
+        p.drawRect(r);
+
+        p.setPen(Qt::black);
+        QString text = QString::fromStdString(ev->getNome()) +
+               "\n" +
+               QString::fromStdString(ev->getDescrizione());
+
+        p.drawText(r.adjusted(5, 5, -5, -5),
+                    Qt::AlignLeft | Qt::AlignTop,
+                    text);
+
+    }
 }
+
 
 void DayWeekView::drawWeek(QPainter& p)
 {
-    p.drawText(20, 20, "Vista Settimana (da implementare)");
+    QDate base = m_selectedDate.isValid() ? m_selectedDate : QDate::currentDate();
+    QDate monday = base.addDays(-(base.dayOfWeek() - 1));
+
+    int top = 40;
+    int left = 60;
+
+    int dayWidth = (width() - left - 20) / 7;
+    int hourHeight = (height() - top - 20) / (m_hourEnd - m_hourStart);
+
+    // intestazione
+    p.setFont(QFont("Arial", 14, QFont::Bold));
+    p.drawText(20, 25, QString("Settimana %1 - %2")
+               .arg(monday.toString("dd MMM"))
+               .arg(monday.addDays(6).toString("dd MMM yyyy")));
+
+    // intestazioni giorni
+    p.setFont(QFont("Arial", 10, QFont::Bold));
+    for (int i = 0; i < 7; ++i) {
+        QDate d = monday.addDays(i);
+        int x = left + i * dayWidth;
+
+        if (d == m_selectedDate) {
+            p.fillRect(QRect(x, top, dayWidth, 20), QColor(200,220,255));
+        }
+
+        p.setPen(Qt::black);
+        p.drawText(x + 5, top + 15, d.toString("ddd dd"));
+    }
+
+    // griglia oraria
+    for (int h = m_hourStart; h <= m_hourEnd; ++h) {
+        int y = top + 20 + (h - m_hourStart) * hourHeight;
+
+        p.setPen(QColor(200,200,200));
+        p.drawLine(left, y, width() - 10, y);
+
+        p.setPen(Qt::black);
+        p.drawText(10, y + 5, QString("%1:00").arg(h, 2, 10, QChar('0')));
+    }
+
+    // eventi
+    for (int i = 0; i < 7; ++i) {
+        QDate d = monday.addDays(i);
+        auto evs = eventsFor(d);
+
+        int x = left + i * dayWidth;
+
+        for (auto& ev : evs) {
+            auto start = ev->getMomentoInizio();
+            auto end   = ev->getMomentoFine();
+
+            int sh = start.getSec();
+            int eh = end.getSec();
+            int sm = start.getMin();
+            int em = end.getMin();
+
+            double startPos = (sh - m_hourStart) * hourHeight + (sm / 60.0) * hourHeight;
+            double endPos   = (eh - m_hourStart) * hourHeight + (em / 60.0) * hourHeight;
+
+            QRect r(x + 5, top + 20 + startPos, dayWidth - 10, endPos - startPos);
+
+            p.fillRect(r, QColor(180, 210, 255));
+            p.setPen(Qt::blue);
+            p.drawRect(r);
+
+            p.setPen(Qt::black);
+            QString text = QString::fromStdString(ev->getNome()) +
+               "\n" +
+               QString::fromStdString(ev->getDescrizione());
+
+            p.drawText(r.adjusted(5, 5, -5, -5),
+                        Qt::AlignLeft | Qt::AlignTop,
+                        text);
+
+        }
+    }
 }
+

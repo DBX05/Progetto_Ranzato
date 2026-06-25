@@ -1,5 +1,7 @@
 #include "EventModel.h"
 #include <QVariant>
+#include <QColor>
+#include <QIcon>
 #include <algorithm>
 
 EventModel::EventModel(QObject* parent)
@@ -21,13 +23,45 @@ QVariant EventModel::data(const QModelIndex& index, int role) const
     const auto& ev = m_events[index.row()];
 
     switch (role) {
-    case IdRole:          return ev->getId();
-    case NameRole:        return QString::fromStdString(ev->getNome());
-    case StartRole:       return QString::fromStdString(ev->getMomentoInizio().getDateTime());
-    case EndRole:         return QString::fromStdString(ev->getMomentoFine().getDateTime());
-    case PriorityRole:    return (int)ev->getPriorita();
-    case DescriptionRole: return QString::fromStdString(ev->getDescrizione());
-    default:              return {};
+
+    case IdRole:
+        return ev->getId();
+
+    case NameRole:
+        return QString::fromStdString(ev->getNome());
+
+    case StartRole:
+        return QString::fromStdString(ev->getMomentoInizio().getDateTime());
+
+    case EndRole:
+        return QString::fromStdString(ev->getMomentoFine().getDateTime());
+
+    case PriorityRole:
+        return (int)ev->getPriorita();
+
+    case DescriptionRole:
+        return QString::fromStdString(ev->getDescrizione());
+
+    // 🎨 COLORE basato sulla priorità
+    case ColorRole: {
+        int p = ev->getPriorita();
+        if (p == 1) return QColor("#4CAF50");   // verde
+        if (p == 2) return QColor("#FFC107");   // giallo
+        if (p == 3) return QColor("#F44336");   // rosso
+        return QColor("#90A4AE");               // grigio
+    }
+
+    // 🖼️ ICONA basata sulla priorità
+    case IconRole: {
+        int p = ev->getPriorita();
+        if (p == 1) return QIcon(":/icons/low.png");
+        if (p == 2) return QIcon(":/icons/medium.png");
+        if (p == 3) return QIcon(":/icons/high.png");
+        return QIcon(":/icons/default.png");
+    }
+
+    default:
+        return {};
     }
 }
 
@@ -40,6 +74,8 @@ QHash<int, QByteArray> EventModel::roleNames() const
     roles[EndRole]         = "end";
     roles[PriorityRole]    = "priority";
     roles[DescriptionRole] = "description";
+    roles[ColorRole]       = "color";
+    roles[IconRole]        = "icon";
     return roles;
 }
 
@@ -64,7 +100,7 @@ void EventModel::clear()
 std::vector<std::shared_ptr<eventoLungo>> EventModel::eventsForDate(const dateTime& dt) const
 {
     std::vector<std::shared_ptr<eventoLungo>> res;
-    QString target = QString::fromStdString(dt.getDateTime()).mid(0, 10); // "YYYY-MM-DD"
+    QString target = QString::fromStdString(dt.getDateTime()).mid(0, 10);
 
     for (const auto& ev : m_events) {
         QString di = QString::fromStdString(ev->getMomentoInizio().getDateTime()).mid(0, 10);

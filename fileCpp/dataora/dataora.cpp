@@ -259,7 +259,7 @@ void dateTime::FormatDate(std::string s)
     tm.tm_min = getMin();
     tm.tm_hour = getHour();
     tm.tm_mday = getGiorniMese();
-    tm.tm_year = getAnno();
+    tm.tm_year = getAnno() - 1900;
     tm.tm_mon = numMese();
     std::ostringstream ss;
     if (s.empty()) ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");

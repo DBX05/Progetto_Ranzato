@@ -31,7 +31,7 @@ dateTime qStringToDateTime(const QString& s)
     if (dow < 0) dow = 0;
     if (dow > 6) dow = 6;
 
-    return dateTime(year, month, day, qdt.time().hour(), qdt.time().minute(), qdt.time().second());
+    return dateTime(year, month, day, dow, qdt.time().hour(), qdt.time().minute(), qdt.time().second());
 }
 
 
