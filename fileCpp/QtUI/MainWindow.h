@@ -57,6 +57,12 @@ private:
 
     void onLabelCalendarClicked();
 
+    void onDeleteEventClicked();
+
+    void onFilterTypeChanged(const QString& type);
+
+    void loadEventsForVisibleRange();
+
     Ui::MainWindow* ui;
 
     QSqlDatabase m_db;

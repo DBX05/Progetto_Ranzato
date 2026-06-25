@@ -40,6 +40,24 @@
          </widget>
         </item>
         <item>
+            <widget class="QPushButton" name="deleteEventButton">
+            <property name="text">
+            <string>Elimina evento</string>
+            </property>
+            </widget>
+        </item>
+
+        <item>
+            <widget class="QComboBox" name="filterTypeCombo">
+            <item><property name="text"><string>Tutti</string></property></item>
+            <item><property name="text"><string>Compleanno</string></property></item>
+            <item><property name="text"><string>Riunione</string></property></item>
+            <item><property name="text"><string>Raggruppa</string></property></item>
+            <item><property name="text"><string>Generico</string></property></item>
+            </widget>
+        </item>
+
+        <item>
          <widget class="QComboBox" name="modeCombo">
           <item>
            <property name="text">

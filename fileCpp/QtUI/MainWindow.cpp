@@ -9,7 +9,7 @@
 #include "EventDelegate.h"
 #include "DayWeekView.h"
 
-
+#include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlQuery>
@@ -60,6 +60,17 @@ MainWindow::MainWindow(QSqlDatabase db, int userId,
 
     connect(m_dayWeekView, &DayWeekView::daySelected,
             this, &MainWindow::onDaySelectedFromView);
+
+    connect(ui->deleteEventButton, &QPushButton::clicked,
+        this, &MainWindow::onDeleteEventClicked);
+
+
+    connect(ui->filterTypeCombo, &QComboBox::currentTextChanged,
+        this, &MainWindow::onFilterTypeChanged);
+
+        connect(this, &MainWindow::onDeleteEventClicked,
+        this, &MainWindow::updateEventsForCurrentMode);
+
 
     // MENU FILE
     QMenu* fileMenu = menuBar()->addMenu("File");
@@ -593,3 +604,187 @@ void MainWindow::onLabelCalendarClicked()
     m_dayWeekView->setDate(dateTime(next.year(), next.month(), 1, 0, 0, 0));
     updateAllLabelsForCurrentMode();
 }
+
+
+void MainWindow::onDeleteEventClicked()
+{
+    QString name = QInputDialog::getText(this, "Elimina evento", "Nome evento:");
+    if (name.isEmpty()) return;
+
+    QString dateStr = QInputDialog::getText(this, "Elimina evento", "Data (YYYY-MM-DD):");
+    QDate date = QDate::fromString(dateStr, "yyyy-MM-dd");
+    if (!date.isValid()) {
+        QMessageBox::warning(this, "Errore", "Data non valida.");
+        return;
+    }
+
+    QSqlQuery q(m_db);
+    q.prepare(R"(
+        DELETE FROM events
+        WHERE user_id = :uid
+          AND name = :name
+          AND date(start_datetime) <= :d
+          AND date(end_datetime) >= :d
+    )");
+
+    q.bindValue(":uid", m_userId);
+    q.bindValue(":name", name);
+    q.bindValue(":d", date.toString(Qt::ISODate));
+
+    if (!q.exec()) {
+        QMessageBox::critical(this, "Errore DB", q.lastError().text());
+        return;
+    }
+
+    if (q.numRowsAffected() == 0) {
+        QMessageBox::information(this, "Nessun evento", "Nessun evento trovato.");
+        return;
+    }
+
+    QMessageBox::information(this, "OK", "Evento eliminato.");
+
+    loadEventsForVisibleRange();
+}
+
+
+void MainWindow::onFilterTypeChanged(const QString& type)
+{
+    if (!m_db.isOpen()) return;
+    if (!m_eventModel) return;
+
+    if (type == "Tutti" || type.isEmpty()) {
+        loadEventsForVisibleRange();
+        return;
+    }
+
+    QDate base = ui->calendarWidget->selectedDate();
+    if (!base.isValid())
+        base = QDate::currentDate();
+
+    QDate start(base.year(), base.month(), 1);
+    QDate end = start.addMonths(1).addDays(-1);
+
+    QSqlQuery q(m_db);
+    q.prepare(R"(
+        SELECT id, name, start_datetime, end_datetime
+        FROM events
+        WHERE user_id = :uid
+          AND name LIKE :filter
+          AND date(start_datetime) <= :end
+          AND date(end_datetime) >= :start
+    )");
+
+    q.bindValue(":uid", m_userId);
+    q.bindValue(":filter", "%" + type + "%");
+    q.bindValue(":start", start.toString(Qt::ISODate));
+    q.bindValue(":end", end.toString(Qt::ISODate));
+
+    if (!q.exec()) {
+        qWarning() << "Errore filtro:" << q.lastError().text();
+        return;
+    }
+
+    m_eventModel->clear();
+
+    while (q.next()) {
+        int id = q.value("id").toInt();
+        QString name = q.value("name").toString();
+        QString sdt = q.value("start_datetime").toString();
+        QString edt = q.value("end_datetime").toString();
+
+        dateTime dtStart = qStringToDateTime(sdt);
+        dateTime dtEnd   = qStringToDateTime(edt);
+
+        orario oStart(dtStart.getHour(), dtStart.getMin(), dtStart.getSec());
+        orario oEnd(dtEnd.getHour(), dtEnd.getMin(), dtEnd.getSec());
+
+        auto ev = std::make_shared<eventoLungo>(
+            id,
+            dtStart,
+            1,
+            name.toStdString(),
+            dtEnd,
+            "",
+            oStart,
+            oEnd
+        );
+
+        m_eventModel->addEvent(ev);
+    }
+
+    if (m_dayWeekView)
+        m_dayWeekView->update();
+    updateEventsForCurrentMode();
+
+
+}
+
+void MainWindow::loadEventsForVisibleRange()
+{
+    if (!ui || !ui->calendarWidget) return;
+    if (!m_eventModel) return;
+    if (!m_db.isOpen()) return;
+
+    // Calcolo del mese visibile
+    QDate base = ui->calendarWidget->selectedDate();
+    if (!base.isValid())
+        base = QDate::currentDate();
+
+    QDate start(base.year(), base.month(), 1);
+    QDate end = start.addMonths(1).addDays(-1);
+
+    QSqlQuery q(m_db);
+    q.prepare(R"(
+        SELECT id, name, start_datetime, end_datetime
+        FROM events
+        WHERE user_id = :uid
+          AND date(start_datetime) <= :end
+          AND date(end_datetime) >= :start
+    )");
+
+    q.bindValue(":uid", m_userId);
+    q.bindValue(":start", start.toString(Qt::ISODate));
+    q.bindValue(":end", end.toString(Qt::ISODate));
+
+    if (!q.exec()) {
+        qWarning() << "Errore query loadEventsForVisibleRange:" << q.lastError().text();
+        return;
+    }
+
+    m_eventModel->clear();
+
+    while (q.next()) {
+        int id = q.value("id").toInt();
+        QString name = q.value("name").toString();
+        QString sdt = q.value("start_datetime").toString();
+        QString edt = q.value("end_datetime").toString();
+
+        dateTime dtStart = qStringToDateTime(sdt);
+        dateTime dtEnd   = qStringToDateTime(edt);
+
+        orario oStart(dtStart.getHour(), dtStart.getMin(), dtStart.getSec());
+        orario oEnd(dtEnd.getHour(), dtEnd.getMin(), dtEnd.getSec());
+
+        auto ev = std::make_shared<eventoLungo>(
+            id,
+            dtStart,
+            1, // priorità default
+            name.toStdString(),
+            dtEnd,
+            "", // descrizione vuota
+            oStart,
+            oEnd
+        );
+
+        m_eventModel->addEvent(ev);
+    }
+
+    if (m_dayWeekView)
+        m_dayWeekView->update();
+
+    updateEventsForCurrentMode();
+
+
+}
+
+
