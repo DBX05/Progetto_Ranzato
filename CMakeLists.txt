@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 
+if(WIN32)
+    if(NOT DEFINED CMAKE_C_COMPILER AND EXISTS "C:/Qt/Tools/mingw1120_64/bin/gcc.exe")
+        set(CMAKE_C_COMPILER "C:/Qt/Tools/mingw1120_64/bin/gcc.exe")
+    endif()
+    if(NOT DEFINED CMAKE_CXX_COMPILER AND EXISTS "C:/Qt/Tools/mingw1120_64/bin/g++.exe")
+        set(CMAKE_CXX_COMPILER "C:/Qt/Tools/mingw1120_64/bin/g++.exe")
+    endif()
+    if(EXISTS "C:/Qt/Tools/mingw1120_64/bin/mingw32-make.exe")
+        set(CMAKE_MAKE_PROGRAM "C:/Qt/Tools/mingw1120_64/bin/mingw32-make.exe")
+    endif()
+endif()
+
 project(untitled VERSION 0.1 LANGUAGES CXX)
 
 # Percorso root di Qt (adatta se usi versione diversa)
