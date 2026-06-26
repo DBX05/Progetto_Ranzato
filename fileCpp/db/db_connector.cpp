@@ -69,41 +69,67 @@ bool DBConnector::connect(const QString &dbName, QSqlDatabase &outDb, QString &o
         // Create events table
         if (!q.exec(R"(
             CREATE TABLE IF NOT EXISTS events (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id     INTEGER NOT NULL,
+                name        TEXT    NOT NULL,
                 start_datetime TEXT NOT NULL,
-                end_datetime TEXT NOT NULL,
-                description TEXT,        -- Added description field
-                priority INTEGER DEFAULT 1, -- Added priority field (default to 1)
-                event_type TEXT,         -- Added event_type field
+                end_datetime   TEXT NOT NULL,
+                description TEXT,
+                priority    INTEGER DEFAULT 1,
+                event_type  TEXT    DEFAULT 'Generico',
                 FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
             );
         )")) {
             outError = "Failed to create 'events' table: " + q.lastError().text();
             qCritical() << outError;
-            db.close(); // Close connection on critical error
+            db.close();
             return false;
         }
         qDebug() << "[DBConnector] 'events' table created successfully.";
 
-         // Create event_types table (optional, for enum-like types)
-        if (!q.exec(R"(
-            CREATE TABLE IF NOT EXISTS event_types (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type_name TEXT NOT NULL UNIQUE
-            );
-        )")) {
-            outError = "Failed to create 'event_types' table: " + q.lastError().text();
-            qCritical() << outError;
-            db.close();
-            return false;
-        }
-        qDebug() << "[DBConnector] 'event_types' table created successfully.";
-        // Optionally insert default types here if needed
-    } else {
-        qDebug() << "[DBConnector] Database file already exists. Skipping table creation.";
+        // ---- Seed: utenti di esempio ----
+        q.exec(R"(
+            INSERT INTO users (name, email, password_hash) VALUES
+            ('Riccardo Bianchi', 'riccardo@example.com', 'pass123'),
+            ('Laura Verdi',      'laura@example.com',    'laura2024'),
+            ('Marco Rossi',      'marco@example.com',    'marco_pw');
+        )");
+        qDebug() << "[DBConnector] Sample users inserted.";
+
+        // ---- Seed: eventi di esempio (user_id 1 = Riccardo) ----
+        q.exec(R"(
+            INSERT INTO events (user_id, name, start_datetime, end_datetime, description, priority, event_type) VALUES
+            (1, 'Riunione di team',    '2026-06-26 09:00:00', '2026-06-26 10:30:00', 'Review sprint settimanale',   2, 'Riunione'),
+            (1, 'Allenamento',         '2026-06-26 18:00:00', '2026-06-26 19:30:00', 'Palestra — gambe',            1, 'Generico'),
+            (1, 'Compleanno Marco',    '2026-06-27 20:00:00', '2026-06-27 23:00:00', 'Cena a sorpresa',             1, 'Compleanno'),
+            (1, 'Visita medica',       '2026-06-28 15:00:00', '2026-06-28 16:00:00', 'Controllo annuale',           3, 'Generico'),
+            (1, 'Studio PaO',          '2026-06-29 14:00:00', '2026-06-29 17:00:00', 'Preparazione esame giugno',   2, 'Generico'),
+            (1, 'Call con cliente',    '2026-06-30 11:00:00', '2026-06-30 11:45:00', 'Demo progetto Qt',            2, 'Riunione'),
+            (1, 'Festa laurea Laura',  '2026-07-05 19:00:00', '2026-07-05 23:59:00', '',                            1, 'Festività'),
+            (2, 'Corso yoga',          '2026-06-26 07:30:00', '2026-06-26 08:30:00', '',                            1, 'Generico'),
+            (2, 'Riunione dipartimento','2026-06-28 10:00:00','2026-06-28 12:00:00', 'Budget Q3',                   3, 'Riunione'),
+            (3, 'Kick-off progetto',   '2026-06-27 09:00:00', '2026-06-27 11:00:00', 'Nuovo cliente enterprise',    2, 'Riunione');
+        )");
+        qDebug() << "[DBConnector] Sample events inserted.";
+
+        qDebug() << "[DBConnector] Database file already exists. Running schema migration...";
+
+        // SQLite >= 3.37 supports ADD COLUMN IF NOT EXISTS; for older versions we ignore the error.
+        auto tryAlter = [&](const char* sql) {
+            QSqlQuery aq(db);
+            if (!aq.exec(sql))
+                qWarning() << "[DBConnector] Migration note:" << aq.lastError().text();
+        };
+
+        tryAlter("ALTER TABLE events ADD COLUMN description TEXT");
+        tryAlter("ALTER TABLE events ADD COLUMN priority    INTEGER DEFAULT 1");
+        tryAlter("ALTER TABLE events ADD COLUMN event_type  TEXT    DEFAULT 'Generico'");
+
+        qDebug() << "[DBConnector] Schema migration complete.";
     }
+
+    // ---- remove old branch close ----
+    // (the old else block and its closing brace are replaced above)
 
     // Assign the connected database object to the output parameter.
     outDb = db;

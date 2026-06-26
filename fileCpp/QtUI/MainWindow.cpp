@@ -27,6 +27,8 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QTextEdit>
+#include <QSpinBox>
 
 MainWindow::MainWindow(QSqlDatabase db, int userId,
                        const QString& name, const QString& email,
@@ -131,8 +133,19 @@ void MainWindow::setupStackedPages()
     m_newEventTypeCombo->addItem("Generico", 0);
     m_newEventTypeCombo->addItem("Compleanno", 1);
     m_newEventTypeCombo->addItem("Riunione", 2);
-    m_newEventTypeCombo->addItem("Raggruppa", 3);
+    m_newEventTypeCombo->addItem("Festività", 3);
     createForm->addRow("Tipo:", m_newEventTypeCombo);
+
+    m_newEventPriorityEdit = new QSpinBox(m_createPage);
+    m_newEventPriorityEdit->setRange(1, 3);
+    m_newEventPriorityEdit->setValue(1);
+    m_newEventPriorityEdit->setToolTip("1 = Bassa, 2 = Media, 3 = Alta");
+    createForm->addRow("Priorità (1-3):", m_newEventPriorityEdit);
+
+    m_newEventDescEdit = new QTextEdit(m_createPage);
+    m_newEventDescEdit->setPlaceholderText("Descrizione (opzionale)");
+    m_newEventDescEdit->setMaximumHeight(80);
+    createForm->addRow("Descrizione:", m_newEventDescEdit);
 
     createLayout->addLayout(createForm);
 
@@ -235,7 +248,7 @@ void MainWindow::loadEventsFromDb()
     qDebug() << "[loadEventsFromDb] Event model cleared.";
 
     QSqlQuery q(m_db);
-    q.prepare("SELECT id, name, start_datetime, end_datetime "
+    q.prepare("SELECT id, name, start_datetime, end_datetime, description, priority, event_type "
               "FROM events WHERE user_id = :uid ORDER BY start_datetime");
     q.bindValue(":uid", m_userId);
     qDebug() << "[loadEventsFromDb] Prepared query for user" << m_userId;
@@ -250,10 +263,14 @@ void MainWindow::loadEventsFromDb()
     int rowIndex = 0;
     while (q.next()) {
         ++rowIndex;
-        int id = q.value("id").toInt();
+        int id       = q.value("id").toInt();
         QString name = q.value("name").toString();
         QString start = q.value("start_datetime").toString();
         QString end   = q.value("end_datetime").toString();
+        QString desc  = q.value("description").toString();
+        int priority  = q.value("priority").toInt();
+        if (priority < 1) priority = 1;
+        // event_type stored for display; eventoLungo is the concrete type we always instantiate
 
         qDebug() << "[loadEventsFromDb] Row" << rowIndex << "id=" << id
                  << "name=" << name
@@ -278,10 +295,10 @@ void MainWindow::loadEventsFromDb()
         auto ev = std::make_shared<eventoLungo>(
             id,
             dtStart,
-            1, // Default priority if not in DB
+            static_cast<unsigned int>(priority),
             name.toStdString(),
             dtEnd,
-            "", // Default description if not in DB
+            desc.toStdString(),
             oStart,
             oEnd
         );
@@ -299,22 +316,34 @@ bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
 {
     auto el = std::dynamic_pointer_cast<eventoLungo>(baseEv);
     if (!el) return false;
+    return insertEventoFull(el,
+                            QString::fromStdString(el->getevName()),
+                            static_cast<int>(el->getPriorita()),
+                            QString::fromStdString(el->getDescrizione()));
+}
 
-    dateTime dtStart = el->getMomentoInizio();
-    dateTime dtEnd   = el->getMomentoFine();
+bool MainWindow::insertEventoFull(const std::shared_ptr<eventoLungo>& el,
+                                   const QString& eventType,
+                                   int priority,
+                                   const QString& description)
+{
+    if (!el) return false;
 
-    QString startStr = QString::fromStdString(dtStart.getDateTime());
-    QString endStr   = QString::fromStdString(dtEnd.getDateTime());
+    QString startStr = QString::fromStdString(el->getMomentoInizio().getDateTime());
+    QString endStr   = QString::fromStdString(el->getMomentoFine().getDateTime());
     qDebug() << "[insertEvento] Inserting event. Start:" << startStr << "End:" << endStr;
 
     QSqlQuery q(m_db);
-    q.prepare("INSERT INTO events (user_id, name, start_datetime, end_datetime) "
-              "VALUES (:uid, :name, :start, :end)");
+    q.prepare("INSERT INTO events (user_id, name, start_datetime, end_datetime, description, priority, event_type) "
+              "VALUES (:uid, :name, :start, :end, :desc, :prio, :etype)");
 
-    q.bindValue(":uid", m_userId);
-    q.bindValue(":name", QString::fromStdString(el->getNome()));
+    q.bindValue(":uid",   m_userId);
+    q.bindValue(":name",  QString::fromStdString(el->getNome()));
     q.bindValue(":start", startStr);
-    q.bindValue(":end", endStr);
+    q.bindValue(":end",   endStr);
+    q.bindValue(":desc",  description);
+    q.bindValue(":prio",  priority);
+    q.bindValue(":etype", eventType);
 
     if (!q.exec()) {
         QMessageBox::warning(this, "Errore", "Errore inserimento evento:\n" + q.lastError().text());
@@ -322,7 +351,7 @@ bool MainWindow::insertEvento(const std::shared_ptr<evento>& baseEv)
     }
 
     el->setId(q.lastInsertId().toInt());
-    m_eventModel->addEvent(el); // Add to model after successful DB insertion
+    m_eventModel->addEvent(el);
     qDebug() << "[insertEvento] Event inserted successfully. New ID:" << el->getId();
     return true;
 }
@@ -353,6 +382,9 @@ void MainWindow::onCreateEventSubmit()
     QDate date = m_newEventDateEdit->date();
     QTime startTime = m_newEventStartEdit->time();
     QTime endTime = m_newEventEndEdit->time();
+    int priority = m_newEventPriorityEdit ? m_newEventPriorityEdit->value() : 1;
+    QString description = m_newEventDescEdit ? m_newEventDescEdit->toPlainText().trimmed() : "";
+    QString eventType = m_newEventTypeCombo->currentText();
 
     QString startStr = QString("%1-%2-%3 %4:%5:00")
         .arg(date.year(), 4, 10, QChar('0'))
@@ -376,15 +408,16 @@ void MainWindow::onCreateEventSubmit()
     auto ev = std::make_shared<eventoLungo>(
         -1,
         dtStart,
-        1,
+        static_cast<unsigned int>(priority),
         name.toStdString(),
         dtEnd,
-        "",
+        description.toStdString(),
         oStart,
         oEnd
     );
 
-    if (insertEvento(ev)) {
+    // Passa tipo e priorità al DB tramite insertEvento esteso
+    if (insertEventoFull(ev, eventType, priority, description)) {
         loadEventsFromDb();
         updateViewForCurrentMonth();
         showMainPage();
@@ -657,19 +690,25 @@ void MainWindow::loadEventsForVisibleRange()
     bool applyFilter = (filterType != "Tutti" && !filterType.isEmpty());
 
     QString queryStr = R"(
-        SELECT id, name, start_datetime, end_datetime
+        SELECT id, name, start_datetime, end_datetime, description, priority, event_type
         FROM events
         WHERE user_id = :uid
           AND date(start_datetime) <= :end
           AND date(end_datetime) >= :start
-        ORDER BY start_datetime
     )";
+
+    if (applyFilter)
+        queryStr += "  AND event_type = :etype\n";
+
+    queryStr += "ORDER BY start_datetime";
 
     QSqlQuery q(m_db);
     q.prepare(queryStr);
-    q.bindValue(":uid", m_userId);
+    q.bindValue(":uid",   m_userId);
     q.bindValue(":start", startDate.toString(Qt::ISODate));
-    q.bindValue(":end", endDate.toString(Qt::ISODate));
+    q.bindValue(":end",   endDate.toString(Qt::ISODate));
+    if (applyFilter)
+        q.bindValue(":etype", filterType);
 
     if (!q.exec()) {
         qWarning() << "Error loading events for visible range:" << q.lastError().text();
@@ -681,8 +720,11 @@ void MainWindow::loadEventsForVisibleRange()
     while (q.next()) {
         int id = q.value("id").toInt();
         QString name = q.value("name").toString();
-        QString sdt = q.value("start_datetime").toString();
-        QString edt = q.value("end_datetime").toString();
+        QString sdt  = q.value("start_datetime").toString();
+        QString edt  = q.value("end_datetime").toString();
+        QString desc = q.value("description").toString();
+        int priority = q.value("priority").toInt();
+        if (priority < 1) priority = 1;
 
         dateTime dtStart = qStringToDateTime(sdt);
         dateTime dtEnd   = qStringToDateTime(edt);
@@ -693,31 +735,13 @@ void MainWindow::loadEventsForVisibleRange()
         auto ev = std::make_shared<eventoLungo>(
             id,
             dtStart,
-            1,
+            static_cast<unsigned int>(priority),
             name.toStdString(),
             dtEnd,
-            "",
+            desc.toStdString(),
             oStart,
             oEnd
         );
-
-        if (applyFilter) {
-            const std::string typeName = ev->getevName();
-            bool matches = false;
-            if (filterType == "Compleanno") {
-                matches = (typeName == "compleann");
-            } else if (filterType == "Riunione") {
-                matches = (typeName == "riunione");
-            } else if (filterType == "Raggruppa") {
-                matches = (typeName == "raggruppa");
-            } else if (filterType == "Generico") {
-                matches = (typeName == "evento");
-            }
-
-            if (!matches) {
-                continue;
-            }
-        }
 
         m_eventModel->addEvent(ev);
     }

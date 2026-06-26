@@ -16,6 +16,8 @@ class QLineEdit;
 class QDateEdit;
 class QTimeEdit;
 class QComboBox;
+class QTextEdit;
+class QSpinBox;
 
 namespace Ui {
 class MainWindow;
@@ -52,6 +54,10 @@ private:
     QString sqlTime(const orario& o) const;
 
     bool insertEvento(const std::shared_ptr<evento>& baseEv);
+    bool insertEventoFull(const std::shared_ptr<eventoLungo>& el,
+                          const QString& eventType,
+                          int priority,
+                          const QString& description);
     void loadEventsFromDb();
     void loadEventsForDate(const QDate& date);
 
@@ -89,6 +95,8 @@ private:
     QTimeEdit* m_newEventStartEdit = nullptr;
     QTimeEdit* m_newEventEndEdit = nullptr;
     QComboBox* m_newEventTypeCombo = nullptr;
+    QTextEdit* m_newEventDescEdit = nullptr;
+    QSpinBox*  m_newEventPriorityEdit = nullptr;
 
     QLineEdit* m_deleteEventNameEdit = nullptr;
     QDateEdit* m_deleteEventDateEdit = nullptr;

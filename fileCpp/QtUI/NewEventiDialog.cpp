@@ -52,7 +52,7 @@ NewEventDialog::NewEventDialog(QWidget* parent)
     m_typeCombo->addItem("Generico", 0);
     m_typeCombo->addItem("Compleanno", 1);
     m_typeCombo->addItem("Riunione", 2);
-    m_typeCombo->addItem("Raggruppa", 3);
+    m_typeCombo->addItem("Festività", 3);
     formLayout->addRow("Tipo evento:", m_typeCombo);
 
     layout->addLayout(formLayout);

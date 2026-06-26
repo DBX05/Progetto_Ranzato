@@ -52,7 +52,7 @@
             <item><property name="text"><string>Tutti</string></property></item>
             <item><property name="text"><string>Compleanno</string></property></item>
             <item><property name="text"><string>Riunione</string></property></item>
-            <item><property name="text"><string>Raggruppa</string></property></item>
+            <item><property name="text"><string>Festività</string></property></item>
             <item><property name="text"><string>Generico</string></property></item>
             </widget>
         </item>
