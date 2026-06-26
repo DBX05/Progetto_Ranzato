@@ -1,0 +1,35 @@
+[
+  {
+    "id": 100,
+    "nome": "Conferenza Qt",
+    "priorita": 2,
+    "momentoInizio": "2026-07-10T09:00:00",
+    "momentoFine":   "2026-07-10T12:00:00",
+    "inizio": "09:00:00",
+    "fine":   "12:00:00",
+    "Descrizione": "Sessione mattutina sulla nuova API Qt 6",
+    "Particolarita": null
+  },
+  {
+    "id": 101,
+    "nome": "Pranzo di lavoro",
+    "priorita": 1,
+    "momentoInizio": "2026-07-10T13:00:00",
+    "momentoFine":   "2026-07-10T14:30:00",
+    "inizio": "13:00:00",
+    "fine":   "14:30:00",
+    "Descrizione": "Con il team di progetto",
+    "Particolarita": null
+  },
+  {
+    "id": 102,
+    "nome": "Scadenza relazione",
+    "priorita": 3,
+    "momentoInizio": "2026-07-15T23:59:00",
+    "momentoFine":   "2026-07-15T23:59:00",
+    "inizio": "23:59:00",
+    "fine":   "23:59:00",
+    "Descrizione": "Consegna relazione PaO entro mezzanotte",
+    "Particolarita": "Obbligatorio"
+  }
+]

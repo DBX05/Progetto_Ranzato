@@ -67,8 +67,6 @@ private:
 
     bool monthHasEvents(const QDate& date);
 
-    void onLabelCalendarClicked();
-
     void onDeleteEventClicked();
 
     void onFilterTypeChanged(const QString& type);

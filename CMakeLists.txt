@@ -25,6 +25,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+        "Build type: Debug, Release, RelWithDebInfo, MinSizeRel" FORCE)
+endif()
+
 # Sorgenti del progetto (includi fileCpp, src, auth, utils)
 file(GLOB_RECURSE PROJECT_SOURCES
     fileCpp/*.cpp

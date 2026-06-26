@@ -55,18 +55,6 @@ public:
     ~evento();
 };
 
-// ==================== TERZO LIVELLO ====================
-class promemoria: public evento
-{
-private:
-    std::string descrizione;
-
-public:
-    promemoria(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, std::string descrizione, orario inizio, orario fine);
-    std::string getDescrizione() const;
-    void modificaPromemoria(std::string nuovaDescrizione);
-};
-
 // ==================== eventoLungo ====================
 class eventoLungo: public evento
 {

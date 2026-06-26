@@ -5,7 +5,6 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-#include "../auth/DBConnectDialog.h"
 #include "../auth/UserAuthDialog.h"
 #include "../db/db_connector.h"
 #include "MainWindow.h"

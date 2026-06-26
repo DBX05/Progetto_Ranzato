@@ -4,15 +4,30 @@
 #include <QWidget>
 #include <QDate>
 #include <QDateTime>
+#include <QSortFilterProxyModel>
 #include <memory>
 
 class EventModel;
 class QCalendarWidget;
-class QLabel;
-class QScrollArea;
+class QListView;
+class EventDelegate;
 
-class eventoLungo;
-namespace dataora { class dateTime; }
+// Proxy che filtra le righe del modello tenendo solo gli eventi
+// che ricadono nella data selezionata
+class EventDateFilter : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    explicit EventDateFilter(QObject* parent = nullptr);
+    void setFilterDate(const QDate& date);
+    void refresh();
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+private:
+    QDate m_date;
+};
 
 class DayWeekView : public QWidget
 {
@@ -24,17 +39,13 @@ public:
     void setModel(EventModel* model);
     void setCalendarWidget(QCalendarWidget* calendar);
 
-    // Aggiorna la label con gli eventi del giorno specificato
     Q_SLOT void updateLabelEventsForDate(const QDate& date);
 
 private:
-    static bool parseDateTimeString(const QString& s, QDateTime& out);
-    QString buildEventsHtmlForDate(const QDate& date) const;
-
-    EventModel* m_model = nullptr;
+    EventModel*      m_model    = nullptr;
     QCalendarWidget* m_calendar = nullptr;
-    QLabel* m_labelEvents = nullptr;
-    QScrollArea* m_scrollArea = nullptr;
+    QListView*       m_listView = nullptr;
+    EventDateFilter* m_filter   = nullptr;
 };
 
 #endif // DAYWEEKVIEW_H

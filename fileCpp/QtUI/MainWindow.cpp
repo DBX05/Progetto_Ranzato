@@ -3,7 +3,6 @@
 #include "ui_MainWindow.h"
 
 #include "EventModel.h"
-#include "NewEventiDialog.h" // Assumed corrected include name
 #include "DayWeekView.h"
 #include "../utils/util_DateTime.h"
 #include "../json/jsonManager.hpp" // Assumed correct path
@@ -550,21 +549,6 @@ void MainWindow::updateLabelEvents(const QDate& date)
         formatted[0] = formatted[0].toUpper();
 
     ui->labelEvents->setText("Eventi del " + formatted);
-}
-
-void MainWindow::onLabelCalendarClicked()
-{
-    // This slot seems to be intended for an interaction with labelCalendar itself.
-    // Currently, it navigates the calendar widget to the next month.
-    QDate currentCalDate = ui->calendarWidget->selectedDate();
-    if (!currentCalDate.isValid())
-        currentCalDate = QDate::currentDate();
-
-    QDate nextMonth = currentCalDate.addMonths(1);
-    ui->calendarWidget->setCurrentPage(nextMonth.year(), nextMonth.month());
-
-    // Update the DayWeekView to show the first day of the new month
-    updateViewForCurrentMonth(); // Ensure the view reflects the new month
 }
 
 void MainWindow::onDeleteEventClicked()
