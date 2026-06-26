@@ -57,30 +57,6 @@
             </widget>
         </item>
 
-        <item>
-         <widget class="QComboBox" name="modeCombo">
-          <item>
-           <property name="text">
-            <string>Day</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Week</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Month</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Year</string>
-           </property>
-          </item>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="rightPane">
@@ -105,7 +81,7 @@
         <item>
          <widget class="QLabel" name="labelEvents">
           <property name="text">
-           <string>Eventi del giorno</string>
+           <string>Eventi </string>
           </property>
          </widget>
         </item>

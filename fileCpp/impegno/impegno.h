@@ -65,7 +65,6 @@ public:
     promemoria(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, std::string descrizione, orario inizio, orario fine);
     std::string getDescrizione() const;
     void modificaPromemoria(std::string nuovaDescrizione);
-    void stampa() const override;
 };
 
 // ==================== eventoLungo ====================
@@ -82,6 +81,7 @@ public:
     dateTime getMomentoFine() const;
     std::string getDescrizione() const;
     virtual int getType() const;
+    virtual std::string getevName() const; 
     virtual ~eventoLungo();
 
     virtual void modificaEventoLungo(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, std::string nuovaDescrizione);
@@ -95,8 +95,10 @@ private:
     std::vector<evento*> eventiRaggruppati;
 
 public:
+    raggruppa();
     raggruppa(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione);
     int getType() const override;
+    std::string getevName() const override; 
     void stampaEventiRaggruppati();
     void stampa() const override;
     void aggiungiEvento(evento* nuovoEvento);
@@ -116,6 +118,7 @@ public:
     std::vector<eventoLungo*> createFeste();
     void stampa() const override;
     int getType() const override;
+    std::string getevName() const override; 
 };
 
 class compleanno: public eventoLungo
@@ -128,6 +131,7 @@ private:
 public:
     compleanno(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, int partecipanti, orario inizio, orario fine);
     int getType() const override;
+    std::string getevName() const override; 
     void aggiungiPartecipante(std::string nome);
     void stampa() const override;
 };
@@ -142,6 +146,7 @@ private:
 public:
     riunione(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::vector<std::string> mailPartecipanti, std::vector<int> TelPartecipanti);
     int getType() const override;
+    std::string getevName() const override; 
     void aggiungiPartecipante(std::string mail, int tel);
     void stampa() const override;
 };
@@ -156,6 +161,7 @@ public:
     altroTipo(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::string Particolarita);
     void stampa() const override;
     int getType() const override;
+    std::string getevName() const override; 
     std::string getParticolarita() const;
     void modificaParticolarita(std::string nuovaParticolarita);
 };

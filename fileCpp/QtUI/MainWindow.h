@@ -1,15 +1,21 @@
+// MainWindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QSqlDatabase>
 #include <QDate>
+#include <QStackedWidget>
 #include "../dataora/dataora.h"
 #include "../impegno/impegno.h"
 #include "DayWeekView.h"
 
 class EventModel;
 class DayWeekView;
+class QLineEdit;
+class QDateEdit;
+class QTimeEdit;
+class QComboBox;
 
 namespace Ui {
 class MainWindow;
@@ -29,11 +35,19 @@ public:
 private slots:
     void onImportJson();
     void onNewEvent();
-    void onModeChanged(int index);
     void onCalendarDateChanged();
     void onDaySelectedFromView(const QDate& date);
+    void onCreateEventSubmit();
+    void onDeleteEventSubmit();
 
 private:
+    void setupFileMenu();
+    void setupStackedPages();
+    void showMainPage();
+    void showCreateEventPage();
+    void showDeleteEventPage();
+    void updateViewForCurrentMonth();
+
     QString sqlDate(const dateTime& dt) const;
     QString sqlTime(const orario& o) const;
 
@@ -43,17 +57,9 @@ private:
 
     void on_calendarWidget_currentPageChanged(int year, int month);
     void updateCalendarLabel(const QDate& date);
-    void updateCalendarLabelMode(DayWeekView::Mode mode, const QDate& date);
-    void updateCalendarLabelColor(const QDate& date);
-
-    bool monthHasEvents(const QDate& date);
-
-    void updateEventsForCurrentMode();
     void updateLabelEvents(const QDate& date);
 
-    void updateModeFeedback();
-
-    void updateAllLabelsForCurrentMode();
+    bool monthHasEvents(const QDate& date);
 
     void onLabelCalendarClicked();
 
@@ -72,6 +78,20 @@ private:
 
     EventModel* m_eventModel;
     DayWeekView* m_dayWeekView;
+
+    QStackedWidget* m_stack = nullptr;
+    QWidget* m_mainPage = nullptr;
+    QWidget* m_createPage = nullptr;
+    QWidget* m_deletePage = nullptr;
+
+    QLineEdit* m_newEventNameEdit = nullptr;
+    QDateEdit* m_newEventDateEdit = nullptr;
+    QTimeEdit* m_newEventStartEdit = nullptr;
+    QTimeEdit* m_newEventEndEdit = nullptr;
+    QComboBox* m_newEventTypeCombo = nullptr;
+
+    QLineEdit* m_deleteEventNameEdit = nullptr;
+    QDateEdit* m_deleteEventDateEdit = nullptr;
 };
 
 #endif

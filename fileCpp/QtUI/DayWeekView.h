@@ -3,47 +3,38 @@
 
 #include <QWidget>
 #include <QDate>
-#include "../dataora/dataora.h"
-#include <../impegno/impegno.h>
+#include <QDateTime>
+#include <memory>
 
 class EventModel;
+class QCalendarWidget;
+class QLabel;
+class QScrollArea;
+
+class eventoLungo;
+namespace dataora { class dateTime; }
 
 class DayWeekView : public QWidget
 {
     Q_OBJECT
 public:
-    enum class Mode { Day, Week, Month, Year };
-    int m_hourStart = 0;   // ora di inizio giornata
-    int m_hourEnd   = 23;  // ora di fine giornata
-
-    Mode mode() const { return m_mode; }
-    QDate selectedDate() const { return m_selectedDate; }
     explicit DayWeekView(QWidget* parent = nullptr);
+    ~DayWeekView() override = default;
 
     void setModel(EventModel* model);
-    void setMode(Mode mode);
-    void setDate(const dateTime& dt);   // la firma resta così per compatibilità
+    void setCalendarWidget(QCalendarWidget* calendar);
 
-signals:
-    void daySelected(const QDate& date);
-
-protected:
-    void paintEvent(QPaintEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
+    // Aggiorna la label con gli eventi del giorno specificato
+    Q_SLOT void updateLabelEventsForDate(const QDate& date);
 
 private:
-    Mode m_mode;
-    void drawDay(QPainter& p);
-    void drawWeek(QPainter& p);
-    void drawMonth(QPainter& p);
-    void drawYear(QPainter& p);
-    std::vector<std::shared_ptr<eventoLungo>> eventsFor(const QDate& d) const;
+    static bool parseDateTimeString(const QString& s, QDateTime& out);
+    QString buildEventsHtmlForDate(const QDate& date) const;
 
-    bool hasEventsOn(const QDate& d) const;
-
-    EventModel* m_model;
-    QDate m_currentDate;     // <-- QDate, non più dateTime
-    QDate m_selectedDate;
+    EventModel* m_model = nullptr;
+    QCalendarWidget* m_calendar = nullptr;
+    QLabel* m_labelEvents = nullptr;
+    QScrollArea* m_scrollArea = nullptr;
 };
 
-#endif
+#endif // DAYWEEKVIEW_H

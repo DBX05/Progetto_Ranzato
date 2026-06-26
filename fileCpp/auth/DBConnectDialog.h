@@ -2,6 +2,7 @@
 #define DBCONNECTDIALOG_H
 
 #include <QDialog>
+#include <QSqlDatabase>
 
 class QLineEdit;
 class QSpinBox;
@@ -21,9 +22,12 @@ class DBConnectDialog : public QDialog {
 public:
     explicit DBConnectDialog(QWidget* parent = nullptr);
     DBConnectParams params() const;
+    QSqlDatabase connectedDb() const;
 
 private slots:
     void validateInputs();
+    void tryConnect();
+    void updateInputEnableState();
 
 private:
     QLineEdit* m_host;
@@ -31,9 +35,10 @@ private:
     QLineEdit* m_user;
     QLineEdit* m_password;
     QLineEdit* m_dbName;
-    QPushButton* m_ok;
-    QPushButton* m_cancel;
+    QPushButton* m_connectButton;
+    QPushButton* m_cancelButton;
     QLabel* m_errorLabel;
+    QSqlDatabase m_connectedDb;
 };
 
 #endif // DBCONNECTDIALOG_H

@@ -1,10 +1,11 @@
+//EventModel.h
 #ifndef EVENTMODEL_H
 #define EVENTMODEL_H
 
 #include <QAbstractListModel>
 #include <vector>
 #include <memory>
-#include "fileCpp/impegno/impegno.h"
+#include "../impegno/impegno.h"
 
 class EventModel : public QAbstractListModel
 {
@@ -19,8 +20,9 @@ public:
         EndRole,
         PriorityRole,
         DescriptionRole,
-        ColorRole,   // <--- AGGIUNGI QUESTO
-        IconRole 
+        ColorRole,
+        IconRole,
+        EventTypeRole
     };
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;

@@ -62,6 +62,7 @@ eventoLungo::eventoLungo(int id, dateTime momentoInizio, unsigned int priorita, 
 dateTime eventoLungo::getMomentoFine() const { return momentoFine; }
 std::string eventoLungo::getDescrizione() const { return Descrizione; }
 int eventoLungo::getType() const { return 0; }
+std::string eventoLungo::getevName() const { return "evento";}
 eventoLungo::~eventoLungo() = default;
 
 void eventoLungo::modificaEventoLungo(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, std::string nuovaDescrizione) {
@@ -76,12 +77,18 @@ void eventoLungo::stampa() const {
 }
 
 // ==================== raggruppa ====================
+raggruppa::raggruppa()
+    : eventoLungo(-1, dateTime(1970, 0, 1, 0, 0, 0), 0, "", dateTime(1970, 0, 1, 0, 0, 0), "", orario(0,0,0), orario(23,59))
+{
+}
+
 raggruppa::raggruppa(int id, dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione)
     : eventoLungo(id, momentoInizio, priorita, std::move(nome), momentoFine, std::move(Descrizione), orario(0,0,0), orario(23,59))
 {
 }
 
 int raggruppa::getType() const { return 3; }
+std::string raggruppa::getevName() const { return "raggruppa";}
 
 void raggruppa::stampaEventiRaggruppati() {
     for (int i = 0; i < static_cast<int>(eventiRaggruppati.size()); ++i) {
@@ -157,8 +164,9 @@ int festivita::getType() const {
     return 0; // oppure il codice che preferisci per il tipo (es. 0 = generico)
 }
 
-// Se non l'hai già definita, assicurati che la firma corrisponda a quella in header:
-// void festivita::stampa() const { ... }  // già presente altrove nel file
+std::string festivita::getevName() const {
+    return "festivita";
+}
 
 
 void festivita::stampa() const {
@@ -174,6 +182,7 @@ compleanno::compleanno(dateTime momentoInizio, unsigned int priorita, std::strin
 }
 
 int compleanno::getType() const { return 1; }
+std::string compleanno::getevName() const { return "compleann";}
 
 void compleanno::aggiungiPartecipante(std::string nome){
     if (nome.empty()) return;
@@ -195,6 +204,7 @@ riunione::riunione(dateTime momentoInizio, unsigned int priorita, std::string no
 }
 
 int riunione::getType() const { return 2; }
+std::string riunione::getevName() const { return "riunione";}
 
 void riunione::aggiungiPartecipante(std::string mail, int tel){
     if (mail.empty() || tel <= 0) return;
@@ -218,6 +228,7 @@ altroTipo::altroTipo(dateTime momentoInizio, unsigned int priorita, std::string 
 }
 
 int altroTipo::getType() const { return 4; }
+std::string altroTipo::getevName() const { return "generale";}
 
 void altroTipo::stampa() const {
     std::cout << "=== Altro Tipo Evento ===\nID: " << getId() << "\nNome: " << getNome()
