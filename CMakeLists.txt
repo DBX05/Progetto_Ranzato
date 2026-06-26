@@ -1,25 +1,27 @@
 cmake_minimum_required(VERSION 3.16)
 
+# ── Toolchain hints (Windows only) ──────────────────────────────────────────
 if(WIN32)
-    if(NOT DEFINED CMAKE_C_COMPILER AND EXISTS "C:/Qt/Tools/mingw1120_64/bin/gcc.exe")
-        set(CMAKE_C_COMPILER "C:/Qt/Tools/mingw1120_64/bin/gcc.exe")
+    if(NOT DEFINED CMAKE_C_COMPILER AND EXISTS "C:/Qt/Tools/mingw1310_64/bin/gcc.exe")
+        set(CMAKE_C_COMPILER "C:/Qt/Tools/mingw1310_64/bin/gcc.exe")
     endif()
-    if(NOT DEFINED CMAKE_CXX_COMPILER AND EXISTS "C:/Qt/Tools/mingw1120_64/bin/g++.exe")
-        set(CMAKE_CXX_COMPILER "C:/Qt/Tools/mingw1120_64/bin/g++.exe")
+    if(NOT DEFINED CMAKE_CXX_COMPILER AND EXISTS "C:/Qt/Tools/mingw1310_64/bin/g++.exe")
+        set(CMAKE_CXX_COMPILER "C:/Qt/Tools/mingw1310_64/bin/g++.exe")
     endif()
-    if(EXISTS "C:/Qt/Tools/mingw1120_64/bin/mingw32-make.exe")
-        set(CMAKE_MAKE_PROGRAM "C:/Qt/Tools/mingw1120_64/bin/mingw32-make.exe")
+    if(EXISTS "C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe")
+        set(CMAKE_MAKE_PROGRAM "C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe")
     endif()
+    # Qt installation path on Windows – override via -DCMAKE_PREFIX_PATH=... if different
+    if(NOT CMAKE_PREFIX_PATH)
+        set(CMAKE_PREFIX_PATH "C:/Qt/6.11.1/mingw_64")
+    endif()
+    # On Linux Qt is usually found via system packages or a user-supplied CMAKE_PREFIX_PATH
 endif()
 
 project(untitled VERSION 0.1 LANGUAGES CXX)
 
-# Percorso root di Qt (adatta se usi versione diversa)
-set(CMAKE_PREFIX_PATH "C:/Qt/6.11.1/mingw_64")
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -78,10 +80,10 @@ target_include_directories(untitled PRIVATE
 # Link a Qt (Widgets e Sql)
 target_link_libraries(untitled PRIVATE Qt6::Widgets Qt6::Sql)
 
-# Windows bundle properties
+# Bundle / executable-type properties
 set_target_properties(untitled PROPERTIES
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    WIN32_EXECUTABLE $<BOOL:${WIN32}>
 )
 
 # Install rules (opzionale)
