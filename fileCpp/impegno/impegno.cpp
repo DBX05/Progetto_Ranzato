@@ -1,6 +1,7 @@
 #include "impegno.h"
 #include "../dataora/dataora.h"
 #include <iostream>
+#include <sstream>
 #include <utility>
 
 // Distruttore puro virtuale definito
@@ -42,6 +43,17 @@ void evento::stampa() const {
               << "\nInizio: " << getInizio() << "\nFine: " << getFine()
               << "\nPriorita: " << getPriorita() << std::endl;
 }
+
+std::string evento::buildUiSummary() const {
+    std::ostringstream os;
+    os << getNome() << "\n" << getInizio() << " -> " << getFine();
+    return os.str();
+}
+
+std::string evento::suggestedAction() const {
+    return "Apri dettaglio evento";
+}
+
 evento::~evento() = default;
 
 // ==================== eventoLungo ====================
@@ -76,6 +88,19 @@ void eventoLungo::stampa() const {
               << "\nFine: " << getMomentoFine().getDateTime() << "\nPriorita: " << getPriorita() << std::endl;
 }
 
+std::string eventoLungo::buildUiSummary() const {
+    std::ostringstream os;
+    os << getNome()
+       << "\n" << getMomentoInizio().getDateTime()
+       << " -> " << getMomentoFine().getDateTime()
+       << "\n" << getDescrizione();
+    return os.str();
+}
+
+std::string eventoLungo::suggestedAction() const {
+    return "Mostra timeline estesa";
+}
+
 // ==================== raggruppa ====================
 raggruppa::raggruppa()
     : eventoLungo(-1, dateTime(1970, 0, 1, 0, 0, 0), 0, "", dateTime(1970, 0, 1, 0, 0, 0), "", orario(0,0,0), orario(23,59))
@@ -103,6 +128,20 @@ void raggruppa::stampaEventiRaggruppati() {
 void raggruppa::stampa() const {
     std::cout << "=== Raggruppa ===\nID: " << getId() << "\nNome: " << getNome()
               << "\nDescrizione: " << getDescrizione() << "\nEventi raggruppati: " << numEventi() << std::endl;
+}
+
+std::string raggruppa::buildUiSummary() const {
+    std::ostringstream os;
+    os << "Categoria: " << getNome()
+       << "\nEventi nel gruppo: " << numEventi();
+    if (numEventi() > 0 && getEvento(0) != nullptr) {
+        os << "\nPrimo evento: " << getEvento(0)->getNome();
+    }
+    return os.str();
+}
+
+std::string raggruppa::suggestedAction() const {
+    return "Espandi gruppo e filtra sottovoci";
 }
 
 void raggruppa::aggiungiEvento(evento* nuovoEvento){
@@ -174,6 +213,18 @@ void festivita::stampa() const {
               << "\nDescrizione: " << getDescrizione() << "\nFeste italiane disponibili: " << festeItaliane.size() << std::endl;
 }
 
+std::string festivita::buildUiSummary() const {
+    std::ostringstream os;
+    os << "Festivita: " << getNome()
+       << "\nGiorno intero"
+       << "\n" << getMomentoInizio().getDateTime();
+    return os.str();
+}
+
+std::string festivita::suggestedAction() const {
+    return "Imposta promemoria annuale";
+}
+
 // ==================== compleanno ====================
 compleanno::compleanno(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, int partecipanti, orario inizio, orario fine)
     : eventoLungo(compleanno::id, momentoInizio, priorita, std::move(nome), momentoFine, std::move(Descrizione), inizio, fine),
@@ -194,6 +245,18 @@ void compleanno::stampa() const {
     std::cout << "=== Compleanno ===\nID: " << getId() << "\nNome: " << getNome()
               << "\nDescrizione: " << getDescrizione() << "\nPartecipanti: " << partecipanti << std::endl;
     for (const auto &n : NomePartecipanti) std::cout << "  - " << n << std::endl;
+}
+
+std::string compleanno::buildUiSummary() const {
+    std::ostringstream os;
+    os << "Compleanno: " << getNome()
+       << "\nInvitati: " << partecipanti
+       << "\n" << getMomentoInizio().getDateTime();
+    return os.str();
+}
+
+std::string compleanno::suggestedAction() const {
+    return "Invia auguri o invito agli invitati";
 }
 
 // ==================== riunione ====================
@@ -220,6 +283,19 @@ void riunione::stampa() const {
     }
 }
 
+std::string riunione::buildUiSummary() const {
+    std::ostringstream os;
+    os << "Riunione: " << getNome()
+       << "\nPartecipanti: " << mailPartecipanti.size()
+       << "\n" << getMomentoInizio().getDateTime()
+       << " -> " << getMomentoFine().getDateTime();
+    return os.str();
+}
+
+std::string riunione::suggestedAction() const {
+    return "Invia ordine del giorno ai partecipanti";
+}
+
 // ==================== altroTipo ====================
 altroTipo::altroTipo(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::string Particolarita)
     : eventoLungo(altroTipo::id, momentoInizio, priorita, std::move(nome), momentoFine, std::move(Descrizione), orario(0,0,0), orario(23,59)),
@@ -234,6 +310,18 @@ void altroTipo::stampa() const {
     std::cout << "=== Altro Tipo Evento ===\nID: " << getId() << "\nNome: " << getNome()
               << "\nDescrizione: " << getDescrizione() << "\nPriorita: " << getPriorita()
               << "\nParticolarita: " << Particolarita << std::endl;
+}
+
+std::string altroTipo::buildUiSummary() const {
+    std::ostringstream os;
+    os << "Attivita personalizzata: " << getNome()
+       << "\nParticolarita: " << Particolarita
+       << "\n" << getMomentoInizio().getDateTime();
+    return os.str();
+}
+
+std::string altroTipo::suggestedAction() const {
+    return "Apri workflow personalizzato";
 }
 
 std::string altroTipo::getParticolarita() const { return Particolarita; }

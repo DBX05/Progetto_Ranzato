@@ -28,6 +28,8 @@ public:
     virtual int getId() const;
     virtual void modificaImpegno(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita);
     virtual void stampa() const = 0;
+    virtual std::string buildUiSummary() const = 0;
+    virtual std::string suggestedAction() const = 0;
     void setId(int x);
 
 
@@ -52,6 +54,8 @@ public:
 
     void modificaName(std::string nuovoNome);
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
     ~evento();
 };
 
@@ -74,6 +78,8 @@ public:
 
     virtual void modificaEventoLungo(dateTime nuovoMomentoInizio, unsigned int nuovaPriorita, dateTime nuovoMomentoFine, std::string nuovaDescrizione);
     virtual void stampa() const;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
 };
 
 // ==================== QUARTO LIVELLO ====================
@@ -89,6 +95,8 @@ public:
     std::string getevName() const override; 
     void stampaEventiRaggruppati();
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
     void aggiungiEvento(evento* nuovoEvento);
     void rimuoviEvento(evento* eventoDaRimuovere);
     int numEventi() const;
@@ -105,6 +113,8 @@ public:
     festivita(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, orario inizio, orario fine);
     std::vector<eventoLungo*> createFeste();
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
     int getType() const override;
     std::string getevName() const override; 
 };
@@ -122,6 +132,8 @@ public:
     std::string getevName() const override; 
     void aggiungiPartecipante(std::string nome);
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
 };
 
 class riunione: public eventoLungo
@@ -137,6 +149,8 @@ public:
     std::string getevName() const override; 
     void aggiungiPartecipante(std::string mail, int tel);
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
 };
 
 class altroTipo: public eventoLungo
@@ -148,6 +162,8 @@ private:
 public:
     altroTipo(dateTime momentoInizio, unsigned int priorita, std::string nome, dateTime momentoFine, std::string Descrizione, std::string Particolarita);
     void stampa() const override;
+    std::string buildUiSummary() const override;
+    std::string suggestedAction() const override;
     int getType() const override;
     std::string getevName() const override; 
     std::string getParticolarita() const;

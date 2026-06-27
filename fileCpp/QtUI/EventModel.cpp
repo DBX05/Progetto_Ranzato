@@ -40,18 +40,7 @@ QVariant EventModel::data(const QModelIndex& index, int role) const
 
     switch (role) {
         case Qt::DisplayRole: {
-            // Primary display format: Name, followed by start and end times
-            QString name  = QString::fromStdString(ev->getNome());
-            QDateTime startDateTime = QDateTime::fromString(QString::fromStdString(ev->getMomentoInizio().getDateTime()), Qt::ISODate);
-            QDateTime endDateTime = QDateTime::fromString(QString::fromStdString(ev->getMomentoFine().getDateTime()), Qt::ISODate);
-
-            QString formattedStart = startDateTime.isValid() ? startDateTime.toString("yyyy-MM-dd HH:mm") : "Invalid Date";
-            QString formattedEnd = endDateTime.isValid() ? endDateTime.toString("yyyy-MM-dd HH:mm") : "Invalid Date";
-
-            return QString("%1\n🕒 %2 → %3")
-                    .arg(name)
-                    .arg(formattedStart)
-                    .arg(formattedEnd);
+            return QString::fromStdString(ev->buildUiSummary());
         }
 
         case Qt::DecorationRole: {
@@ -93,7 +82,7 @@ QVariant EventModel::data(const QModelIndex& index, int role) const
             return static_cast<int>(ev->getPriorita());
 
         case DescriptionRole:
-            return QString::fromStdString(ev->getDescrizione());
+            return QString::fromStdString(ev->suggestedAction());
 
         case ColorRole: {
             // Provide a color role, distinct from BackgroundRole, possibly for finer control
