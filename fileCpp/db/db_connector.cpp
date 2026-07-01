@@ -18,9 +18,33 @@
 bool DBConnector::connect(const QString &dbName, QSqlDatabase &outDb, QString &outError)
 {
     QString filePath = dbName;
-    // If the provided dbName is not an absolute path, prepend the current working directory.
+    // If dbName is relative, place the database file inside a "sql" folder.
     if (!QFileInfo(filePath).isAbsolute()) {
-        filePath = QDir::currentPath() + "/" + dbName;
+        QDir probeDir(QDir::currentPath());
+        QString sqlDirPath;
+
+        while (true) {
+            if (probeDir.exists("sql")) {
+                sqlDirPath = probeDir.filePath("sql");
+                break;
+            }
+            if (!probeDir.cdUp()) {
+                break;
+            }
+        }
+
+        if (sqlDirPath.isEmpty()) {
+            // Fallback: create ./sql if no existing sql directory is found.
+            QDir fallbackDir(QDir::currentPath());
+            if (!fallbackDir.mkpath("sql")) {
+                outError = "Impossibile creare la cartella 'sql' per il database.";
+                qCritical() << outError;
+                return false;
+            }
+            sqlDirPath = fallbackDir.filePath("sql");
+        }
+
+        filePath = QDir(sqlDirPath).filePath(dbName);
     }
 
     qDebug() << "[DBConnector] Attempting to connect to database file:" << filePath;
