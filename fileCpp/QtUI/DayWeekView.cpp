@@ -20,14 +20,12 @@ EventDateFilter::EventDateFilter(QObject* parent)
 void EventDateFilter::setFilterDate(const QDate& date)
 {
     m_date = date;
-    beginFilterChange();
-    endFilterChange();
+    invalidateFilter();
 }
 
 void EventDateFilter::refresh()
 {
-    beginFilterChange();
-    endFilterChange();
+    invalidateFilter();
 }
 
 bool EventDateFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
